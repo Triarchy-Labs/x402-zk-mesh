@@ -456,6 +456,71 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 
 ---
 
+<div align="center">
+
+◢◤￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣◥◣
+
+## /// WHO WE ARE
+
+◥◣＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿◢◤
+
+</div>
+
+Small team of engineers who operate across the full spectrum — protocol security, native desktop apps, WebGL frontends, knowledge graphs, and low-level Linux infrastructure. We audit DeFi protocols for a living, build research tooling because nothing off-the-shelf fits our workflow, and ship native Rust binaries because Electron is bloat.
+
+We run Arch btw.
+
+─── / ───
+
+**Security Research** — We audit smart contracts across Solana, Stellar/Soroban, EVM, Cosmos, and XRP Ledger. Active on Cantina, Code4rena, Sherlock, and Immunefi. Our custom SAST tooling runs a 13-phase pipeline with 27 integrated scanners. Findings submitted against protocols managing $50M+ in TVL.
+
+**Native Desktop & Sovereign Infrastructure** — Our main platform ships as a Tauri v2 binary with WebGPU rendering, local WASI 0.2 runtime, and zero Chromium overhead. Execution model built around Extism WASM sandboxing — microsecond cold starts instead of Docker containers. We write our own systemd watchdogs.
+
+**Turing Agentic Payments on Stellar** — Sovereign gateway for autonomous micropayments on Soroban. Live agent registry with reputation scoring, zero-trust payload quarantine, replay protection, and budget enforcement. Currently the only implementation with a WASM-based trust layer between payment verification and task execution.
+
+**AI & Local Inference** — Self-hosted LLM infrastructure on AMD ROCm. Custom quantization pipelines, vLLM serving, multi-model routing through OpenRouter. GLiNER for zero-hallucination entity extraction.
+
+**Creative Engineering** — Lusion-grade WebGL pipelines. GPGPU particle systems, custom GLSL fluid dynamics shaders, React Three Fiber scene graphs. We build immersive 3D interfaces for protocol dashboards because terminals shouldn't be the only option.
+
+─── / ───
+
+<div align="center">
+
+◢◤ AUDIT COVERAGE ◥◣
+
+</div>
+
+```
+ECOSYSTEM              TOOLS                           PROTOCOLS REVIEWED
+───────                ─────                           ──────────────────
+Solana / Anchor        Mythril, Slither, Echidna       Perena, Pump.fun
+Stellar / Soroban      Foundry, Heimdall, custom       K2 Lending, Monetrix
+EVM / Uniswap V4      CodeQL, AFL++, Semgrep          Revert Finance, Morpho
+Cosmos / CometBFT      Go vet, custom Go analyzer      QBTC Bridge
+XRP Ledger             rippled source audit            SponsorshipSet
+```
+
+<div align="center">
+
+◢◤ ACTIVE PROJECTS ◥◣
+
+</div>
+
+| Project | Stack | Status |
+|---------|-------|--------|
+| **X402 ZK Mesh** | Circom, snarkjs, Soroban, Next.js | ✅ This repo |
+| **ExoSuit Mark 53** | Rust, Tauri v2, WebGPU | 🟡 Prototype |
+| **ABLS Audit Pipeline** | Python, Rust — 13-phase, 27 tools | 🔨 In development |
+| **Crucible Graph** | Rust, KuzuDB — codebase intelligence | 🔨 In development |
+| **Bounty Radar** | TypeScript, n8n — real-time triage | 🟢 Internal |
+| **TMiK Intelligence** | Next.js, KuzuDB, GLiNER | ✅ Deployed |
+
+> Most repos are currently private while we harden the security layer. Reach out if you want access.
+
+**Hackathon Track Record** — Active on DoraHacks (Stellar Hacks, FlagOS Open Computing), AI Trading Agents ($55K pool). Hackathons as forcing functions for shipping production-grade prototypes under pressure, not weekend toys.
+
+---
+
 ## /// BUILT WITH
 
 - [Stellar Soroban](https://soroban.stellar.org/) — Smart contract platform (Protocol 25/26)
@@ -470,6 +535,12 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 
 ---
 
-## /// LICENSE
+<div align="center">
+
+◢◤￣￣￣￣￣￣￣￣￣￣◥◣
 
 MIT — © 2026 Triarchy Labs
+
+◥◣＿＿＿＿＿＿＿＿＿＿◢◤
+
+</div>

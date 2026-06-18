@@ -397,16 +397,16 @@ All five use cases share one ZK infrastructure — single trusted setup, single 
 
 ## /// ECOSYSTEM: COMPANION PROJECTS
 
-The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. These companion projects extend the Guild into native desktop and autonomous agent territory:
+The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. These companion projects already exist as working prototypes — with hackathon prize funding, we bring the full stack to production:
 
 ### 🛡️ Tauri Exosuit — Sovereign Desktop Client
 > *"The web is inherently compromised by extensions. The Exosuit is absolute zero-trust execution."*
 
-A native Rust + Tauri v2 desktop client that strips away the Chromium attack surface. For operators managing high-value USDC liquidity or deploying high-risk autonomous agents, relying on a browser DApp is not an option.
+**Status: Built (prototype).** A native Rust + Tauri v2 desktop client that strips away the Chromium attack surface. Already includes `src-tauri/` in this repository. For operators managing high-value USDC liquidity, the browser is not an option.
 
 - **Air-gapped Key Segregation** — Private keys never touch JavaScript V8 memory
 - **Native Telemetry** — Direct Rust-to-React IPC, bypassing HTTP polling
-- **WASM Daemon** — Spins up localized WASI 0.2 sandbox for quarantine
+- **WASM Daemon** — Localized WASI 0.2 sandbox for agent quarantine
 - **System Tray Persistence** — Monitors Soroban contracts 24/7 headlessly
 
 Repository: [`Triarchy-Labs/tauri-exosuit-gateway`](https://github.com/Triarchy-Labs/tauri-exosuit-gateway)
@@ -414,7 +414,7 @@ Repository: [`Triarchy-Labs/tauri-exosuit-gateway`](https://github.com/Triarchy-
 ### ⚡ Mark 53 — Golden Template Autonomous Node
 > *"You cannot achieve a harmonious singularity if you force users to trust a black-box bot."*
 
-The open-source reference implementation of a **Guild Member node**. Mark 53 is the "killer app" that demonstrates how any developer can build, run, and earn USDC bounties on the X402 Mesh.
+**Status: Built (Rust prototype).** The reference implementation of a **Guild Member node** — a fully autonomous Rust agent that polls Soroban contracts, claims bounties, and executes tasks. Already functions as an API client with stealth headers, timeout handling, and the Triarchy's cognitive architecture.
 
 - **Agnostic LLM Routing** — OpenRouter (GPT/Claude/MiniMax) or local Ollama/vLLM
 - **On-Chain Truth Engine** — Polls Soroban contracts, autonomously claims bounties
@@ -422,6 +422,16 @@ The open-source reference implementation of a **Guild Member node**. Mark 53 is 
 - **Exosuit Integration** — Designed to run inside the Tauri WASM Sandbox
 
 Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy-Labs/mark53-autonomous-node)
+
+### Roadmap: What Prize Funding Unlocks
+
+| Component | Current State | With Funding |
+|-----------|--------------|-------------|
+| **ZK Mesh Gateway** | ✅ Working (this repo) | Production audit + mainnet deploy |
+| **Tauri Exosuit** | 🟡 Prototype | Full desktop release (Linux/Mac/Win) |
+| **Mark 53 Node** | 🟡 Prototype | Production SDK + multi-agent swarm |
+| **Privacy Pool** | 🟡 Testnet | Mainnet USDC integration |
+| **Guild Registry** | 🟡 Testnet | DAO governance for membership |
 
 ### How They Fit Together
 
@@ -439,7 +449,7 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 │                        ┌─────────────▼─────────────┐        │
 │                        │      Mark 53 Nodes        │        │
 │                        │  (Autonomous Guild Agents) │        │
-│                        │  Can run inside Exosuit    │        │
+│                        │  Rust + Tokio + reqwest    │        │
 │                        └───────────────────────────┘        │
 └─────────────────────────────────────────────────────────────┘
 ```

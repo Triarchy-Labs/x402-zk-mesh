@@ -7,11 +7,10 @@
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
   <p><em>Privacy-Preserving AI Agent Task Marketplace on Stellar / DoraHacks 2026</em></p>
 
-  ![Stellar](https://img.shields.io/badge/Stellar-Protocol_26-black?logo=stellar)
-  ![ZK](https://img.shields.io/badge/ZK-Groth16_+_Circom-blueviolet)
-  ![Soroban](https://img.shields.io/badge/Soroban-Testnet-green)
-  ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
-  ![WASM](https://img.shields.io/badge/WASM-Extism_WASI_0.2-orange)
+  ![Stellar](https://img.shields.io/badge/Stellar-Protocol_26-000?style=flat-square&logo=stellar&logoColor=fff)
+  ![ZK](https://img.shields.io/badge/ZK-Groth16-000?style=flat-square)
+  ![Soroban](https://img.shields.io/badge/Soroban-Testnet-000?style=flat-square)
+  ![WASM](https://img.shields.io/badge/WASM-Extism-000?style=flat-square)
 
   <br/>
   <a href="#quick-start">Quick Start</a> •
@@ -127,7 +126,7 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 
 All modules share **one ZK stack**: Circom 2.0 → snarkjs (Groth16) → soroban-verifier-gen → Stellar Testnet BN254.
 
-### Module 1: 🔒 Privacy Pool (Shielded Bounties)
+### Module 1: Privacy Pool (Shielded Bounties)
 
 **Circuit**: [`circuits/deposit_commitment.circom`](circuits/deposit_commitment.circom)
 
@@ -137,7 +136,7 @@ Clients deposit USDC into a Privacy Pool, generating a UTXO commitment: `commitm
 - Groth16 proof generated **client-side** via snarkjs WASM (secrets never leave the device)
 - Soroban verifier checks proof on-chain using BN254 `pairing_check` (Protocol 25)
 
-### Module 2: 🎭 Guild Identity (Agent Membership)
+### Module 2: Guild Identity (Agent Membership)
 
 **Circuit**: [`circuits/membership_proof.circom`](circuits/membership_proof.circom)
 
@@ -146,7 +145,7 @@ Agents prove they belong to the approved Guild roster using a Merkle inclusion p
 - **2,450 constraints** — 10-level Merkle tree (supports 1024 agents)
 - Leaf = `Poseidon(agent_pubkey)`, verified against on-chain root
 
-### Module 3: ✅ Proof-of-Execution (Verifiable Task Completion)
+### Module 3: Proof-of-Execution (Verifiable Task Completion)
 
 **Circuit**: [`circuits/execution_proof.circom`](circuits/execution_proof.circom)
 
@@ -154,7 +153,7 @@ After completing a task, the agent generates a proof: `executionId = Poseidon(ta
 
 - **264 constraints** — lightweight, meant for high-frequency micro-bounties
 
-### Module 4: 🏛️ ASP Compliance Layer
+### Module 4: ASP Compliance Layer
 
 Adapted from Nethermind's [`stellar-private-payments`](https://github.com/NethermindEth/stellar-private-payments). Association Set Provider maintains allow/block Merkle trees so regulators can verify the pool contains only approved participants — without seeing individual transactions.
 
@@ -282,21 +281,21 @@ We believe in honest submissions. Here's what works and what doesn't:
 
 | Component | Status | Details |
 |-----------|--------|---------|
-| ZK Circuits (3x Circom) | ✅ Working | Compiles, generates valid Groth16 proofs |
-| Trusted Setup (Powers of Tau) | ✅ Complete | bn128 depth 14, Phase 2 for all circuits |
-| Groth16 Verification (server-side) | ✅ Working | snarkjs verification with real VKs |
-| `/api/hire` ZK Integration | ✅ Working | Real Groth16 verification, not string checks |
-| `/api/zk/verify` Endpoint | ✅ Working | Standalone proof verification |
-| Dashboard UI | ✅ Working | GPU-accelerated telemetry + shielded toggle |
-| L402 Payment Pipeline | ✅ Working | 3-tier routing (Micro/Enterprise/P2P) |
-| WASM Quarantine | ✅ Working | Extism WASI 0.2, 30+ heuristic patterns |
-| Replay Guard + Spending Policy | ✅ Working | Anti-replay, budget caps, allowlist/blocklist |
-| Soroban Verifier (on-chain) | 🟡 In Progress | Contract generated, testnet deploy pending |
-| Privacy Pool Contract | 🟡 In Progress | UTXO tree + nullifier tracking |
-| Guild Registry Contract | 🟡 In Progress | Agent Merkle root storage |
-| Testnet USDC Integration | 🟡 Mock | Uses test tokens |
-| ASP Compliance Trees | 🟡 Partial | Reference from Nethermind SPP |
-| Production Audit | ❌ Not Done | Research prototype |
+| ZK Circuits (3x Circom) | Working | Compiles, generates valid Groth16 proofs |
+| Trusted Setup (Powers of Tau) | Complete | bn128 depth 14, Phase 2 for all circuits |
+| Groth16 Verification (server-side) | Working | snarkjs verification with real VKs |
+| `/api/hire` ZK Integration | Working | Real Groth16 verification, not string checks |
+| `/api/zk/verify` Endpoint | Working | Standalone proof verification |
+| Dashboard UI | Working | GPU-accelerated telemetry + shielded toggle |
+| L402 Payment Pipeline | Working | 3-tier routing (Micro/Enterprise/P2P) |
+| WASM Quarantine | Working | Extism WASI 0.2, 30+ heuristic patterns |
+| Replay Guard + Spending Policy | Working | Anti-replay, budget caps, allowlist/blocklist |
+| Soroban Verifier (on-chain) | In Progress | Contract generated, testnet deploy pending |
+| Privacy Pool Contract | In Progress | UTXO tree + nullifier tracking |
+| Guild Registry Contract | In Progress | Agent Merkle root storage |
+| Testnet USDC Integration | Mock | Uses test tokens |
+| ASP Compliance Trees | Partial | Reference from Nethermind SPP |
+| Production Audit | -- | Research prototype |
 
 ---
 
@@ -385,11 +384,11 @@ This project addresses multiple ideas from the Stellar Hacks brief:
 
 | Hackathon Idea | Our Implementation | Tier |
 |---------------|-------------------|------|
-| Private Payments / Shielded Transfers | Privacy Pool with UTXO commitments | 🟡 Medium |
-| Private Allowlist Membership | Guild Merkle membership proofs | 🟢 Mild |
-| Verifiable Off-Chain Computation | Proof-of-Execution circuit | 🟢 Mild |
-| Compliant Privacy Pool with ASP | Association Set Provider integration | 🟠 Spicy |
-| Anonymous Attestations | Agent task results without identity reveal | 🟢 Mild |
+| Private Payments / Shielded Transfers | Privacy Pool with UTXO commitments | Medium |
+| Private Allowlist Membership | Guild Merkle membership proofs | Mild |
+| Verifiable Off-Chain Computation | Proof-of-Execution circuit | Mild |
+| Compliant Privacy Pool with ASP | Association Set Provider integration | Spicy |
+| Anonymous Attestations | Agent task results without identity reveal | Mild |
 
 All five use cases share one ZK infrastructure — single trusted setup, single verifier pattern.
 
@@ -399,7 +398,7 @@ All five use cases share one ZK infrastructure — single trusted setup, single 
 
 The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. These companion projects already exist as working prototypes — with hackathon prize funding, we bring the full stack to production:
 
-### 🛡️ Tauri Exosuit — Sovereign Desktop Client
+### Tauri Exosuit — Sovereign Desktop Client
 > *"The web is inherently compromised by extensions. The Exosuit is absolute zero-trust execution."*
 
 **Status: Built (prototype).** A native Rust + Tauri v2 desktop client that strips away the Chromium attack surface. Already includes `src-tauri/` in this repository. For operators managing high-value USDC liquidity, the browser is not an option.
@@ -411,7 +410,7 @@ The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. Th
 
 Repository: [`Triarchy-Labs/tauri-exosuit-gateway`](https://github.com/Triarchy-Labs/tauri-exosuit-gateway)
 
-### ⚡ Mark 53 — Golden Template Autonomous Node
+### Mark 53 — Golden Template Autonomous Node
 > *"You cannot achieve a harmonious singularity if you force users to trust a black-box bot."*
 
 **Status: Built (Rust prototype).** The reference implementation of a **Guild Member node** — a fully autonomous Rust agent that polls Soroban contracts, claims bounties, and executes tasks. Already functions as an API client with stealth headers, timeout handling, and the Triarchy's cognitive architecture.
@@ -427,11 +426,11 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 
 | Component | Current State | With Funding |
 |-----------|--------------|-------------|
-| **ZK Mesh Gateway** | ✅ Working (this repo) | Production audit + mainnet deploy |
-| **Tauri Exosuit** | 🟡 Prototype | Full desktop release (Linux/Mac/Win) |
-| **Mark 53 Node** | 🟡 Prototype | Production SDK + multi-agent swarm |
-| **Privacy Pool** | 🟡 Testnet | Mainnet USDC integration |
-| **Guild Registry** | 🟡 Testnet | DAO governance for membership |
+| **ZK Mesh Gateway** | Working (this repo) | Production audit + mainnet deploy |
+| **Tauri Exosuit** | Prototype | Full desktop release (Linux/Mac/Win) |
+| **Mark 53 Node** | Prototype | Production SDK + multi-agent swarm |
+| **Privacy Pool** | Testnet | Mainnet USDC integration |
+| **Guild Registry** | Testnet | DAO governance for membership |
 
 ### How They Fit Together
 
@@ -508,12 +507,12 @@ XRP Ledger             rippled source audit            SponsorshipSet
 
 | Project | Stack | Status |
 |---------|-------|--------|
-| **X402 ZK Mesh** | Circom, snarkjs, Soroban, Next.js | ✅ This repo |
-| **ExoSuit Mark 53** | Rust, Tauri v2, WebGPU | 🟡 Prototype |
-| **ABLS Audit Pipeline** | Python, Rust — 13-phase, 27 tools | 🔨 In development |
-| **Crucible Graph** | Rust, KuzuDB — codebase intelligence | 🔨 In development |
-| **Bounty Radar** | TypeScript, n8n — real-time triage | 🟢 Internal |
-| **TMiK Intelligence** | Next.js, KuzuDB, GLiNER | ✅ Deployed |
+| **X402 ZK Mesh** | Circom, snarkjs, Soroban, Next.js | This repo |
+| **ExoSuit Mark 53** | Rust, Tauri v2, WebGPU | Prototype |
+| **ABLS Audit Pipeline** | Python, Rust — 13-phase, 27 tools | In development |
+| **Crucible Graph** | Rust, KuzuDB — codebase intelligence | In development |
+| **Bounty Radar** | TypeScript, n8n — real-time triage | Internal |
+| **TMiK Intelligence** | Next.js, KuzuDB, GLiNER | Deployed |
 
 > Most repos are currently private while we harden the security layer. Reach out if you want access.
 
@@ -537,10 +536,12 @@ XRP Ledger             rippled source audit            SponsorshipSet
 
 <div align="center">
 
-◢◤￣￣￣￣￣￣￣￣￣￣◥◣
+◢◤￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣◥◣
 
-MIT — © 2026 Triarchy Labs
+Source Available — © 2026 Triarchy Labs
+View and test only. No commercial use without written permission.
+See [LICENSE](LICENSE) for full terms.
 
-◥◣＿＿＿＿＿＿＿＿＿＿◢◤
+◥◣＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿◢◤
 
 </div>

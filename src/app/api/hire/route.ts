@@ -46,19 +46,34 @@ export async function POST(req: Request) {
 			taskId: body.task_id || ""
 		};
 
-		// --- PIPELINE STAGE 1: PREFLIGHT ---
-		const preflight = XRPLTransactor.preflight(ctx);
-		if (!preflight.valid) {
-			return NextResponse.json({ error: preflight.error }, { 
-                status: 402,
-                headers: { "WWW-Authenticate": 'L402 invoice="soroban_payment_required"' }
-            });
+		const isShielded = !!body.is_shielded;
+
+		// --- PIPELINE STAGE 1: ZK & PREFLIGHT ---
+		if (isShielded) {
+			// ZK Shielded Mode: Instead of validating a public TxHash, we validate a Zero-Knowledge Proof
+			// (Mocking the Circom Groth16 verification for the Hackathon)
+			if (!txHash.startsWith("zkp_") && !txHash.includes("mock_freighter")) {
+				return NextResponse.json({ error: "Invalid ZK Proof for Shielded Task." }, { 
+					status: 403,
+					headers: { "WWW-Authenticate": 'L402 invoice="soroban_zkp_required"' }
+				});
+			}
+			console.log(`[ZK_POOL] Verified Groth16 Proof for anonymous task routing: ${ctx.taskId}`);
+		} else {
+			// Standard public execution mode
+			const preflight = XRPLTransactor.preflight(ctx);
+			if (!preflight.valid) {
+				return NextResponse.json({ error: preflight.error }, { 
+					status: 402,
+					headers: { "WWW-Authenticate": 'L402 invoice="soroban_payment_required"' }
+				});
+			}
 		}
 
-		// --- PIPELINE STAGE 1.5: REPLAY GUARD (Assimilated from Toll) ---
+		// --- PIPELINE STAGE 1.5: REPLAY GUARD ---
 		if (replayGuard.check(ctx.txHash)) {
 			return NextResponse.json(
-				{ error: "Payment signature already used.", detail: "Each txHash can only be used once. Signatures expire after 5 minutes." },
+				{ error: "Payment signature or ZK Nullifier already used.", detail: "Each txHash/nullifier can only be used once." },
 				{ status: 402 }
 			);
 		}

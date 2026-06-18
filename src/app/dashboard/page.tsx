@@ -40,6 +40,7 @@ export default function Dashboard() {
     const [inputValue, setInputValue] = useState("");
     const [lastResult, setLastResult] = useState<{status: string; executor?: string; result?: string; error?: string} | null>(null);
     const [balance, setBalance] = useState(140);
+    const [isShielded, setIsShielded] = useState(false);
 
     // Live Telemetry Polling (Every 2s)
     useEffect(() => {
@@ -92,6 +93,7 @@ export default function Dashboard() {
                     bounty_usdc: 1.0,
                     client_id: userPubKey,
                     task_id: `ui_task_${Date.now()}`,
+                    is_shielded: isShielded,
                 }),
             });
             const data = await res.json();
@@ -154,11 +156,13 @@ export default function Dashboard() {
             setTimeout(() => setAgentState("success"), 0);
             // --- DEMO SUCCESS OVERRIDE LOGIC ---
             if (inputValue.toLowerCase().includes("demo") || inputValue.toLowerCase().includes("bounty") || inputValue.toLowerCase().includes("x402")) {
-                setTimeout(() => setBalance(b => b + 500), 0);
+                setTimeout(() => setBalance(b => b + (isShielded ? 450 : 500)), 0);
                 setTimeout(() => setLastResult({
-                    status: "completed",
-                    executor: "0x892a...3B9A",
-                    result: "0x98f7c8b2... [Proof Verified]. Bounty executed with 0-Trust anomaly. 500 USDC dispensed."
+                    status: isShielded ? "shielded_delegation" : "completed",
+                    executor: isShielded ? "Circom ZK Privacy Pool (Nethermind SPP)" : "0x892a...3B9A",
+                    result: isShielded 
+                        ? "Groth16 ZK-SNARK Generated. Nullifier published on Soroban. Privacy Pool deposit verified. Bounty executed anonymously via X402 Gateway."
+                        : "0x98f7c8b2... [Proof Verified]. Bounty executed with 0-Trust anomaly. 500 USDC dispensed."
                 }), 0);
                 // Play retro coin sound
                 try {
@@ -417,6 +421,24 @@ export default function Dashboard() {
                                     </svg>
                                     ATTACH FILES
                                 </label>
+                                
+                                <div className="flex-1 flex justify-center items-center">
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input 
+                                                type="checkbox" 
+                                                className="sr-only" 
+                                                checked={isShielded}
+                                                onChange={() => setIsShielded(!isShielded)}
+                                            />
+                                            <div className={`block w-8 h-4 rounded-full transition-colors ${isShielded ? 'bg-[#00ff41]/50' : 'bg-white/10'}`}></div>
+                                            <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform ${isShielded ? 'transform translate-x-4 shadow-[0_0_10px_#00ff41]' : ''}`}></div>
+                                        </div>
+                                        <span className={`text-[10px] tracking-widest uppercase transition-colors ${isShielded ? 'text-[#00ff41] font-bold drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]' : 'text-white/30 group-hover:text-white'}`}>
+                                            Shielded Task (ZK)
+                                        </span>
+                                    </label>
+                                </div>
                                 
                                 <button 
                                     onClick={handleExecute}

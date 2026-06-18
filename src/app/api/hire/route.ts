@@ -50,15 +50,41 @@ export async function POST(req: Request) {
 
 		// --- PIPELINE STAGE 1: ZK & PREFLIGHT ---
 		if (isShielded) {
-			// ZK Shielded Mode: Instead of validating a public TxHash, we validate a Zero-Knowledge Proof
-			// (Mocking the Circom Groth16 verification for the Hackathon)
-			if (!txHash.startsWith("zkp_") && !txHash.includes("mock_freighter")) {
-				return NextResponse.json({ error: "Invalid ZK Proof for Shielded Task." }, { 
-					status: 403,
-					headers: { "WWW-Authenticate": 'L402 invoice="soroban_zkp_required"' }
-				});
+			// ZK Shielded Mode: Verify a real Groth16 proof from the client
+			const zkProof = body.zk_proof;
+			const zkPublicSignals = body.zk_public_signals;
+			const zkCircuit = body.zk_circuit || "deposit_commitment";
+
+			if (!zkProof || !zkPublicSignals) {
+				return NextResponse.json(
+					{ error: "Shielded mode requires zk_proof and zk_public_signals in request body." },
+					{
+						status: 403,
+						headers: { "WWW-Authenticate": 'L402 invoice="soroban_zkp_required"' },
+					}
+				);
 			}
-			console.log(`[ZK_POOL] Verified Groth16 Proof for anonymous task routing: ${ctx.taskId}`);
+
+			// Verify the Groth16 proof using snarkjs verification keys
+			try {
+				const { verifyProof } = await import("@/lib/zk-verifier");
+				const result = await verifyProof(zkCircuit, zkProof, zkPublicSignals);
+
+				if (!result.valid) {
+					return NextResponse.json(
+						{ error: "ZK Proof verification FAILED. Invalid Groth16 proof." },
+						{ status: 403 }
+					);
+				}
+
+				console.log(`[ZK_POOL] ✅ Groth16 proof VERIFIED (${result.method}) for task: ${ctx.taskId} | circuit: ${zkCircuit}`);
+			} catch (zkError) {
+				console.error("[ZK_POOL] Verification error:", zkError);
+				return NextResponse.json(
+					{ error: "ZK verification engine error", details: zkError instanceof Error ? zkError.message : "Unknown" },
+					{ status: 500 }
+				);
+			}
 		} else {
 			// Standard public execution mode
 			const preflight = XRPLTransactor.preflight(ctx);

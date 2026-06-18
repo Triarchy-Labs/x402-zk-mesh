@@ -1,1 +1,0 @@
-/home/minimalmod/Triarchy/Agent_Zone/projects/x402-zk-mesh/contracts/target/wasm32-unknown-unknown/release/guild_registry.wasm: /home/minimalmod/Triarchy/Agent_Zone/projects/x402-zk-mesh/contracts/guild-registry/src/lib.rs

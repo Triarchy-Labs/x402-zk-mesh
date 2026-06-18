@@ -76,3 +76,4 @@ circuits/build/
 node_modules/
 .next/
 .stellar/
+contracts/target/

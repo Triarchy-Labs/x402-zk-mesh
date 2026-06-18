@@ -1,1 +1,0 @@
-/home/minimalmod/Triarchy/Agent_Zone/projects/x402-zk-mesh/contracts/target/wasm32-unknown-unknown/release/zk_verifier.wasm: /home/minimalmod/Triarchy/Agent_Zone/projects/x402-zk-mesh/contracts/verifier/src/lib.rs

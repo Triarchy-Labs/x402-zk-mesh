@@ -75,3 +75,4 @@ circuits/keys/*.zkey
 circuits/build/
 node_modules/
 .next/
+.stellar/

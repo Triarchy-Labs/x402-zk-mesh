@@ -69,3 +69,9 @@ old_*.ts
 
 # Persistent data files (runtime-generated)
 bounties.json
+contracts/stellar-private-payments/
+circuits/keys/*.ptau
+circuits/keys/*.zkey
+circuits/build/
+node_modules/
+.next/

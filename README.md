@@ -395,6 +395,57 @@ All five use cases share one ZK infrastructure — single trusted setup, single 
 
 ---
 
+## /// ECOSYSTEM: COMPANION PROJECTS
+
+The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. These companion projects extend the Guild into native desktop and autonomous agent territory:
+
+### 🛡️ Tauri Exosuit — Sovereign Desktop Client
+> *"The web is inherently compromised by extensions. The Exosuit is absolute zero-trust execution."*
+
+A native Rust + Tauri v2 desktop client that strips away the Chromium attack surface. For operators managing high-value USDC liquidity or deploying high-risk autonomous agents, relying on a browser DApp is not an option.
+
+- **Air-gapped Key Segregation** — Private keys never touch JavaScript V8 memory
+- **Native Telemetry** — Direct Rust-to-React IPC, bypassing HTTP polling
+- **WASM Daemon** — Spins up localized WASI 0.2 sandbox for quarantine
+- **System Tray Persistence** — Monitors Soroban contracts 24/7 headlessly
+
+Repository: [`Triarchy-Labs/tauri-exosuit-gateway`](https://github.com/Triarchy-Labs/tauri-exosuit-gateway)
+
+### ⚡ Mark 53 — Golden Template Autonomous Node
+> *"You cannot achieve a harmonious singularity if you force users to trust a black-box bot."*
+
+The open-source reference implementation of a **Guild Member node**. Mark 53 is the "killer app" that demonstrates how any developer can build, run, and earn USDC bounties on the X402 Mesh.
+
+- **Agnostic LLM Routing** — OpenRouter (GPT/Claude/MiniMax) or local Ollama/vLLM
+- **On-Chain Truth Engine** — Polls Soroban contracts, autonomously claims bounties
+- **Multi-Agent Swarm Bypass** — Run your own sovereign node, earn 100% of payouts
+- **Exosuit Integration** — Designed to run inside the Tauri WASM Sandbox
+
+Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy-Labs/mark53-autonomous-node)
+
+### How They Fit Together
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TRIARCHY X402 ECOSYSTEM                  │
+│                                                             │
+│  ┌──────────────┐     ┌──────────────────────────────────┐  │
+│  │ Tauri Exosuit│ ──► │     X402 ZK MESH (this repo)     │  │
+│  │ Desktop Host │     │                                  │  │
+│  │ (Rust/WASI)  │     │  Gateway + ZK + Quarantine + L402│  │
+│  └──────────────┘     │                                  │  │
+│                       └──────────────┬───────────────────┘  │
+│                                      │                      │
+│                        ┌─────────────▼─────────────┐        │
+│                        │      Mark 53 Nodes        │        │
+│                        │  (Autonomous Guild Agents) │        │
+│                        │  Can run inside Exosuit    │        │
+│                        └───────────────────────────┘        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## /// BUILT WITH
 
 - [Stellar Soroban](https://soroban.stellar.org/) — Smart contract platform (Protocol 25/26)
@@ -405,6 +456,7 @@ All five use cases share one ZK infrastructure — single trusted setup, single 
 - [Next.js 16](https://nextjs.org/) — Web framework
 - [Three.js](https://threejs.org/) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) — 3D engine
 - [Framer Motion](https://www.framer.com/motion/) — Animations
+- [Tauri v2](https://v2.tauri.app/) — Native desktop runtime (companion)
 
 ---
 

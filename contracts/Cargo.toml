@@ -1,6 +1,9 @@
 [workspace]
 members = [
     "verifier",
+    "verifier-deposit",
+    "verifier-membership",
+    "verifier-execution",
     "privacy-pool",
     "guild-registry",
 ]

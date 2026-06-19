@@ -7,6 +7,18 @@ import { requestAccess } from "@stellar/freighter-api";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
 import { useRef, useEffect } from "react";
 
+interface Bounty {
+	id: string;
+	title: string;
+	description: string;
+	amount: number;
+	status: string;
+	skills: string[];
+	difficulty: string;
+	bounty: string;
+	[key: string]: unknown;
+}
+
 const AnimatedCounter = ({ value, prefix = "", suffix = "", isFloat = false }: { value: number, prefix?: string, suffix?: string, isFloat?: boolean }) => {
 	const ref = useRef<HTMLSpanElement>(null);
 	const motionValue = useMotionValue(0);
@@ -85,7 +97,7 @@ const BountiesPage = () => {
 		}
 	};
 
-	const [bounties, setBounties] = useState<any[]>([]);
+	const [bounties, setBounties] = useState<Bounty[]>([]);
 
 	useEffect(() => {
 		const loadBounties = async () => {

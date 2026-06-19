@@ -12,7 +12,19 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated circuit artifacts (circom output):
+    "circuits/**",
+    // Vendored Nethermind reference:
+    "contracts/stellar-private-payments/**",
+    // Rust build artifacts:
+    "contracts/target/**",
   ]),
+  {
+    rules: {
+      // React 19 cascading setState in effect — acceptable for dashboard animations
+      "react-hooks/rules-of-hooks": "error",
+    },
+  },
 ]);
 
 export default eslintConfig;

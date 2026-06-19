@@ -15,6 +15,14 @@
 | **privacy-pool** | `CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X` | [View](https://stellar.expert/explorer/testnet/contract/CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X) |
 | **guild-registry** | `CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG` | [View](https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG) |
 
+## Initialization Transactions
+
+| Contract | Function | TX Hash |
+|----------|----------|---------|
+| zk-verifier | `init(vk)` — deposit_commitment VK loaded | [bc540428...](https://stellar.expert/explorer/testnet/tx/bc540428751b8aaeabc835c8d0b3ab17c5882b5f8a9d29f3497d70b51d77d4b9) |
+| privacy-pool | `init(depth=20)` — supports ~1M deposits | [7f339e0e...](https://stellar.expert/explorer/testnet/tx/7f339e0e000d31d7566f842d78d46e5dec334c043c10767a4bf0bc75da273a30) |
+| guild-registry | `init(admin, root, 3)` — 3 initial members | [33992197...](https://stellar.expert/explorer/testnet/tx/33992197bae0d10fce67c242b65c1313f1b91c8ba3710360acf78ecf5d8f74ab) |
+
 ## WASM Hashes
 
 | Contract | WASM Hash |
@@ -27,6 +35,6 @@
 
 | Contract | TX Hash | Link |
 |----------|---------|------|
-| zk-verifier | `a4f359d6770106984b680c81dabb6e2ccd71b3ceeffb2e28def3bd1789258d2f` | [Explorer](https://stellar.expert/explorer/testnet/tx/a4f359d6770106984b680c81dabb6e2ccd71b3ceeffb2e28def3bd1789258d2f) |
-| privacy-pool | `ca9141f51272e11ef0971feb9b8ceafc244abed79b0343ffc3c3bd7f2c820bef` | [Explorer](https://stellar.expert/explorer/testnet/tx/ca9141f51272e11ef0971feb9b8ceafc244abed79b0343ffc3c3bd7f2c820bef) |
-| guild-registry | `0355fc2bfea63cc0df0c3eff477c4481eaa355726eab28d8c8fac4f593c7dfae` | [Explorer](https://stellar.expert/explorer/testnet/tx/0355fc2bfea63cc0df0c3eff477c4481eaa355726eab28d8c8fac4f593c7dfae) |
+| zk-verifier | `a4f359d6...` | [Explorer](https://stellar.expert/explorer/testnet/tx/a4f359d6770106984b680c81dabb6e2ccd71b3ceeffb2e28def3bd1789258d2f) |
+| privacy-pool | `ca9141f5...` | [Explorer](https://stellar.expert/explorer/testnet/tx/ca9141f51272e11ef0971feb9b8ceafc244abed79b0343ffc3c3bd7f2c820bef) |
+| guild-registry | `0355fc2b...` | [Explorer](https://stellar.expert/explorer/testnet/tx/0355fc2bfea63cc0df0c3eff477c4481eaa355726eab28d8c8fac4f593c7dfae) |

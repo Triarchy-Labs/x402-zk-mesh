@@ -283,16 +283,17 @@ We believe in honest submissions. Here's what works and what doesn't:
 |-----------|--------|---------|
 | ZK Circuits (3x Circom) | Working | Compiles, generates valid Groth16 proofs |
 | Trusted Setup (Powers of Tau) | Complete | bn128 depth 14, Phase 2 for all circuits |
-| Groth16 Verification (server-side) | Working | snarkjs verification with real VKs |
+| Groth16 Verification (dual-path) | Working | On-chain Soroban + local snarkjs fallback |
 | `/api/hire` ZK Integration | Working | Real Groth16 verification, not string checks |
 | `/api/zk/verify` Endpoint | Working | Standalone proof verification |
+| `/api/contracts` Endpoint | Working | Returns deployed contract addresses |
 | Dashboard UI | Working | GPU-accelerated telemetry + shielded toggle |
 | L402 Payment Pipeline | Working | 3-tier routing (Micro/Enterprise/P2P) |
 | WASM Quarantine | Working | Extism WASI 0.2, 30+ heuristic patterns |
 | Replay Guard + Spending Policy | Working | Anti-replay, budget caps, allowlist/blocklist |
-| Soroban Verifier (on-chain) | In Progress | Contract generated, testnet deploy pending |
-| Privacy Pool Contract | In Progress | UTXO tree + nullifier tracking |
-| Guild Registry Contract | In Progress | Agent Merkle root storage |
+| Soroban Verifier (on-chain) | Deployed | [`CDSOE...SCQL`](https://stellar.expert/explorer/testnet/contract/CDSOEVAUKQQBRJ4GQVH4XZM2CARDONRPD2X2B6IZDXSVP33PUYYKSCQL) |
+| Privacy Pool Contract | Deployed | [`CDGTA...74X`](https://stellar.expert/explorer/testnet/contract/CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X) |
+| Guild Registry Contract | Deployed | [`CBH5U...GLG`](https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG) |
 | Testnet USDC Integration | Mock | Uses test tokens |
 | ASP Compliance Trees | Partial | Reference from Nethermind SPP |
 | Production Audit | -- | Research prototype |
@@ -429,8 +430,8 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 | **ZK Mesh Gateway** | Working (this repo) | Production audit + mainnet deploy |
 | **Tauri Exosuit** | Prototype | Full desktop release (Linux/Mac/Win) |
 | **Mark 53 Node** | Prototype | Production SDK + multi-agent swarm |
-| **Privacy Pool** | Testnet | Mainnet USDC integration |
-| **Guild Registry** | Testnet | DAO governance for membership |
+| **Privacy Pool** | Deployed | Mainnet USDC integration |
+| **Guild Registry** | Deployed | DAO governance for membership |
 
 ### How They Fit Together
 

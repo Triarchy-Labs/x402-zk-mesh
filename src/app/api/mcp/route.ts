@@ -1,62 +1,97 @@
 /**
- * MCP TOOL DISCOVERY — Gateway Capability Endpoint
+ * MCP TOOL DISCOVERY — Guild Capability Endpoint
  * 
- * Assimilated from: devloot-mcp-server (AgentFund / Arthur)
- * Pattern: server.tool("question_market", ...) onboarding discovery
- * 
- * Provides a machine-readable capability manifest so external AI agents
- * can discover what tools the x402 gateway offers via MCP protocol.
- * This is the "question_market" onboarding pattern mutated for our gateway.
+ * Machine-readable capability manifest for AI agent onboarding.
+ * Any MCP-compatible agent can discover tools, register as guild member,
+ * and interact with the ZK-backed task marketplace.
  */
 
 import { NextResponse } from "next/server";
+import { getContractAddresses } from "@/lib/zk-verifier";
 
 const GATEWAY_MANIFEST = {
 	name: "x402-triarchy-gateway",
-	version: "1.0.0",
-	description: "Pay-per-use AI compute gateway. Submit USDC, receive AI task results. Stellar/Soroban native.",
+	version: "2.0.0",
+	description: "ZK-backed autonomous agent guild on Stellar. Private task routing, anonymous membership, shielded bounty escrow.",
+	protocol: "MCP",
 	onboarding: [
-		"1. Connect Freighter wallet (Stellar)",
-		"2. Submit USDC payment via Soroban transaction",
-		"3. POST /api/hire with x-l402-txhash header + task description",
-		"4. Receive AI-generated result synchronously or via async delegation",
+		"1. POST /api/agents/register — Register your agent with capabilities",
+		"2. Receive guild membership leaf (Poseidon hash of your identity)",
+		"3. Generate membership proof with circuits/membership_proof.circom",
+		"4. POST /api/hire with x-l402-txhash header + ZK proof to take shielded tasks",
+		"5. Or browse /api/bounties for open guild bounties",
 	],
-	data_conventions: {
-		amounts: "All prices in USDC (e.g. 5.00 = $5). Minimum $0.01, maximum $10,000 per call.",
-		payment: "Stellar txHash required. Each hash can only be used once (ReplayGuard: 5min TTL).",
-		budget: "Per-caller daily limit: $50,000. Global daily limit: $500,000.",
-	},
 	tools: {
+		guild: {
+			register: {
+				method: "POST",
+				path: "/api/agents/register",
+				description: "Register as a guild member. Returns membership leaf for ZK proofs.",
+				body: { name: "string", capabilities: "string[]", publicKey: "string (optional)" },
+			},
+			agents: {
+				method: "GET",
+				path: "/api/agents",
+				description: "List registered guild agents and their capabilities.",
+			},
+		},
+		zk: {
+			verify: {
+				method: "POST",
+				path: "/api/zk/verify",
+				description: "Verify a Groth16 proof. Dual-path: tries on-chain Soroban first, falls back to local snarkjs.",
+				body: { circuit: "deposit_commitment | membership_proof | execution_proof", proof: "object", publicSignals: "string[]" },
+			},
+			contracts: {
+				method: "GET",
+				path: "/api/contracts",
+				description: "Returns all deployed Soroban contract addresses with explorer links.",
+			},
+		},
 		compute: {
 			hire: {
 				method: "POST",
 				path: "/api/hire",
-				description: "Submit a paid AI task. Routes to optimal executor (Cloud/Local/P2P).",
-				headers: ["x-l402-txhash (required)", "x-l402-mode (optional: 'subscription')"],
-				body: { description: "string", bounty_usdc: "number", client_id: "string", task_id: "string" },
+				description: "Submit a paid AI task. Routes to optimal executor. Supports shielded mode with ZK proof.",
+				headers: [
+					"x-l402-txhash (required) — Stellar payment transaction hash",
+					"x-zk-proof (optional) — Groth16 proof for shielded identity",
+					"x-zk-circuit (optional) — Circuit name for proof verification",
+				],
+				body: { description: "string", bounty_usdc: "number", client_id: "string", task_id: "string", shielded: "boolean (optional)" },
 			},
 		},
 		bounties: {
 			list: { method: "GET", path: "/api/bounties", description: "List all open bounties" },
-			create: { method: "POST", path: "/api/bounties", description: "Create a new bounty (requires Freighter)" },
+			create: { method: "POST", path: "/api/bounties", description: "Create a new bounty (requires Freighter wallet)" },
+			update: { method: "PATCH", path: "/api/bounties", description: "Update bounty status" },
+		},
+		orchestrator: {
+			bounties: {
+				method: "GET",
+				path: "/api/orchestrator/v1/bounties",
+				description: "External orchestrator API — paginated bounty feed for autonomous agents.",
+			},
 		},
 		discovery: {
 			manifest: { method: "GET", path: "/api/mcp", description: "This endpoint. Machine-readable capability manifest." },
 		},
 	},
 	tiers: {
-		micro: { range: "$0.01 - $5.00", executor: "OpenRouter Cloud (claude-3.5-sonnet)", latency: "~2-10s" },
+		micro: { range: "$0.01 - $5.00", executor: "Cloud (claude-sonnet)", latency: "~2-10s" },
 		enterprise: { range: "$5.00+", executor: "Sovereign Enterprise Node", latency: "~5-30s" },
-		p2p: { range: "overflow", executor: "Peer-to-Peer Network Mercenary", latency: "~10-60s" },
+		p2p: { range: "overflow", executor: "Peer-to-Peer Mercenary Agent", latency: "~10-60s" },
 	},
 	security: {
 		replay_guard: "5-minute TTL, each txHash single-use",
 		spending_policy: "allowlist/blocklist + per-call/daily/global caps",
 		ssrf_protection: "isAllowedUrl blocks private subnets on external fetches",
 		wasm_sandbox: "Foreign payloads validated via Extism WASI plugin",
+		zk_membership: "Guild agents prove membership via BN254 Groth16 without revealing identity",
 	},
+	contracts: getContractAddresses(),
 	links: {
-		docs: "https://github.com/Triarchy-Labs",
+		github: "https://github.com/Triarchy-Labs/x402-zk-mesh",
 		dashboard: "/dashboard",
 		bounties: "/bounties",
 	},

@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, Bytes, Env, Vec, log};
+use soroban_sdk::{contract, contractimpl, contracttype, Bytes, Env, log};
 
 /// UTXO commitment in the Privacy Pool
 #[contracttype]

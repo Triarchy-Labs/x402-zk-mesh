@@ -596,10 +596,9 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 	}, []);
 
 	// Portal to body — bypass Lenis CSS transforms that break position:fixed
-	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-	useEffect(() => {
-		setPortalTarget(document.body);
-	}, []);
+	const [portalTarget] = useState<HTMLElement | null>(() =>
+		typeof document !== "undefined" ? document.body : null
+	);
 
 	if (!portalTarget) return null;
 

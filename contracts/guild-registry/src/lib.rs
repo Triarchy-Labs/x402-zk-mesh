@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, Bytes, Env, Address, Vec, log};
+use soroban_sdk::{contract, contractimpl, contracttype, Bytes, Env, Address, log};
 
 /// Storage keys for the Guild Registry
 #[contracttype]

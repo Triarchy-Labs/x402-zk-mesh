@@ -3,7 +3,7 @@
 import * as fs from "node:fs";
 import { NextResponse } from "next/server";
 import { AgentRegistry } from "@/lib/agent_registry";
-import { XRPLTransactor, TransactorContext } from "@/lib/xrpl-transactor";
+import { StellarTransactor, TransactorContext } from "@/lib/stellar-transactor";
 import { replayGuard } from "@/lib/replay-guard";
 import { spendingPolicy } from "@/lib/spending-policy";
 import { isAllowedUrl } from "@/lib/security";
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 			}
 		} else {
 			// Standard public execution mode
-			const preflight = XRPLTransactor.preflight(ctx);
+			const preflight = StellarTransactor.preflight(ctx);
 			if (!preflight.valid) {
 				return NextResponse.json({ error: preflight.error }, { 
 					status: 402,
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
 		}
 
 		// --- PIPELINE STAGE 2: PRECLAIM ---
-		const preclaim = await XRPLTransactor.preclaim(ctx);
+		const preclaim = await StellarTransactor.preclaim(ctx);
 		if (!preclaim.valid) {
 			return NextResponse.json(
 				{ 
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
 		const client_id = ctx.clientId;
 
 		// --- PIPELINE STAGE 3: QUEUE CHECK ---
-		const isQueueFull = XRPLTransactor.checkQueueState(LOCAL_EXECUTION_HOOK);
+		const isQueueFull = StellarTransactor.checkQueueState(LOCAL_EXECUTION_HOOK);
 
 		// 2. TIER 1: MICRO-BOUNTY (Cloud LLM Sync via OpenRouter / Local Ollama fallback)
 		if (price > 0 && price < ENTERPRISE_THRESHOLD && !isQueueFull) {

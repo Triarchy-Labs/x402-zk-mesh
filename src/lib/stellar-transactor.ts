@@ -3,10 +3,9 @@ import { validateForeignPayload } from "./wasm_sandbox";
 import * as fs from "node:fs";
 
 /**
- * XRPL TRANSACTOR PIPELINE (D2128)
+ * STELLAR TRANSACTOR PIPELINE
  * 
- * Ported from rippled C++ architecture. Ensures Bank-Grade security
- * for the x402 Gateway.
+ * Three-phase transaction validation for the x402 Gateway.
  * 
  * 1. preflight() - Cheap syntax, signature, and format checks. NO external RPCs.
  * 2. preclaim() - Expensive checks. Horizon RPC calls. Ledger state checks. WASM Sandbox.
@@ -21,7 +20,7 @@ export interface TransactorContext {
     taskId: string;
 }
 
-export class XRPLTransactor {
+export class StellarTransactor {
     /**
      * @brief Checks structural validity of the payload.
      * Rejects early before making expensive Horizon RPC calls.
@@ -33,7 +32,7 @@ export class XRPLTransactor {
         if (!ctx.description || ctx.bountyUsdc === undefined || ctx.bountyUsdc < 0) {
             return { valid: false, error: "Malformed payload: missing definition or negative bounty." };
         }
-        // Strict XRPL-style boundary checks (Overflow protection D2128)
+        // Strict boundary checks (Overflow protection)
         if (ctx.bountyUsdc > 1000000) {
             return { valid: false, error: "TFAIL: Bounty exceeds maximum transaction size limit." };
         }

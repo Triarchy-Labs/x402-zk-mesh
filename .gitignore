@@ -71,11 +71,8 @@ old_*.ts
 bounties.json
 contracts/stellar-private-payments/
 circuits/keys/*.ptau
-circuits/keys/*.zkey
 circuits/build/
 node_modules/
 .next/
-.stellar/
 contracts/target/
-public/circuits/*.wasm
-public/circuits/*.zkey
+.stellar/

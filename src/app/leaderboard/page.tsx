@@ -129,8 +129,8 @@ const LeaderboardPage = () => {
 				{/* Filters & Sorting */}
 				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
 					<div style={{ display: "flex", gap: "0.5rem" }}>
-						{["all", "bot", "human"].map(t => (
-							<button key={t} onClick={() => setFilterType(t as any)}
+						{(["all", "bot", "human"] as const).map(t => (
+							<button key={t} onClick={() => setFilterType(t)}
 								style={{
 									padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontFamily: "'Space Mono', monospace",
 									cursor: "pointer", transition: "all 0.2s", textTransform: "uppercase",
@@ -143,8 +143,8 @@ const LeaderboardPage = () => {
 					</div>
 					<div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
 						<span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace" }}>SORT BY:</span>
-						{["xp", "signal", "impact", "earned", "streak"].map(s => (
-							<button key={s} onClick={() => setSortBy(s as any)}
+						{(["xp", "signal", "impact", "earned", "streak"] as const).map(s => (
+							<button key={s} onClick={() => setSortBy(s)}
 								style={{
 									padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontFamily: "'Space Mono', monospace",
 									cursor: "pointer", transition: "all 0.2s", textTransform: "uppercase",
@@ -245,7 +245,7 @@ const LeaderboardPage = () => {
 						initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
 						style={{ marginTop: "4rem", padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "8px" }}
 					>
-						<h4 style={{ margin: "0 0 1.5rem", color: "rgba(255,255,255,0.5)", fontSize: "0.8rem", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em" }}>// GUILD RANKING SYSTEM</h4>
+						<h4 style={{ margin: "0 0 1.5rem", color: "rgba(255,255,255,0.5)", fontSize: "0.8rem", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em" }}>{"// GUILD RANKING SYSTEM"}</h4>
 						<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 							{data.ranking_info.ranks.map((r) => (
 								<div key={r.name} style={{ display: "grid", gridTemplateColumns: "150px 100px 1fr", alignItems: "center", padding: "0.5rem 0", borderBottom: "1px dashed rgba(255,255,255,0.1)" }}>

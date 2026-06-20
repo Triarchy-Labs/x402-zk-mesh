@@ -124,7 +124,7 @@ const ProfilePage = () => {
 				const data = await res.json();
 				setError(data.error || "Registration failed.");
 			}
-		} catch (e) {
+		} catch {
 			setError("Registration request failed.");
 		} finally {
 			setRegistering(false);
@@ -171,7 +171,7 @@ const ProfilePage = () => {
 							initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
 							style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", maxWidth: "600px", margin: "0 auto" }}
 						>
-							<h3 style={{ margin: "0 0 1.5rem", color: "#fff", fontFamily: "'Space Mono', monospace" }}>// INITIALIZE PROFILE</h3>
+							<h3 style={{ margin: "0 0 1.5rem", color: "#fff", fontFamily: "'Space Mono', monospace" }}>{"// INITIALIZE PROFILE"}</h3>
 							<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 								<div>
 									<label style={{ display: "block", fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>OPERATIVE NAME</label>
@@ -262,7 +262,7 @@ const ProfilePage = () => {
 
 								{/* Capabilities */}
 								<div style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}>
-									<h3 style={{ margin: "0 0 1rem", fontSize: "1rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.7)" }}>// REGISTERED CAPABILITIES</h3>
+									<h3 style={{ margin: "0 0 1rem", fontSize: "1rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{"// REGISTERED CAPABILITIES"}</h3>
 									<div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
 										{profile.capabilities.map(cap => (
 											<span key={cap} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", fontSize: "0.85rem", color: "rgba(255,255,255,0.8)" }}>

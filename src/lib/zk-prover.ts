@@ -58,8 +58,8 @@ export async function generateProof(
   circuit: CircuitName,
   inputs: CircuitInputs
 ): Promise<ZKProof> {
-  const wasmPath = `/circuits/${circuit}/${circuit}.wasm`;
-  const zkeyPath = `/circuits/${circuit}/${circuit}_final.zkey`;
+  const wasmPath = `/circuits/${circuit}.wasm`;
+  const zkeyPath = `/circuits/${circuit}_final.zkey`;
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     inputs,
@@ -79,7 +79,7 @@ export async function verifyProofLocally(
   proof: ZKProof["proof"],
   publicSignals: string[]
 ): Promise<boolean> {
-  const vkPath = `/circuits/${circuit}/${circuit}_vk.json`;
+  const vkPath = `/circuits/${circuit}_vk.json`;
   const vkResponse = await fetch(vkPath);
   const vk = await vkResponse.json();
 

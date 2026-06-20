@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "verifier",
     "verifier-deposit",
     "verifier-membership",
     "verifier-execution",

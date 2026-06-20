@@ -76,11 +76,11 @@ function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
 					background: p.accentHover,
 					color: "#000",
 					border: `1px solid ${p.accentHover}`,
-					padding: "16px 48px",
-					borderRadius: "40px",
+					padding: "1.9rem 3.7rem",
+					borderRadius: "4rem",
 					cursor: "pointer",
 					fontFamily: FONT_HEADING,
-					fontSize: "0.9rem",
+					fontSize: "1.4rem",
 					fontWeight: 600,
 					letterSpacing: "0.15em",
 					boxShadow: `0 0 40px ${p.glowHover}`,
@@ -98,12 +98,12 @@ function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
 					background: "transparent",
 					color: p.text,
 					border: `1px solid rgba(255,255,255,0.2)`,
-					padding: "16px 48px",
-					borderRadius: "40px",
+					padding: "1.9rem 3.7rem",
+					borderRadius: "4rem",
 					cursor: "pointer",
 					fontFamily: FONT_HEADING,
-					fontSize: "0.9rem",
-					fontWeight: 600,
+					fontSize: "1.4rem",
+					fontWeight: 500,
 					backdropFilter: "blur(12px)",
 					WebkitBackdropFilter: "blur(12px)",
 					letterSpacing: "0.15em",
@@ -449,7 +449,7 @@ export default function Page() {
 					</div>
 
 					{/* SYSTEM ARCHITECTURE */}
-					<section style={{ position: "relative", zIndex: 10, width: "100%", padding: "4rem 0" }}>
+					<section style={{ position: "relative", zIndex: 10, width: "100%", padding: "10rem 5vw" }}>
 						<motion.h2 
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
@@ -509,7 +509,7 @@ export default function Page() {
 							height: "1px",
 							background: `linear-gradient(90deg, transparent, ${theme === "dark" ? "rgba(0,255,65,0.3)" : "rgba(0,100,34,0.2)"}, transparent)`,
 						}} />
-						<div style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
+						<div style={{ width: "100%", padding: "0 5vw", margin: "0 auto", textAlign: "center" }}>
 							<h2 style={{ 
 								fontFamily: FONT_HEADING, 
 								fontSize: "2.5rem", 

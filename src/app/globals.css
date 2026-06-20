@@ -65,6 +65,28 @@ html[data-theme="dark"] .global-bg-canvas {
   --font-mono: var(--font-geist-mono);
 }
 
+/* ============================================================
+   MDX VW SCALING ARCHITECTURE (1rem = 10px @ 1920px)
+   ============================================================ */
+html {
+	font-size: 0.5208333333vw; /* Desktop / Ultrawide */
+}
+@media screen and (max-width: 991px) {
+	html {
+		font-size: 2.2727272727vw; /* Mobile & small tablet */
+	}
+}
+@media screen and (min-width: 482px) and (max-width: 991px) {
+	html {
+		font-size: 1.3020833333vw; /* Tablet */
+	}
+}
+@media (min-width: 992px) and (orientation: portrait) {
+	html {
+		font-size: 1.6666666667vw; /* Portrait Laptop */
+	}
+}
+
 @media (prefers-color-scheme: dark) {
 	:root {
 		--background: #0a0a0a;
@@ -356,11 +378,11 @@ html.lenis, html.lenis body {
 }
 
 .connect-btn-base {
-  padding: 10px 26px;
-  border-radius: 30px;
+  padding: 1.5rem 3rem;
+  border-radius: 4rem;
   cursor: pointer;
   font-family: "Space Mono", monospace;
-  font-size: 0.75rem;
+  font-size: 1.4rem;
   font-weight: bold;
   letter-spacing: 0.15em;
   backdrop-filter: blur(12px);

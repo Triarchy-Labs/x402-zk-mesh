@@ -73,7 +73,7 @@ function ModuleCard({ module, showSnake }: { module: ModuleInfo; showSnake: bool
 		>
 			<div style={{
 				fontFamily: FONT_HEADING,
-				fontSize: "0.65rem",
+				fontSize: "1.1rem",
 				fontWeight: 600,
 				letterSpacing: "0.14em",
 				color: showSnake ? "#00ff41" : "rgba(255,255,255,0.8)",
@@ -84,7 +84,7 @@ function ModuleCard({ module, showSnake }: { module: ModuleInfo; showSnake: bool
 			</div>
 			<div style={{
 				fontFamily: FONT_MONO,
-				fontSize: "0.55rem",
+				fontSize: "0.9rem",
 				color: "rgba(255,255,255,0.4)",
 				lineHeight: 1.6,
 				letterSpacing: "0.02em",

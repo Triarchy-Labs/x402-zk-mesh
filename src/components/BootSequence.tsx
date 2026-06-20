@@ -78,7 +78,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
                 style={{ 
                     marginTop: "1.5rem", 
                     letterSpacing: "0.2em", 
-                    fontSize: "0.8rem", 
+                    fontSize: "1.2rem", 
                     color: "rgba(255, 255, 255, 0.6)" 
                 }}
             >

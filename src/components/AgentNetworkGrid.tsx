@@ -103,7 +103,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
 				<span style={{ 
 					fontWeight: 500, 
-					fontSize: "1.4rem", 
+					fontSize: "1.8rem", 
 					letterSpacing: "0.02em",
 					color: hovered ? "#00ff41" : "#fff",
 					transition: lusionTransition,
@@ -113,7 +113,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				<span
 					style={{
 						padding: "6px 12px",
-						fontSize: "0.8rem",
+						fontSize: "1.2rem",
 						border: `1px solid ${statusColor}`,
 						color: statusColor,
 						borderRadius: "6px",
@@ -132,12 +132,12 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				justifyContent: "space-between", 
                 alignItems: "flex-end",
 				marginTop: "auto", 
-				fontSize: "0.95rem", 
+				fontSize: "1.4rem", 
 				color: "rgba(255,255,255,0.6)",
                 fontFamily: "'SF Mono', monospace"
 			}}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <span style={{ fontSize: "0.75rem", opacity: 0.6, letterSpacing: "0.1em" }}>DOMAIN</span>
+                    <span style={{ fontSize: "1.1rem", opacity: 0.6, letterSpacing: "0.1em" }}>DOMAIN</span>
                     <span>[{agent.task}]</span>
                 </div>
 
@@ -159,7 +159,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								color: statusColor,
 								borderRadius: "4px",
 								fontFamily: "'SF Mono', monospace",
-								fontSize: "0.75rem",
+								fontSize: "1.1rem",
 								letterSpacing: "0.1em",
 								cursor: "pointer",
 								transition: lusionTransition,
@@ -176,7 +176,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								color: theme === "dark" ? "#000" : "#fff",
 								borderRadius: "4px",
 								fontFamily: "'SF Mono', monospace",
-								fontSize: "0.75rem",
+								fontSize: "1.1rem",
 								letterSpacing: "0.1em",
 								fontWeight: "bold",
 								cursor: "pointer",
@@ -267,7 +267,7 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 			>
 				<h2 style={{ 
 					color: theme === "dark" ? "rgba(255,255,255,0.9)" : "#111", 
-					fontSize: "1.8rem", 
+					fontSize: "2.4rem", 
 					letterSpacing: "0.15em", 
 					margin: 0,
 					fontWeight: 500,
@@ -275,7 +275,7 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 					LIVE AGENT REGISTRY
 				</h2>
 				<div style={{ 
-					fontSize: "0.85rem", 
+					fontSize: "1.3rem", 
 					color: theme === "dark" ? "#555" : "#888", 
 					letterSpacing: "0.1em",
 					fontFamily: "'SF Mono', monospace",

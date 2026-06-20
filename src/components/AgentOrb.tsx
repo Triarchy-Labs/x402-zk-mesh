@@ -136,7 +136,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 						<motion.div 
 							animate={{ skewY: [5, -5, 5] }}
 							transition={{ repeat: Infinity, duration: 0.4, ease: "easeInOut" }}
-							className="w-14 h-10 bg-black border border-white/20 absolute right-1.5 top-0 rounded-l-md shadow-[0_0_20px_#ff003c] flex items-center justify-center text-[10px]"
+							className="w-14 h-10 bg-black border border-white/20 absolute right-1.5 top-0 rounded-l-md shadow-[0_0_20px_#ff003c] flex items-center justify-center text-[1.5rem]"
 						>
 							☠️
 						</motion.div>

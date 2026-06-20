@@ -630,7 +630,7 @@ function CardStyles() {
         justify-content: space-between;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        font-size: 0.64rem;
+        font-size: 1.1rem;
         color: rgba(255, 245, 225, 0.65);
         transform: translateZ(48px);
       }
@@ -697,7 +697,7 @@ function CardStyles() {
       }
       .hc-balance span {
         display: block;
-        font-size: 0.62rem;
+        font-size: 1.1rem;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: rgba(255, 245, 225, 0.65);
@@ -705,7 +705,7 @@ function CardStyles() {
       }
       .hc-balance strong {
         display: block;
-        font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+        font-size: clamp(2.4rem, 4vw, 3.2rem);
         font-weight: 700;
         letter-spacing: -0.04em;
         color: #fff8ec;
@@ -722,13 +722,13 @@ function CardStyles() {
         color: rgba(255, 249, 235, 0.95);
       }
       .hc-digits .hc-label {
-        font-size: 0.6rem;
+        font-size: 1.1rem;
         text-transform: uppercase;
         letter-spacing: 0.16em;
         color: rgba(255, 245, 225, 0.6);
       }
       .hc-digits .hc-value {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         letter-spacing: 0.2em;
       }
 

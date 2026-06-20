@@ -112,15 +112,7 @@ export function Nav() {
                     style={{ overflow: "hidden", whiteSpace: "nowrap" }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 >
-                    <span className="hidden sm:inline" style={{ 
-                        fontFamily: '"Space Mono", monospace', 
-                        fontSize: "0.85rem", 
-                        fontWeight: "bold",
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        color: "#fff",
-                        paddingLeft: "4px"
-                    }}>
+                    <span className="hidden sm:inline" style={{ fontFamily: '"Space Mono", monospace', fontSize: "1.3rem", fontWeight: "bold", letterSpacing: "0.1em", textTransform: "uppercase", color: "#fff", paddingLeft: "4px" }}>
                         [ RETURN TO HQ ]
                     </span>
                 </motion.div>
@@ -277,7 +269,7 @@ export function Nav() {
                         }}
                         onClick={handleDisconnect}
                     >
-                        <span style={{ fontFamily: '"Space Mono", monospace', fontSize: "0.75rem", fontWeight: "bold" }}>DISCONNECT</span>
+                        <span style={{ fontFamily: '"Space Mono", monospace', fontSize: "1.1rem", fontWeight: "bold" }}>DISCONNECT</span>
                     </motion.div>
                 </div>
 			</div>

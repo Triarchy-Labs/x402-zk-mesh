@@ -51,7 +51,7 @@ export default function AgentDashboard() {
 				style={{
 					color: "rgba(255,255,255,0.85)",
 					fontFamily: "'Helvetica Now Display', 'Inter', sans-serif",
-					fontSize: "1.5rem",
+					fontSize: "2.4rem",
 					letterSpacing: "0.2em",
 					borderBottom: "1px solid rgba(255,255,255,0.3)",
 					paddingBottom: "1rem",
@@ -91,7 +91,7 @@ export default function AgentDashboard() {
 							<span
 								style={{
 									color: "#fff",
-									fontSize: "1.2rem",
+									fontSize: "1.6rem",
 									fontWeight: "bold",
 								}}
 							>
@@ -106,7 +106,7 @@ export default function AgentDashboard() {
 												? "#ff003c"
 												: "#888",
 									textTransform: "uppercase",
-									fontSize: "0.8rem",
+									fontSize: "1.2rem",
 									padding: "0.2rem 0.5rem",
 									border: `1px solid ${agent.status === "active" ? "rgba(255,255,255,0.85)" : agent.status === "quarantined" ? "#ff003c" : "#888"}`,
 								}}
@@ -117,7 +117,7 @@ export default function AgentDashboard() {
 						<div
 							style={{
 								color: "#aaa",
-								fontSize: "0.9rem",
+								fontSize: "1.3rem",
 								marginBottom: "1rem",
 							}}
 						>
@@ -128,7 +128,7 @@ export default function AgentDashboard() {
 								display: "flex",
 								justifyContent: "space-between",
 								color: "rgba(255,255,255,0.85)",
-								fontSize: "0.9rem",
+								fontSize: "1.3rem",
 							}}
 						>
 							<span>REP: {agent.reputationScore.toFixed(1)}</span>

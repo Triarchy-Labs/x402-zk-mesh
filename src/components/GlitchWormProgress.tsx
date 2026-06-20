@@ -40,7 +40,7 @@ export function GlitchWormProgress({ progress }: GlitchWormProps) {
                         initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
                         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 flex items-center justify-center z-50 text-[#00ff41] font-bold text-center tracking-widest text-[14px]"
+                        className="absolute inset-0 flex items-center justify-center z-50 text-[#00ff41] font-bold text-center tracking-widest text-[1.5rem]"
                         style={{ textShadow: "0 0 20px #00ff41, 0 0 10px #00ff41" }}
                     >
                         <motion.span
@@ -56,7 +56,7 @@ export function GlitchWormProgress({ progress }: GlitchWormProps) {
                         exit={{ opacity: 0, scale: 1.1, filter: "brightness(200%)" }}
                         className="flex flex-col items-center gap-2 w-full"
                     >
-                        <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] flex justify-between w-full pb-1 border-b border-white/5">
+                        <div className="text-[1.2rem] text-white/30 uppercase tracking-[0.2em] flex justify-between w-full pb-1 border-b border-white/5">
                             <span>Ingestion Worm</span>
                             <span className="text-[#00ff41] drop-shadow-[0_0_5px_#00ff41]">{Math.round(safeProgress)}%</span>
                         </div>

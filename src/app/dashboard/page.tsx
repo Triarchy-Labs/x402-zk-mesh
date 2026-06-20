@@ -200,8 +200,8 @@ export default function Dashboard() {
                             <span className="text-gray-500 mr-4"><motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span></span>
                             Sovereign <span className="text-[#00ff41] font-bold tracking-tight shadow-[#00ff41]/20 drop-shadow-[0_0_15px_rgba(0,255,65,0.4)]">Dashboard</span>
                         </motion.h1>
-                        <p className="text-gray-400 max-w-2xl text-sm leading-relaxed tracking-wide">
-                            The Sovereign Command Matrix. Live L1 autonomous task execution and Zero-Trust WASM OPSEC Firewall.
+                        <p className="text-gray-400 max-w-2xl text-sm leading-relaxed tracking-wide mt-2">
+                            The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Nemotron 550B Semantic Firewall.
                         </p>
                     </div>
                     {/* SIMULATE ATTACK BUTTON */}

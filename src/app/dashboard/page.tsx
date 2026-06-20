@@ -239,46 +239,47 @@ export default function Dashboard() {
 				</section>
 
 				{/* 2. BOTTOM: Control Panels */}
-                <section className="w-full flex flex-col xl:flex-row justify-between items-stretch gap-6 z-20 mt-2 px-2 xl:px-0">
+                <section className="w-full flex flex-col lg:flex-row gap-6 z-20 mt-4 px-2 xl:px-0">
                     
-                    {/* Left: Orb Chat Terminal */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[500px] h-[450px] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
-                        <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
-                        <div className="flex flex-col gap-3 text-[10px] overflow-y-auto custom-scrollbar h-full pr-2">
-                            <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
-                            {chatHistory.map((msg, i) => (
-                                <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#00ff41]"}>
-                                    {msg.role === "assistant" ? (
-                                        <details className="group" open>
-                                            <summary className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2">
-                                                <span className="text-[8px] opacity-50 group-open:rotate-90 transition-transform">▶</span>
-                                                [ORB]:
-                                            </summary>
-                                            <div className="mt-2 space-y-1 prose-sm prose-invert prose-p:leading-tight prose-a:text-[#00ff41] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left pl-3 border-l border-white/10 ml-[4px]">
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                    {msg.content}
-                                                </ReactMarkdown>
-                                            </div>
-                                        </details>
-                                    ) : (
-                                        <>
-                                            <span className="font-bold">[USER]: </span>
-                                            <span>{msg.content}</span>
-                                        </>
-                                    )}
-                                </div>
-                            ))}
-                            {agentState === "thinking" && !isAnalyzing && <span className="text-[#00ff41] animate-pulse">...</span>}
-                        </div>
-                    </motion.div>
+                    {/* Left Column (70%): Chat Log & Input */}
+                    <div className="flex-[7] flex flex-col gap-4 w-full lg:h-[600px]">
+                        {/* Chat Log */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[300px]">
+                            <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3 text-[10px]">
+                                <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
+                                {chatHistory.map((msg, i) => (
+                                    <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#00ff41]"}>
+                                        {msg.role === "assistant" ? (
+                                            <details className="group" open>
+                                                <summary className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2">
+                                                    <span className="text-[8px] opacity-50 group-open:rotate-90 transition-transform">▶</span>
+                                                    [ORB]:
+                                                </summary>
+                                                <div className="mt-2 space-y-1 prose-sm prose-invert prose-p:leading-tight prose-a:text-[#00ff41] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left pl-3 border-l border-white/10 ml-[4px]">
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </details>
+                                        ) : (
+                                            <>
+                                                <span className="font-bold">[USER]: </span>
+                                                <span>{msg.content}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                                {agentState === "thinking" && !isAnalyzing && <span className="text-[#00ff41] animate-pulse">...</span>}
+                            </div>
+                        </motion.div>
 
-                    {/* Center: Task/Chat Input Box */}
-                    <div className="flex-[2] flex flex-col justify-end xl:pb-4 order-last xl:order-none">
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative group w-full max-w-4xl mx-auto">
+                        {/* Input Box */}
+                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative group w-full flex-none">
                             <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00ff41]/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000"></div>
                             <div className="relative bg-black/80 rounded-2xl border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
                                 <textarea 
-                                    className="w-full h-24 bg-transparent resize-none outline-none text-[13px] font-mono text-[#00ff41] placeholder:text-white/20 custom-scrollbar"
+                                    className="w-full h-20 bg-transparent resize-none outline-none text-[13px] font-mono text-[#00ff41] placeholder:text-white/20 custom-scrollbar"
                                     placeholder="CHAT WITH THE ORB OR DESCRIBE YOUR BOUNTY TASK..."
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
@@ -301,12 +302,12 @@ export default function Dashboard() {
                         </motion.div>
                     </div>
 
-                    {/* Right: WASI Nodes & Quarantine Feed */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[400px] h-[450px] flex flex-col gap-4 relative z-20">
+                    {/* Right Column (30%): WASI Nodes & Quarantine Feed */}
+                    <div className="flex-[3] flex flex-col gap-4 w-full lg:max-w-[420px] lg:h-[600px]">
                         {/* WASI Nodes */}
-                        <div className="h-[40%] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[200px]">
                             <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2 text-right">WASI_NODES /// L1 DEFENDER</div>
-                            <div className="flex flex-col gap-2 mt-2 overflow-y-auto custom-scrollbar pr-1">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 flex flex-col gap-2">
                                 {wasiNodes.slice(0,4).map((node, i) => (
                                     <div key={node.id} className={`w-full h-8 min-h-[32px] border rounded-md flex items-center px-4 justify-between transition-colors ${isAnalyzing ? "border-[#ffd700]/30 bg-[#ffd700]/5" : agentState === "danger" && i === 0 ? "border-[#ff003c]/50 bg-[#ff003c]/10" : "border-white/5 bg-white/[0.02]"}`}>
                                         <div className="flex items-center gap-3">
@@ -319,15 +320,15 @@ export default function Dashboard() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Quarantine Threat Feed */}
-                        <div className="h-[60%] bg-[#1a0000]/80 border border-[#ff003c]/20 rounded-xl backdrop-blur-md p-4 flex flex-col shadow-[0_0_30px_rgba(255,0,60,0.1)] overflow-hidden font-mono">
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-[1.5] bg-[#1a0000]/80 border border-[#ff003c]/20 rounded-xl backdrop-blur-md p-4 flex flex-col shadow-[0_0_30px_rgba(255,0,60,0.1)] overflow-hidden font-mono min-h-[250px]">
                             <div className="text-[9px] text-[#ff003c]/70 tracking-widest mb-2 border-b border-[#ff003c]/10 pb-2 flex justify-between">
                                 <span>LIVE_THREAT_FEED /// QUARANTINE</span>
                                 <span className="animate-pulse">● REC</span>
                             </div>
-                            <div className="flex flex-col gap-2 overflow-y-auto custom-scrollbar h-full">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-1">
                                 {quarantineEvents.length === 0 && <span className="text-[10px] text-[#ff003c]/30 mt-2">AWAITING INCIDENTS...</span>}
                                 <AnimatePresence>
                                     {quarantineEvents.map((evt, i) => (
@@ -339,8 +340,8 @@ export default function Dashboard() {
                                     ))}
                                 </AnimatePresence>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </div>
                 </section>
 			</div>
 		</main>

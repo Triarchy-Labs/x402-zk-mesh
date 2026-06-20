@@ -128,6 +128,64 @@ export function Nav() {
 			</div>
 
 			<div className="nav-actions" style={{ pointerEvents: "auto", display: "flex", gap: "24px", alignItems: "center", position: "relative" }}>
+	<button
+					onClick={() => window.location.href = "/bounties"}
+					style={{
+						background: "transparent",
+						color: "rgba(255,255,255,0.7)",
+						border: "1px solid rgba(255,255,255,0.2)",
+						padding: "8px 24px",
+						borderRadius: "40px",
+						cursor: "pointer",
+						fontFamily: '"Space Mono", monospace',
+						fontSize: "0.8rem",
+						fontWeight: "bold",
+						letterSpacing: "0.1em",
+						transition: "all 0.2s ease",
+						backdropFilter: "blur(12px)",
+					}}
+					onMouseEnter={(e) => { 
+						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.15)";
+						e.currentTarget.style.color = "#00ff41";
+						e.currentTarget.style.borderColor = "rgba(0, 255, 65, 0.4)";
+					}}
+					onMouseLeave={(e) => { 
+						e.currentTarget.style.backgroundColor = "transparent";
+						e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+						e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+					}}
+				>
+					[ QUESTS ]
+				</button>
+				<button
+					onClick={() => window.location.href = "/leaderboard"}
+					style={{
+						background: "transparent",
+						color: "rgba(255,255,255,0.7)",
+						border: "1px solid rgba(255,255,255,0.2)",
+						padding: "8px 24px",
+						borderRadius: "40px",
+						cursor: "pointer",
+						fontFamily: '"Space Mono", monospace',
+						fontSize: "0.8rem",
+						fontWeight: "bold",
+						letterSpacing: "0.1em",
+						transition: "all 0.2s ease",
+						backdropFilter: "blur(12px)",
+					}}
+					onMouseEnter={(e) => { 
+						e.currentTarget.style.backgroundColor = "rgba(168, 85, 247, 0.15)";
+						e.currentTarget.style.color = "#a855f7";
+						e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.4)";
+					}}
+					onMouseLeave={(e) => { 
+						e.currentTarget.style.backgroundColor = "transparent";
+						e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+						e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+					}}
+				>
+					[ LEADERBOARD ]
+				</button>
 				<button
 					onClick={() => window.location.href = "/dashboard"}
 					style={{
@@ -156,6 +214,35 @@ export function Nav() {
 					}}
 				>
 					[ DASHBOARD ]
+				</button>
+				<button
+					onClick={() => window.location.href = "/profile"}
+					style={{
+						background: "transparent",
+						color: "rgba(255,255,255,0.7)",
+						border: "1px solid rgba(255,255,255,0.2)",
+						padding: "8px 24px",
+						borderRadius: "40px",
+						cursor: "pointer",
+						fontFamily: '"Space Mono", monospace',
+						fontSize: "0.8rem",
+						fontWeight: "bold",
+						letterSpacing: "0.1em",
+						transition: "all 0.2s ease",
+						backdropFilter: "blur(12px)",
+					}}
+					onMouseEnter={(e) => { 
+						e.currentTarget.style.backgroundColor = "rgba(0, 191, 255, 0.15)";
+						e.currentTarget.style.color = "#00bfff";
+						e.currentTarget.style.borderColor = "rgba(0, 191, 255, 0.4)";
+					}}
+					onMouseLeave={(e) => { 
+						e.currentTarget.style.backgroundColor = "transparent";
+						e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+						e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+					}}
+				>
+					[ PROFILE ]
 				</button>
                 <div style={{ position: "relative" }}>
                     <button

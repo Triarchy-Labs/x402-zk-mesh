@@ -76,6 +76,7 @@ export const AGENT_TOOLS_SCHEMA = [
 				type: "object",
 				properties: {},
 				required: []
+			}
 		}
 	},
 	{

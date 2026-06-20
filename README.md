@@ -276,7 +276,20 @@ node guild_agent_bot.js  # Start mock mercenary agent on port 3001
 
 ---
 
-### 8. Connect Your Agent to the Guild
+---
+
+### 8. Sovereign Orb Interface (Dashboard)
+
+The `Dashboard` is not just a UI; it is a 2-way WASI communication bridge to the **Sovereign Orb** (Nemotron 30B persona "Snowball"). It acts as the primary Guild Manager for clients and agents alike:
+
+- **Wallet-Bound Privacy**: Chat sessions are bound to your connected Freighter wallet public key in `localStorage`. Disconnecting or switching wallets isolates the history. Guests have their own ephemeral space.
+- **Session Archives**: The GUI supports archiving past conversations into mini-containers. Users can click `[NEW SESSION]` to stash the current context, and load past logs seamlessly via the `[ARCHIVE]` dropdown.
+- **Nuclear Purge**: A single `[PURGE ALL]` switch obliterates all current and archived logs locally, ensuring zero traces remain on the machine.
+- **Dynamic Context Length**: The Orb's responses dynamically adapt—from toxic 1-sentence clapbacks for basic queries to multi-paragraph technical breakdowns for bounty generation.
+
+---
+
+### 9. Connect Your Agent to the Guild
 
 Any MCP-compatible AI agent can join the Guild in 3 steps:
 
@@ -324,6 +337,7 @@ We believe in honest submissions. Here's what works and what doesn't:
 | `/api/hire` ZK Integration | Working | Real Groth16 verification, shielded mode |
 | `/api/zk/verify` Endpoint | Working | Standalone proof verification |
 | `/api/contracts` Endpoint | Working | Returns all 6 deployed contract addresses |
+| Sovereign Orb Interface | Working | 2-way WASI chat, wallet-bound archives, nuclear purge, dynamic length |
 | Dashboard UI | Working | GPU-accelerated telemetry + shielded toggle |
 | L402 Payment Pipeline | Working | 3-tier routing (Micro/Enterprise/P2P) |
 | WASM Quarantine | Working | Extism WASI 0.2, 30+ heuristic patterns |

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Nav } from "@/components/Nav";
-import { requestAccess } from "@stellar/freighter-api";
+import { requestAccess, isConnected as checkFreighterConnected } from "@stellar/freighter-api";
 import { AgentOrb, AgentState } from "@/components/AgentOrb";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -21,6 +21,7 @@ export default function Dashboard() {
     const [openMessageIndex, setOpenMessageIndex] = useState<number>(-1);
     const [archivedSessions, setArchivedSessions] = useState<{id: string, date: string, preview: string, messages: {role: string; content: string}[]}[]>([]);
     const [showArchives, setShowArchives] = useState(false);
+    const [walletId, setWalletId] = useState<string>("guest");
     
     // OPSEC Quarantine Feed
     const [quarantineEvents, setQuarantineEvents] = useState<Array<{timestamp: string; data: {layer: string; agentId: string; details: string}}>>([]);
@@ -45,26 +46,50 @@ export default function Dashboard() {
         return () => clearInterval(int);
     }, []);
 
-    // LocalStorage Session Management
+    // Wallet Initialization
     useEffect(() => {
-        const savedChat = localStorage.getItem("x402_current_chat");
+        const fetchWallet = async () => {
+            try {
+                const { isConnected } = await checkFreighterConnected();
+                if (isConnected) {
+                    const access = await requestAccess();
+                    if (access.address) setWalletId(access.address);
+                }
+            } catch {}
+        };
+        fetchWallet();
+    }, []);
+
+    // LocalStorage Session Management
+    const currentChatKey = `x402_current_chat_${walletId}`;
+    const archivesKey = `x402_archived_chats_${walletId}`;
+
+    useEffect(() => {
+        const savedChat = localStorage.getItem(currentChatKey);
         if (savedChat) {
             const parsed = JSON.parse(savedChat);
             setChatHistory(parsed);
             setOpenMessageIndex(parsed.length - 1);
+        } else {
+            setChatHistory([]);
+            setOpenMessageIndex(-1);
         }
         
-        const savedArchives = localStorage.getItem("x402_archived_chats");
-        if (savedArchives) setArchivedSessions(JSON.parse(savedArchives));
-    }, []);
+        const savedArchives = localStorage.getItem(archivesKey);
+        if (savedArchives) {
+            setArchivedSessions(JSON.parse(savedArchives));
+        } else {
+            setArchivedSessions([]);
+        }
+    }, [walletId]);
 
     useEffect(() => {
         if (chatHistory.length > 0) {
-            localStorage.setItem("x402_current_chat", JSON.stringify(chatHistory));
+            localStorage.setItem(currentChatKey, JSON.stringify(chatHistory));
         } else {
-            localStorage.removeItem("x402_current_chat");
+            localStorage.removeItem(currentChatKey);
         }
-    }, [chatHistory]);
+    }, [chatHistory, currentChatKey]);
 
     const startNewSession = () => {
         if (chatHistory.length === 0) return;
@@ -77,7 +102,7 @@ export default function Dashboard() {
         };
         const updatedArchives = [newSession, ...archivedSessions];
         setArchivedSessions(updatedArchives);
-        localStorage.setItem("x402_archived_chats", JSON.stringify(updatedArchives));
+        localStorage.setItem(archivesKey, JSON.stringify(updatedArchives));
         
         setChatHistory([]);
         setOpenMessageIndex(-1);
@@ -90,6 +115,15 @@ export default function Dashboard() {
             setOpenMessageIndex(session.messages.length - 1);
             setShowArchives(false);
         }
+    };
+
+    const purgeAllLogs = () => {
+        setChatHistory([]);
+        setArchivedSessions([]);
+        setOpenMessageIndex(-1);
+        localStorage.removeItem(currentChatKey);
+        localStorage.removeItem(archivesKey);
+        setShowArchives(false);
     };
 
     // SSE Event Listener for OPSEC Quarantine
@@ -300,13 +334,16 @@ export default function Dashboard() {
                         {/* Chat Log */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[300px]">
                             <div className="flex justify-between items-center text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">
-                                <span>SYS_LOG /// NEMOTRON 30B (ORB)</span>
+                                <span>SYS_LOG /// NEMOTRON 30B (ORB) {walletId !== "guest" && <span className="text-[#00ff41] ml-2">[{walletId.substring(0,6)}...{walletId.substring(walletId.length-4)}]</span>}</span>
                                 <div className="flex gap-4">
                                     <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#00ff41] transition-colors font-bold">
                                         {showArchives ? "[CLOSE ARCHIVE]" : "[ARCHIVE]"}
                                     </button>
-                                    <button onClick={startNewSession} className="hover:text-[#ff003c] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
+                                    <button onClick={startNewSession} className="hover:text-[#00bfff] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
                                         [NEW SESSION]
+                                    </button>
+                                    <button onClick={purgeAllLogs} className="hover:text-[#ff003c] transition-colors font-bold">
+                                        [PURGE ALL]
                                     </button>
                                 </div>
                             </div>

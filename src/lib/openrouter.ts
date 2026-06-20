@@ -60,8 +60,9 @@ export async function generateOpenRouterResponse(
 
             for (const toolCall of message.tool_calls) {
                 const toolName = toolCall.function.name;
+                const toolArgs = JSON.parse(toolCall.function.arguments || "{}");
 
-                const resultStr = await executeAgentTool(toolName);
+                const resultStr = await executeAgentTool(toolName, toolArgs);
                 
                 newMessages.push({
                     role: "tool",

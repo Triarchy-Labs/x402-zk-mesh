@@ -1,4 +1,4 @@
-import { getTasks, getGuildStats, getEvents, getAgents } from "./guild-store";
+import { getTasks, getGuildStats, getEvents, getAgents, createTask } from "./guild-store";
 
 export const AGENT_TOOLS_SCHEMA = [
 	{
@@ -10,6 +10,24 @@ export const AGENT_TOOLS_SCHEMA = [
 				type: "object",
 				properties: {},
 				required: []
+			}
+		}
+	},
+	{
+		type: "function",
+		function: {
+			name: "create_bounty",
+			description: "Creates a new bounty task in the Triarchy system and returns the newly created task details. Use this when the user asks you to create a bounty.",
+			parameters: {
+				type: "object",
+				properties: {
+					title: { type: "string", description: "Title of the bounty" },
+					description: { type: "string", description: "Detailed description of the bounty" },
+					reward_usdc: { type: "number", description: "Reward in USDC" },
+					difficulty: { type: "string", description: "Difficulty level (e.g. S, A, B, C)" },
+					category: { type: "string", description: "Category (e.g. code, audit, design, review)" }
+				},
+				required: ["title", "description", "reward_usdc", "difficulty", "category"]
 			}
 		}
 	},
@@ -63,7 +81,7 @@ export const AGENT_TOOLS_SCHEMA = [
 	}
 ];
 
-export async function executeAgentTool(name: string): Promise<string> {
+export async function executeAgentTool(name: string, args?: Record<string, unknown>): Promise<string> {
 	try {
 		switch (name) {
 			case "get_open_bounties": {
@@ -77,6 +95,29 @@ export async function executeAgentTool(name: string): Promise<string> {
 					is_shielded: t.is_shielded
 				}));
 				return JSON.stringify(stripped);
+			}
+			case "create_bounty": {
+				const argsObj = args || {};
+				const title = argsObj.title as string;
+				const description = argsObj.description as string;
+				const reward_usdc = argsObj.reward_usdc as number;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const difficulty = (argsObj.difficulty as any) || "C";
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const category = (argsObj.category as any) || "code";
+
+				if (!title || !description || reward_usdc === undefined) {
+					return JSON.stringify({ error: "Missing required fields for create_bounty (title, description, reward_usdc)" });
+				}
+				const task = createTask({
+					title,
+					description,
+					reward_usdc,
+					difficulty,
+					category,
+					issuer_id: "agent_orb_system"
+				});
+				return JSON.stringify({ success: true, taskId: task.id, title: task.title, reward: task.reward_usdc });
 			}
 			case "get_guild_stats": {
 				const stats = getGuildStats();

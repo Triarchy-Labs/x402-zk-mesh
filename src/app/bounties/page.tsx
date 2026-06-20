@@ -46,7 +46,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
-	code: "⚡", audit: "🛡️", research: "🔬", design: "🎨", review: "📋", ops: "⚙️",
+	code: "■", audit: "▲", research: "◆", design: "▼", review: "◇", ops: "⬡",
 };
 
 const BountiesPage = () => {
@@ -75,7 +75,7 @@ const BountiesPage = () => {
 			if (filterStatus) params.set("status", filterStatus);
 			if (filterSOS) params.set("sos", "true");
 
-			const res = await fetch(`/api/tasks?${params}`);
+			const res = await fetch(`/api/tasks?${params}`, { cache: 'no-store' });
 			if (res.ok) {
 				const data = await res.json();
 				setTasks(data.tasks || []);
@@ -261,8 +261,8 @@ const BountiesPage = () => {
 						</div>
 
 						{tasks.map((task, i) => (
+                            <React.Fragment key={task.id}>
 							<motion.div
-								key={task.id}
 								initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
 								transition={{ duration: 0.4, delay: i * 0.05 }}
 								onClick={() => setSelectedTask(selectedTask === task.id ? null : task.id)}
@@ -322,6 +322,21 @@ const BountiesPage = () => {
 									{task.claims_count}/{task.max_claims}
 								</span>
 							</motion.div>
+                            <AnimatePresence>
+                                {selectedTask === task.id && (
+                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", padding: "0 1.25rem" }}>
+                                        <div style={{ padding: "1.5rem", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", borderTop: "none", borderBottomLeftRadius: "6px", borderBottomRightRadius: "6px", marginBottom: "0.5rem" }}>
+                                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", lineHeight: "1.5", marginBottom: "1.5rem", whiteSpace: "pre-wrap" }}>{task.description}</p>
+                                            <div style={{ display: "flex", gap: "1rem" }}>
+                                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG`, '_blank'); }} style={{ padding: "0.5rem 1rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", color: "rgba(255,255,255,0.6)", fontSize: "0.75rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }} onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
+                                                    [ VERIFY ON STELLAR ]
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                            </React.Fragment>
 						))}
 
 						{tasks.length === 0 && (

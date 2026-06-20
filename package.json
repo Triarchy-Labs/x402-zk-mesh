@@ -24,6 +24,7 @@
     "@react-three/fiber": "^9.6.0",
     "@react-three/postprocessing": "^3.0.4",
     "@stellar/freighter-api": "^6.0.1",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/three": "^0.183.1",
     "circomlib": "^2.0.5",
     "concurrently": "^9.2.1",
@@ -37,6 +38,8 @@
     "puppeteer": "^24.41.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "snarkjs": "^0.7.6",
     "three": "^0.183.2",
     "three-stdlib": "^2.36.1"

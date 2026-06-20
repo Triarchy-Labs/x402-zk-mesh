@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Lusion postInvert: light theme inverts WebGL canvas (dump: ThemeController line 48903) */
 html[data-theme="light"] .global-bg-canvas {

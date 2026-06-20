@@ -408,7 +408,7 @@ export function subscribeSSE(callback: SSECallback): () => void {
 	return () => sseSubscribers.delete(callback);
 }
 
-function emitEvent(type: string, data: Record<string, unknown>) {
+export function emitEvent(type: string, data: Record<string, unknown>) {
 	const event: GuildEvent = {
 		id: crypto.randomUUID(),
 		type,

@@ -17,12 +17,13 @@ import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
 import ScreenPaint from "./ScreenPaint";
 import LusionFinalPass from "./LusionFinalPass";
 import FsrRcasPass from "./FsrRcasPass";
+import FsrEasuPass from "./FsrEasuPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
-	high: { particles: 16384, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [1, 1.5] as [number, number], enableChroma: true },
-	mid:  { particles: 8192,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [1, 1.2] as [number, number], enableChroma: true },
-	low:  { particles: 4096,  smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [1, 1] as [number, number], enableChroma: false },
+	high: { particles: 16384, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [0.75, 1.0] as [number, number], enableChroma: true },
+	mid:  { particles: 8192,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [0.5, 0.75] as [number, number], enableChroma: true },
+	low:  { particles: 4096,  smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [0.5, 0.5] as [number, number], enableChroma: false },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -541,6 +542,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { 
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
+				<FsrEasuPass sharpness={0.2} />
 				<FsrRcasPass sharpness={1.0} />
 				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			</EffectComposer>
@@ -551,6 +553,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { 
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
+				<FsrEasuPass sharpness={0.2} />
 				<FsrRcasPass sharpness={1.0} />
 				{/* Bloom disabled — causes full overexposure without aggressive vignette */}
 				{/* LensHaloPass disabled — creates center overexposure on our scene */}
@@ -568,6 +571,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { 
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
+			<FsrEasuPass sharpness={0.2} />
 			<FsrRcasPass sharpness={1.0} />
 			{/* Bloom disabled — causes full overexposure without aggressive vignette */}
 			{/* LensHaloPass disabled */}

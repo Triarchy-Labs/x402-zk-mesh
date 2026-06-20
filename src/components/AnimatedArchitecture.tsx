@@ -7,6 +7,8 @@ import { EffectComposer } from '@react-three/postprocessing';
 import { Effect, BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import { GLTFLoader, KTX2Loader, DRACOLoader } from 'three-stdlib';
+import FsrEasuPass from './FsrEasuPass';
+import FsrRcasPass from './FsrRcasPass';
 
 useGLTF.preload('/models/tech-rings-v2-optimize.glb');
 
@@ -358,6 +360,7 @@ export function AnimatedArchitecture({ theme: _theme }: { theme: "light" | "dark
 				shadows
 				camera={{ position: [0, -0.021, 12], fov: 35, near: 0.1, far: 1000 }}
 				gl={{ antialias: true, alpha: true }}
+				dpr={[0.5, 0.75]}
 			>
 				<SceneEnvironment />
 
@@ -408,6 +411,8 @@ export function AnimatedArchitecture({ theme: _theme }: { theme: "light" | "dark
 
 				{/* GPU Blur+Sharpen постобработка из дампа Peachworlds */}
 				<EffectComposer>
+					<FsrEasuPass sharpness={0.2} />
+					<FsrRcasPass sharpness={1.0} />
 					<BlurSharpenPass />
 				</EffectComposer>
 			</Canvas>

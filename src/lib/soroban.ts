@@ -1,8 +1,8 @@
-/* eslint-disable */
 /**
  * Stellar Horizon RPC Validator (Testnet)
- * Enforces real-world on-chain verification for x402 payments.
- * Replaces the mock validation to meet DoraHacks requirements.
+ *
+ * Validates L402 payment transactions against the Stellar Horizon API.
+ * Checks: tx exists → tx successful → memo matches → USDC payment to platform wallet → amount sufficient.
  */
 
 const HORIZON_TESTNET_URL = "https://horizon-testnet.stellar.org";
@@ -102,8 +102,9 @@ export async function validateSorobanPayment(
 		}
 
 		return { valid: true, amount: totalPaid };
-	} catch (e: any) {
-		console.error("[SOROBAN VALIDATION ERROR]:", e.message);
+	} catch (e: unknown) {
+		const message = e instanceof Error ? e.message : "Unknown error";
+		console.error("[SOROBAN VALIDATION ERROR]:", message);
 		return {
 			valid: false,
 			error: "Internal validation error connecting to Horizon RPC.",

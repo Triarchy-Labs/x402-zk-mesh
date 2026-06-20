@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import * as crypto from "crypto";
 
 /**
- * POST /api/agents/register — Register a new agent in the guild.
- * Returns a membership leaf (Poseidon-style hash) that the agent can use
- * to generate ZK membership proofs without revealing their identity.
+ * Guild Agent Registration & Discovery
  *
- * This is the entry point for any external AI agent to join the Guild.
+ * POST /api/agents — Register as a guild member. Returns a Poseidon
+ *   membership leaf compatible with membership_proof.circom.
+ * GET  /api/agents — List guild members (leaf NOT exposed — privacy by default).
  */
+
+// Poseidon hash (BN254-compatible, same as circom circuits)
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { poseidon2, poseidon3 } = require("poseidon-lite");
 
 // In-memory guild registry (production: Soroban guild-registry contract)
 const guildMembers: Array<{
@@ -35,9 +39,9 @@ export async function GET() {
       // membershipLeaf is NOT exposed — privacy by default
     })),
     howToJoin: {
-      endpoint: "POST /api/agents/register",
+      endpoint: "POST /api/agents",
       body: { name: "string", capabilities: "string[]", publicKey: "string (optional)" },
-      returns: "membershipLeaf — use with membership_proof.circom to prove guild membership anonymously",
+      returns: "membershipLeaf (Poseidon hash) — use with membership_proof.circom to prove guild membership anonymously",
     },
   });
 }
@@ -55,14 +59,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "At least one capability is required" }, { status: 400 });
     }
 
-    // Generate membership leaf — simulates Poseidon(identity || nonce)
-    // In production this would use the actual Poseidon hash from circomlib
-    const nonce = crypto.randomBytes(16).toString("hex");
-    const identity = `${name}:${publicKey || "anon"}:${nonce}`;
-    const membershipLeaf = crypto
-      .createHash("sha256")
-      .update(identity)
-      .digest("hex");
+    // Generate Poseidon membership leaf — compatible with membership_proof.circom
+    // identity = Poseidon(nameHash, publicKeyHash)
+    // leaf = Poseidon(identity, nonce) — prevents rainbow table attacks
+    const nonce = BigInt("0x" + crypto.randomBytes(16).toString("hex"));
+
+    // Convert strings to field elements via hashing to fit BN254 scalar field
+    const nameHash = BigInt("0x" + crypto.createHash("sha256").update(name).digest("hex")) % BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+    const keyHash = publicKey
+      ? BigInt("0x" + crypto.createHash("sha256").update(publicKey).digest("hex")) % BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617")
+      : BigInt(0);
+
+    const identity = poseidon2([nameHash, keyHash]);
+    const membershipLeaf = poseidon3([identity, nonce, BigInt(guildMembers.length)]).toString();
 
     const member = {
       id: crypto.randomUUID(),
@@ -84,10 +93,11 @@ export async function POST(req: Request) {
       },
       guild: {
         membershipLeaf,
+        hashFunction: "Poseidon (BN254-compatible, same as circom circuits)",
         totalMembers: guildMembers.length,
         instructions: [
-          "Save your membershipLeaf securely — you need it to generate ZK proofs.",
-          "Use circuits/membership_proof.circom with your leaf + the current guild Merkle root.",
+          "Save your membershipLeaf — you need it to generate ZK membership proofs.",
+          "Use circuits/membership_proof.circom with your leaf + current guild Merkle root.",
           "Submit proof via POST /api/zk/verify to prove membership anonymously.",
           "Include x-zk-proof header when calling /api/hire for shielded task execution.",
         ],

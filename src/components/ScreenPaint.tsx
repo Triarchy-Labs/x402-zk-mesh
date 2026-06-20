@@ -100,7 +100,7 @@ export default function ScreenPaint({ pointerRef, onTextureReady }: ScreenPaintP
 		type: THREE.FloatType,
 	});
 
-	// eslint-disable-next-line react-hooks/immutability -- Three.js material uniforms are imperatively mutated in useFrame (standard R3F pattern)
+	// Three.js material uniforms are imperatively mutated in useFrame (standard R3F pattern)
 	const paintMaterial = useMemo(() => {
 		return new THREE.ShaderMaterial({
 			vertexShader: screenPaintVert,

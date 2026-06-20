@@ -37,14 +37,14 @@ function getIsMobile(): boolean {
 }
 
 // Snapshot functions for useSyncExternalStore
-const subscribeDummy = () => () => {};
+const noopSubscribe = () => () => {};
 const getServerTier = (): DeviceTier => "high";
 const getServerMobile = (): boolean => false;
 
 export function useDeviceTier(): DeviceTier {
-  return useSyncExternalStore(subscribeDummy, getDeviceTier, getServerTier);
+  return useSyncExternalStore(noopSubscribe, getDeviceTier, getServerTier);
 }
 
 export function useIsMobile(): boolean {
-  return useSyncExternalStore(subscribeDummy, getIsMobile, getServerMobile);
+  return useSyncExternalStore(noopSubscribe, getIsMobile, getServerMobile);
 }

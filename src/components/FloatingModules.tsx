@@ -121,7 +121,6 @@ export default function FloatingModules({ hovered }: { hovered: boolean }) {
 	useEffect(() => {
 		if (!hovered) {
 			// Mouse left: graceful fade out (AnimatePresence handles exit)
-			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setActiveModules([]);
 			setAllMode(false);
 			nextIndexRef.current = 0;

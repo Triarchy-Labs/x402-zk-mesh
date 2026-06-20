@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
 import { Nav } from "@/components/Nav";
 import { requestAccess } from "@stellar/freighter-api";
 import { AgentOrb, AgentState } from "@/components/AgentOrb";
@@ -36,7 +36,7 @@ export default function Dashboard() {
 	const stageRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [wasiNodes, setWasiNodes] = useState<any[]>([]);
-	const [sysLoad, setSysLoad] = useState("0.00");
+	const [, setSysLoad] = useState("0.00");
     const [inputValue, setInputValue] = useState("");
     const [lastResult, setLastResult] = useState<{status: string; executor?: string; result?: string; error?: string} | null>(null);
     const [balance, setBalance] = useState(140);
@@ -52,7 +52,7 @@ export default function Dashboard() {
                     if (data.nodes) setWasiNodes(data.nodes);
                     if (data.system?.load) setSysLoad(data.system.load);
                 }
-            } catch (err) {
+            } catch {
                 // Silently bypass fetch errors if API is down
             }
         };
@@ -82,11 +82,15 @@ export default function Dashboard() {
 
             const userPubKey = accessDetails.address || "GXYZ...";
 
+            // Demo mode: Freighter is connected but no real USDC tx is created.
+            // In production, this would construct a Stellar payment tx before calling /api/hire.
+            const demoTxHash = `demo_${Date.now()}_${userPubKey.slice(0, 8)}`;
+
             const res = await fetch("/api/hire", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-l402-txhash": "mock_freighter_" + userPubKey,
+                    "x-l402-txhash": demoTxHash,
                 },
                 body: JSON.stringify({
                     description: inputValue,
@@ -169,11 +173,11 @@ export default function Dashboard() {
                     const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/bling_bonus.ogg");
                     audio.volume = 0.4;
                     audio.play();
-                } catch (e) {}
+                } catch {}
             }
             // -----------------------------------
         }
-    }, [progress, agentState, inputValue]);
+    }, [progress, agentState, inputValue, isShielded]);
 
 	return (
 		<main className="min-h-screen bg-transparent text-[#ededed] font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-24 pb-8 overflow-hidden">

@@ -270,7 +270,7 @@ curl -X POST http://localhost:3000/api/hire \
 
 ### 7. (Optional) P2P Delegation Demo
 ```bash
-node dummy_external_bot.js  # Start mock mercenary agent on port 3001
+node guild_agent_bot.js  # Start mock mercenary agent on port 3001
 # Now submit a task < $5 — watch it delegate to the external agent
 ```
 
@@ -447,7 +447,7 @@ x402-zk-mesh/
 │       └── agent_registry.ts         # In-memory agent stats
 ├── docs/
 │   └── AUDIT_FINALIST_ASSIMILATION.md # Security audit report
-├── dummy_external_bot.js              # Mock P2P mercenary agent
+├── guild_agent_bot.js              # Mock P2P mercenary agent
 ├── architecture.svg                   # Architecture diagram
 └── .env.example                       # Environment variables
 ```

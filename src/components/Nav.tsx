@@ -30,7 +30,7 @@ export function Nav() {
 						setConnected(true);
 					}
 				}
-			} catch (e) {}
+			} catch {}
 		};
 		checkConn();
 	}, []);

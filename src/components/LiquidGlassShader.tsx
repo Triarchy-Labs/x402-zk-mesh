@@ -3,7 +3,6 @@
 // All particles now unified in LiquidNebula with CPU-side animation
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
-	Bloom,
 	ChromaticAberration,
 	EffectComposer,
 	SMAA,
@@ -15,13 +14,9 @@ import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
-import RefractiveCore from "./RefractiveCore";
 import ScreenPaint from "./ScreenPaint";
 import LusionFinalPass from "./LusionFinalPass";
-import ScreenPaintDistortion from "./ScreenPaintDistortion";
-import BrownianMotionCamera from "./BrownianMotionCamera";
 import FsrRcasPass from "./FsrRcasPass";
-import LensHaloPass from "./LensHaloPass";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
@@ -49,7 +44,8 @@ const U_FOCUS_DIST = "0.32";
 // NOTE: Use strings with decimals for GLSL (JS integers break shader compilation)
 const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
 const SPAWN_OX = "-3.0"; const SPAWN_OY = "-0.5"; const SPAWN_OZ = "0.0";  // Lusion EXACT offset (11_key_constants line 16)
-const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
+// Kill boundaries (reserved for particle respawn shader — currently using wrap-around instead)
+// const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
 
 // ── Exact Lusion GLSL: Simplex 4D Derivatives + Curl (from 01_particle_position_shader.glsl) ──
 const NOISE_GLSL = /* glsl */ `
@@ -291,7 +287,8 @@ void main() {
 `;
 
 // ── LiquidNebula: GPGPU Particle Component ──
-function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; particleCount: number }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- particleCount reserved for dynamic tier switching
+function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" | "light"; particleCount: number }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const materialRef = useRef<THREE.ShaderMaterial>(null);
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
@@ -324,8 +321,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		return [uvs, col];
 	})[0];
 
-	// Dummy positions (vertex shader reads from FBO, not from position attribute)
-	const dummyPositions = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), []);
+	// FBO seed positions (vertex shader reads from FBO, not from position attribute)
+	const fboSeedPositions = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), []);
 
 	// Initialize GPUComputationRenderer
 	useEffect(() => {
@@ -487,7 +484,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	return (
 		<points ref={pointsRef}>
 			<bufferGeometry>
-				<bufferAttribute attach="attributes-position" args={[dummyPositions, 3]} />
+				<bufferAttribute attach="attributes-position" args={[fboSeedPositions, 3]} />
 				<bufferAttribute attach="attributes-a_simUv" args={[simUvs, 2]} />
 				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
 			</bufferGeometry>
@@ -536,7 +533,8 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
  * Mid:  Reduced pipeline (SMAA MEDIUM + FSR RCAS + Bloom reduced + LusionFinal + ScreenPaintDistortion)
  * Low:  Minimal pipeline (SMAA LOW + FSR RCAS + LusionFinal only)
  */
-function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- paintTexture reserved for ScreenPaintDistortion re-enable
+function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
 	const cfg = TIER_CONFIG[tier];
 
 	if (tier === "low") {

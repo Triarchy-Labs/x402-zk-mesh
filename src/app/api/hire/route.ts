@@ -251,7 +251,7 @@ export async function POST(req: Request) {
 		const networkFee = price * activeFeePct;
 		const foreignPrice = price - networkFee;
 
-		// External bot call (Mock for video demo)
+		// P2P delegation to external agent node
 		let externalResult = "Awaiting response...";
 		try {
 			const resp = await fetch("http://127.0.0.1:3001/api/hire", {
@@ -263,7 +263,7 @@ export async function POST(req: Request) {
 			externalResult = data.result;
 		} catch (_e) {
 			console.warn(
-				"Dummy bot at 3001 is offline. Run 'node dummy_external_bot.js' in a separate terminal.",
+				"External agent node at port 3001 is offline. Run 'node guild_agent_bot.js' in a separate terminal.",
 			);
 		}
 
@@ -284,9 +284,10 @@ export async function POST(req: Request) {
 			},
 			{ status: 200 },
 		);
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const message = error instanceof Error ? error.message : "Unknown error";
 		return NextResponse.json(
-			{ error: "Internal Server Error", details: error.message },
+			{ error: "Internal Server Error", details: message },
 			{ status: 500 },
 		);
 	}

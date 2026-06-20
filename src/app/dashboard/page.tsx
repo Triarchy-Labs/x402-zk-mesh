@@ -18,6 +18,7 @@ export default function Dashboard() {
 
     // Chat History for Orb (Nemotron Nano 30B)
     const [chatHistory, setChatHistory] = useState<{role: string; content: string}[]>([]);
+    const [openMessageIndex, setOpenMessageIndex] = useState<number>(-1);
     
     // OPSEC Quarantine Feed
     const [quarantineEvents, setQuarantineEvents] = useState<Array<{timestamp: string; data: {layer: string; agentId: string; details: string}}>>([]);
@@ -84,7 +85,11 @@ export default function Dashboard() {
             const data = await res.json();
             
             if (data.status === "success") {
-                setChatHistory(prev => [...prev, { role: "assistant", content: data.response }]);
+                setChatHistory(prev => {
+                    const newHist = [...prev, { role: "assistant", content: data.response }];
+                    setOpenMessageIndex(newHist.length - 1);
+                    return newHist;
+                });
                 setAgentState("idle");
             } else {
                 setAgentState("danger");
@@ -246,13 +251,19 @@ export default function Dashboard() {
                         {/* Chat Log */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[300px]">
                             <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3 text-[10px]">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3 text-[10px]" data-lenis-prevent>
                                 <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
                                 {chatHistory.map((msg, i) => (
                                     <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#00ff41]"}>
                                         {msg.role === "assistant" ? (
-                                            <details className="group" open>
-                                                <summary className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2">
+                                            <details className="group" open={openMessageIndex === i}>
+                                                <summary 
+                                                    className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setOpenMessageIndex(openMessageIndex === i ? -1 : i);
+                                                    }}
+                                                >
                                                     <span className="text-[8px] opacity-50 group-open:rotate-90 transition-transform">▶</span>
                                                     [ORB]:
                                                 </summary>

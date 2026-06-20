@@ -19,6 +19,8 @@ export default function Dashboard() {
     // Chat History for Orb (Nemotron Nano 30B)
     const [chatHistory, setChatHistory] = useState<{role: string; content: string}[]>([]);
     const [openMessageIndex, setOpenMessageIndex] = useState<number>(-1);
+    const [archivedSessions, setArchivedSessions] = useState<{id: string, date: string, preview: string, messages: {role: string; content: string}[]}[]>([]);
+    const [showArchives, setShowArchives] = useState(false);
     
     // OPSEC Quarantine Feed
     const [quarantineEvents, setQuarantineEvents] = useState<Array<{timestamp: string; data: {layer: string; agentId: string; details: string}}>>([]);
@@ -42,6 +44,53 @@ export default function Dashboard() {
         const int = setInterval(fetchTelemetry, 2000);
         return () => clearInterval(int);
     }, []);
+
+    // LocalStorage Session Management
+    useEffect(() => {
+        const savedChat = localStorage.getItem("x402_current_chat");
+        if (savedChat) {
+            const parsed = JSON.parse(savedChat);
+            setChatHistory(parsed);
+            setOpenMessageIndex(parsed.length - 1);
+        }
+        
+        const savedArchives = localStorage.getItem("x402_archived_chats");
+        if (savedArchives) setArchivedSessions(JSON.parse(savedArchives));
+    }, []);
+
+    useEffect(() => {
+        if (chatHistory.length > 0) {
+            localStorage.setItem("x402_current_chat", JSON.stringify(chatHistory));
+        } else {
+            localStorage.removeItem("x402_current_chat");
+        }
+    }, [chatHistory]);
+
+    const startNewSession = () => {
+        if (chatHistory.length === 0) return;
+        const preview = chatHistory.find(m => m.role === "user")?.content || "System interaction";
+        const newSession = {
+            id: Date.now().toString(),
+            date: new Date().toLocaleString(),
+            preview: preview.length > 40 ? preview.slice(0, 40) + "..." : preview,
+            messages: chatHistory
+        };
+        const updatedArchives = [newSession, ...archivedSessions];
+        setArchivedSessions(updatedArchives);
+        localStorage.setItem("x402_archived_chats", JSON.stringify(updatedArchives));
+        
+        setChatHistory([]);
+        setOpenMessageIndex(-1);
+    };
+
+    const loadSession = (id: string) => {
+        const session = archivedSessions.find(s => s.id === id);
+        if (session) {
+            setChatHistory(session.messages);
+            setOpenMessageIndex(session.messages.length - 1);
+            setShowArchives(false);
+        }
+    };
 
     // SSE Event Listener for OPSEC Quarantine
     useEffect(() => {
@@ -250,7 +299,32 @@ export default function Dashboard() {
                     <div className="flex-[7] flex flex-col gap-4 w-full lg:h-[600px]">
                         {/* Chat Log */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[300px]">
-                            <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
+                            <div className="flex justify-between items-center text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">
+                                <span>SYS_LOG /// NEMOTRON 30B (ORB)</span>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#00ff41] transition-colors font-bold">
+                                        {showArchives ? "[CLOSE ARCHIVE]" : "[ARCHIVE]"}
+                                    </button>
+                                    <button onClick={startNewSession} className="hover:text-[#ff003c] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
+                                        [NEW SESSION]
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {showArchives ? (
+                                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-2">
+                                    {archivedSessions.length === 0 ? (
+                                        <div className="text-white/30 text-xs italic">No archived sessions.</div>
+                                    ) : (
+                                        archivedSessions.map(session => (
+                                            <div key={session.id} className="p-3 border border-white/10 rounded-lg hover:border-[#00ff41]/50 cursor-pointer transition-colors bg-black/50" onClick={() => loadSession(session.id)}>
+                                                <div className="text-[#00ff41] text-[10px] font-bold">{session.date}</div>
+                                                <div className="text-white/60 text-[11px] mt-1 line-clamp-2">{session.preview}</div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            ) : (
                             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3 text-[10px]" data-lenis-prevent>
                                 <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
                                 {chatHistory.map((msg, i) => (
@@ -283,6 +357,7 @@ export default function Dashboard() {
                                 ))}
                                 {agentState === "thinking" && !isAnalyzing && <span className="text-[#00ff41] animate-pulse">...</span>}
                             </div>
+                            )}
                         </motion.div>
 
                         {/* Input Box */}

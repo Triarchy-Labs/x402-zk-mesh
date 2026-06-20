@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 		// We enable withTools = true so Nemotron 30B can pull live platform data
 		const response = await generateOpenRouterResponse(messages, undefined, true);
 
-		return NextResponse.json({ reply: response });
+		return NextResponse.json({ status: "success", response: response });
 	} catch (error) {
 		console.error("Orb API Error:", error);
 		return NextResponse.json(

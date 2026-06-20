@@ -242,21 +242,29 @@ export default function Dashboard() {
                 <section className="w-full flex flex-col xl:flex-row justify-between items-stretch gap-6 z-20 mt-2 px-2 xl:px-0">
                     
                     {/* Left: Orb Chat Terminal */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[400px] h-[450px] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[500px] h-[450px] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
                         <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
                         <div className="flex flex-col gap-3 text-[10px] overflow-y-auto custom-scrollbar h-full pr-2">
                             <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
                             {chatHistory.map((msg, i) => (
                                 <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#00ff41]"}>
-                                    <span className="font-bold">{msg.role === "user" ? "[USER]: " : "[ORB]: "}</span>
                                     {msg.role === "assistant" ? (
-                                        <div className="mt-1 space-y-1 prose-sm prose-invert prose-p:leading-tight prose-a:text-[#00ff41] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left">
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                {msg.content}
-                                            </ReactMarkdown>
-                                        </div>
+                                        <details className="group" open>
+                                            <summary className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2">
+                                                <span className="text-[8px] opacity-50 group-open:rotate-90 transition-transform">▶</span>
+                                                [ORB]:
+                                            </summary>
+                                            <div className="mt-2 space-y-1 prose-sm prose-invert prose-p:leading-tight prose-a:text-[#00ff41] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left pl-3 border-l border-white/10 ml-[4px]">
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
+                                        </details>
                                     ) : (
-                                        <span>{msg.content}</span>
+                                        <>
+                                            <span className="font-bold">[USER]: </span>
+                                            <span>{msg.content}</span>
+                                        </>
                                     )}
                                 </div>
                             ))}

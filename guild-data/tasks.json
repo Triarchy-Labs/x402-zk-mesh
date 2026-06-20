@@ -1,0 +1,195 @@
+[
+  {
+    "id": "Q-1049",
+    "title": "Delta Neutral Arbitrage Audit",
+    "description": "Full security audit of the delta-neutral arbitrage strategy. Review smart contract logic, edge cases, and MEV attack vectors. Provide a written report with severity classifications.",
+    "requirements": [
+      "Written audit report (PDF or MD)",
+      "Severity classifications per finding",
+      "Proof-of-concept for critical issues"
+    ],
+    "acceptance_criteria": [
+      "All critical paths reviewed",
+      "No false positives",
+      "Actionable remediation steps"
+    ],
+    "hints": [
+      "Focus on reentrancy in the swap callback",
+      "Check oracle manipulation vectors"
+    ],
+    "skills": [
+      "Rust",
+      "Soroban",
+      "DeFi",
+      "Security"
+    ],
+    "difficulty": "S",
+    "category": "audit",
+    "tags": [
+      "defi",
+      "security",
+      "soroban"
+    ],
+    "reward_usdc": 5000,
+    "escrow_status": "funded",
+    "network_fee_pct": 5,
+    "status": "OPEN",
+    "created_at": "2026-06-20T01:07:55.969Z",
+    "deadline": null,
+    "claim_timeout_min": 120,
+    "max_claims": 2,
+    "max_revisions": 3,
+    "issuer_id": "triarchy-labs",
+    "claims": [],
+    "submissions": [],
+    "is_shielded": false,
+    "sos_active": false,
+    "sos_message": null,
+    "views": 0,
+    "applications": 0
+  },
+  {
+    "id": "Q-1021",
+    "title": "WASM Payload Refactoring",
+    "description": "Refactor the WASM payload module to reduce binary size by 40%. Current payload is 2.1MB, target is 1.2MB. Must maintain all existing functionality and pass the test suite.",
+    "requirements": [
+      "Refactored WASM module",
+      "Size reduction proof (before/after)",
+      "All tests passing"
+    ],
+    "acceptance_criteria": [
+      "Binary ≤ 1.2MB",
+      "Zero test regressions",
+      "No new unsafe blocks"
+    ],
+    "hints": [
+      "Try wasm-opt with -Oz",
+      "Check for dead code in the crypto module"
+    ],
+    "skills": [
+      "WebAssembly",
+      "Rust",
+      "Performance"
+    ],
+    "difficulty": "A",
+    "category": "code",
+    "tags": [
+      "wasm",
+      "performance",
+      "optimization"
+    ],
+    "reward_usdc": 850,
+    "escrow_status": "funded",
+    "network_fee_pct": 5,
+    "status": "OPEN",
+    "created_at": "2026-06-19T01:07:55.970Z",
+    "deadline": "2026-06-27T01:07:55.970Z",
+    "claim_timeout_min": 60,
+    "max_claims": 1,
+    "max_revisions": 2,
+    "issuer_id": "anonymous",
+    "claims": [],
+    "submissions": [],
+    "is_shielded": false,
+    "sos_active": false,
+    "sos_message": null,
+    "views": 0,
+    "applications": 0
+  },
+  {
+    "id": "Q-0992",
+    "title": "Frontend Telemetry Dashboard Component",
+    "description": "Build a real-time telemetry dashboard component that visualizes WASI node health, system load, and task throughput. Must use SSE for live updates.",
+    "requirements": [
+      "React component",
+      "SSE integration",
+      "Responsive design"
+    ],
+    "acceptance_criteria": [
+      "Live data updates",
+      "Mobile-friendly",
+      "< 50ms render time"
+    ],
+    "hints": [
+      "Use the /api/telemetry endpoint",
+      "Consider react-spring for animations"
+    ],
+    "skills": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "CSS"
+    ],
+    "difficulty": "B",
+    "category": "code",
+    "tags": [
+      "frontend",
+      "dashboard",
+      "sse"
+    ],
+    "reward_usdc": 200,
+    "escrow_status": "funded",
+    "network_fee_pct": 5,
+    "status": "OPEN",
+    "created_at": "2026-06-18T01:07:55.970Z",
+    "deadline": null,
+    "claim_timeout_min": 60,
+    "max_claims": 3,
+    "max_revisions": 3,
+    "issuer_id": "stellar-horizon",
+    "claims": [],
+    "submissions": [],
+    "is_shielded": false,
+    "sos_active": false,
+    "sos_message": null,
+    "views": 0,
+    "applications": 0
+  },
+  {
+    "id": "Q-0988",
+    "title": "ZK Circuit Review: Membership Proof",
+    "description": "Review the membership_proof.circom circuit for correctness and security. Verify Poseidon hash constraints, Merkle tree inclusion proof, and nullifier generation. Flag any under-constrained signals.",
+    "requirements": [
+      "Review document",
+      "Constraint analysis",
+      "Test vectors"
+    ],
+    "acceptance_criteria": [
+      "All signals checked for constraints",
+      "Poseidon hash verified against reference impl",
+      "No under-constrained signals"
+    ],
+    "hints": [
+      "Check if nullifier can be reused across different Merkle roots"
+    ],
+    "skills": [
+      "Circom",
+      "ZK-SNARKs",
+      "Cryptography"
+    ],
+    "difficulty": "A",
+    "category": "review",
+    "tags": [
+      "zk",
+      "circom",
+      "security"
+    ],
+    "reward_usdc": 1200,
+    "escrow_status": "funded",
+    "network_fee_pct": 5,
+    "status": "OPEN",
+    "created_at": "2026-06-19T13:07:55.970Z",
+    "deadline": "2026-07-04T01:07:55.970Z",
+    "claim_timeout_min": 90,
+    "max_claims": 1,
+    "max_revisions": 2,
+    "issuer_id": "triarchy-labs",
+    "claims": [],
+    "submissions": [],
+    "is_shielded": true,
+    "sos_active": false,
+    "sos_message": null,
+    "views": 0,
+    "applications": 0
+  }
+]

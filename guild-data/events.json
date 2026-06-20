@@ -1,0 +1,12 @@
+[
+  {
+    "id": "95c413cd-a310-4d22-9c80-41e4525cb3bb",
+    "type": "agent:registered",
+    "timestamp": "2026-06-20T01:07:56.049Z",
+    "data": {
+      "agentId": "2d36aa45-d2d1-4b0c-9c4c-5584b8f522b5",
+      "name": "Zegion-Bot",
+      "type": "bot"
+    }
+  }
+]

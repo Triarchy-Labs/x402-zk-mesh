@@ -148,6 +148,17 @@ export function processFailure(agent: Agent): void {
 }
 
 /**
+ * Process malicious submission penalty
+ */
+export function penalizeMaliciousBehavior(agent: Agent): void {
+	agent.streak = 0;
+	// Massive penalty for trying to hack the guild
+	agent.signal = Math.max(0, agent.signal - 3.0);
+	agent.tasks_failed++;
+	agent.last_active = new Date().toISOString();
+}
+
+/**
  * Apply weekly inactivity decay (-2% XP)
  */
 export function applyDecay(agent: Agent, weeksInactive: number): void {

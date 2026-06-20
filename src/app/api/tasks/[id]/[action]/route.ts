@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { initStore, getTask, updateTask, getAgent, updateAgent } from "@/lib/guild-store";
-import { processCompletion, processAbandonment, processFailure, canAccessTask } from "@/lib/rank-engine";
+import { processCompletion, processAbandonment, processFailure, canAccessTask, penalizeMaliciousBehavior } from "@/lib/rank-engine";
 import { releaseEscrow } from "@/lib/escrow";
+import { validateForeignPayload } from "@/lib/wasm_sandbox";
 import type { Task, Claim, Submission, Review, TaskStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +49,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 		case "heartbeat":
 			return handleHeartbeat(task, body);
 		case "submit":
-			return handleSubmit(task, body);
+			return await handleSubmit(task, body);
 		case "review":
-			return handleReview(task, body);
+			return await handleReview(task, body);
 		case "sos":
 			return handleSOS(task, body);
 		case "release":
@@ -182,7 +183,7 @@ function handleHeartbeat(task: Task, body: Record<string, unknown>) {
 
 // ═══════════ SUBMIT ═══════════
 
-function handleSubmit(task: Task, body: Record<string, unknown>) {
+async function handleSubmit(task: Task, body: Record<string, unknown>) {
 	const agentId = body.agent_id as string;
 	if (!agentId) return NextResponse.json({ error: "agent_id required" }, { status: 400 });
 
@@ -196,6 +197,27 @@ function handleSubmit(task: Task, body: Record<string, unknown>) {
 	const result = body.result as string;
 	if (!result || result.length < 10) {
 		return NextResponse.json({ error: "result must be at least 10 characters" }, { status: 400 });
+	}
+
+	// [OPSEC FIREWALL] Bi-Directional WASM Sandbox
+	// Validate the agent's submission to prevent reverse prompt injection / malicious payloads
+	// reaching the reviewer (human or orchestrator).
+	const pPayload = JSON.stringify({ result });
+	const sandboxResult = await validateForeignPayload(pPayload);
+
+	if (!sandboxResult.safe) {
+		console.warn(`[OPSEC FIREWALL] Blocked malicious submission from agent ${agentId}.`);
+		
+		const agent = getAgent(agentId);
+		if (agent) {
+			// Apply heavy penalty for attempting to attack the guild
+			penalizeMaliciousBehavior(agent);
+		}
+
+		return NextResponse.json({
+			error: "Submission blocked by WASI Sandbox (TEC_MALICIOUS_SUBMISSION). Signal Score penalized.",
+			details: sandboxResult.error
+		}, { status: 403 });
 	}
 
 	const submission: Submission = {

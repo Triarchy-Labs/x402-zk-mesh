@@ -350,7 +350,7 @@ export default function Page() {
 									fontWeight: 400,
 								}}
 							>
-								x402 protocol / Sovereign Matrix
+								x402 Protocol / ZK Mesh / Sovereign Matrix
 							</motion.p>
 
 							{/* MAIN CTA — Gateway to Bounty Board */}

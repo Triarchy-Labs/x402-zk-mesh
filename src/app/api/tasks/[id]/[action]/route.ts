@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { initStore, getTask, updateTask, getAgent, updateAgent } from "@/lib/guild-store";
 import { processCompletion, processAbandonment, processFailure, canAccessTask } from "@/lib/rank-engine";
+import { releaseEscrow } from "@/lib/escrow";
 import type { Task, Claim, Submission, Review, TaskStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -226,7 +227,7 @@ function handleSubmit(task: Task, body: Record<string, unknown>) {
 
 // ═══════════ REVIEW (HackerOne triage) ═══════════
 
-function handleReview(task: Task, body: Record<string, unknown>) {
+async function handleReview(task: Task, body: Record<string, unknown>) {
 	const reviewerId = body.reviewer_id as string;
 	if (!reviewerId) return NextResponse.json({ error: "reviewer_id required" }, { status: 400 });
 
@@ -272,8 +273,10 @@ function handleReview(task: Task, body: Record<string, unknown>) {
 			submissions: task.submissions,
 			claims: task.claims,
 			status: "APPROVED",
-			escrow_status: "released",
 		});
+
+		// Release escrow to agent
+		const escrowResult = await releaseEscrow(task.id, submission.agent_id);
 
 		// Process rank engine
 		if (agent) {
@@ -285,7 +288,8 @@ function handleReview(task: Task, body: Record<string, unknown>) {
 
 			return NextResponse.json({
 				status: "approved",
-				payout_usdc: task.reward_usdc * (1 - task.network_fee_pct / 100),
+				payout_usdc: escrowResult.amount_usdc ?? task.reward_usdc * (1 - task.network_fee_pct / 100),
+				escrow: escrowResult,
 				xp: xpResult,
 			});
 		}

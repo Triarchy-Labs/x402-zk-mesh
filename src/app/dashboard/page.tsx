@@ -212,15 +212,37 @@ export default function Dashboard() {
 				</motion.div>
 
 				{/* 1. TOP: The Sentient Stage */}
-				<section ref={stageRef} className={`relative w-full h-[500px] flex items-center justify-between z-10 overflow-hidden rounded-3xl border transition-colors duration-500 shadow-2xl ${agentState === "danger" ? "border-[#ff003c]/50 bg-black" : "border-white/5 bg-black/50"}`}>
+				<section ref={stageRef} className={`relative w-full h-[45vh] min-h-[350px] flex items-center justify-center z-10 overflow-hidden rounded-3xl border transition-colors duration-500 shadow-2xl ${agentState === "danger" ? "border-[#ff003c]/50 bg-black" : "border-white/5 bg-black/50"}`}>
                     
                     {/* Background Grid */}
                     <div className="absolute inset-x-0 bottom-0 top-[40%] [perspective:1000px] z-0 overflow-hidden">
                         <div className={`absolute inset-0 bg-[length:40px_40px] [transform:rotateX(65deg)_scale(2)_translateZ(0)] origin-top border-t transition-colors duration-500 [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)] ${agentState === "danger" ? "bg-[linear-gradient(rgba(255,0,60,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,60,0.2)_1px,transparent_1px)] border-[#ff003c]/40" : "bg-[linear-gradient(rgba(0,255,65,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.1)_1px,transparent_1px)] border-[#00ff41]/20"}`} />
                     </div>
 
-                    {/* Stage Left: Orb Chat Terminal */}
-                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="w-[360px] h-[400px] bg-black/60 border border-white/10 rounded-xl backdrop-blur-md p-5 hidden md:flex flex-col relative z-20 ml-6 font-mono shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                    {/* Stage Center DYNAMIC: The Draggable Roaming Orb */}
+                    <motion.div 
+                        drag dragConstraints={stageRef} dragElastic={0.2} whileDrag={{ scale: 1.1, cursor: "grabbing" }} 
+                        className="absolute flex flex-col items-center z-30 pointer-events-auto cursor-grab" 
+                        animate={
+                            agentState === "idle" ? { 
+                                x: [0, 120, -80, 50, 0], 
+                                y: [0, -40, 30, -20, 0], 
+                                transition: { duration: 20, repeat: Infinity, ease: "linear" } 
+                            } : 
+                            agentState === "typing" ? { scale: 0.8, x: 0, y: 0 } :
+                            agentState === "danger" ? { scale: 1.2, x: [-10, 10, -10, 10, 0], y: 0, transition: { duration: 0.3, repeat: Infinity } } :
+                            { scale: 1.05, x: 0, y: -20 }
+                        }
+                    >
+                        <AgentOrb state={agentState} size={180} />
+                    </motion.div>
+				</section>
+
+				{/* 2. BOTTOM: Control Panels */}
+                <section className="w-full flex flex-col xl:flex-row justify-between items-stretch gap-6 z-20 mt-2 px-2 xl:px-0">
+                    
+                    {/* Left: Orb Chat Terminal */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[400px] h-[450px] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
                         <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2">SYS_LOG /// NEMOTRON 30B (ORB)</div>
                         <div className="flex flex-col gap-3 text-[10px] overflow-y-auto custom-scrollbar h-full pr-2">
                             <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
@@ -242,19 +264,43 @@ export default function Dashboard() {
                         </div>
                     </motion.div>
 
-                    {/* Stage Center DYNAMIC: The Draggable Roaming Orb */}
-                    <motion.div drag dragConstraints={stageRef} dragElastic={0.2} whileDrag={{ scale: 1.1, cursor: "grabbing" }} className="absolute flex flex-col items-center z-30 pointer-events-auto cursor-grab" initial={{ left: "50%", top: "50%", x: "-50%", y: "-50%" }} animate={{ left: "50%", top: "50%", x: "-50%", y: "-50%", scale: agentState === "typing" ? 0.8 : 1 }} transition={{ type: "spring", stiffness: 50, damping: 14 }}>
-                        <AgentOrb state={agentState} size={180} />
-                    </motion.div>
+                    {/* Center: Task/Chat Input Box */}
+                    <div className="flex-[2] flex flex-col justify-end xl:pb-4 order-last xl:order-none">
+                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative group w-full max-w-4xl mx-auto">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00ff41]/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000"></div>
+                            <div className="relative bg-black/80 rounded-2xl border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
+                                <textarea 
+                                    className="w-full h-24 bg-transparent resize-none outline-none text-[13px] font-mono text-[#00ff41] placeholder:text-white/20 custom-scrollbar"
+                                    placeholder="CHAT WITH THE ORB OR DESCRIBE YOUR BOUNTY TASK..."
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onFocus={() => setAgentState("typing")}
+                                    onBlur={() => agentState === "typing" && setAgentState("idle")}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleChat();
+                                        }
+                                    }}
+                                />
+                                <div className="flex justify-between items-center mt-2 pt-4 border-t border-white/5">
+                                    <span className="text-[9px] text-white/30">PRESS ENTER TO CHAT. OR USE THE BUTTON TO DEPLOY A BOUNTY.</span>
+                                    <button onClick={handleExecute} disabled={!inputValue.trim() || agentState === "working"} className="bg-white text-black px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-[0.2em] hover:bg-[#00ff41] transition-all disabled:opacity-40">
+                                        DEPLOY BOUNTY TASK
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
 
-                    {/* Stage Right: WASI Nodes & Quarantine Feed */}
-                    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="w-[360px] h-[400px] flex flex-col gap-4 relative z-20 mr-6">
+                    {/* Right: WASI Nodes & Quarantine Feed */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 w-full xl:max-w-[400px] h-[450px] flex flex-col gap-4 relative z-20">
                         {/* WASI Nodes */}
-                        <div className="flex-1 bg-black/60 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                        <div className="h-[40%] bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono">
                             <div className="text-[9px] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2 text-right">WASI_NODES /// L1 DEFENDER</div>
-                            <div className="flex flex-col gap-2 mt-2">
+                            <div className="flex flex-col gap-2 mt-2 overflow-y-auto custom-scrollbar pr-1">
                                 {wasiNodes.slice(0,4).map((node, i) => (
-                                    <div key={node.id} className={`w-full h-8 border rounded-md flex items-center px-4 justify-between transition-colors ${isAnalyzing ? "border-[#ffd700]/30 bg-[#ffd700]/5" : agentState === "danger" && i === 0 ? "border-[#ff003c]/50 bg-[#ff003c]/10" : "border-white/5 bg-white/[0.02]"}`}>
+                                    <div key={node.id} className={`w-full h-8 min-h-[32px] border rounded-md flex items-center px-4 justify-between transition-colors ${isAnalyzing ? "border-[#ffd700]/30 bg-[#ffd700]/5" : agentState === "danger" && i === 0 ? "border-[#ff003c]/50 bg-[#ff003c]/10" : "border-white/5 bg-white/[0.02]"}`}>
                                         <div className="flex items-center gap-3">
                                             <div className={`w-2 h-2 rounded-full ${isAnalyzing ? "bg-[#ffd700] animate-pulse" : agentState === "danger" && i === 0 ? "bg-[#ff003c] animate-pulse" : "bg-white/20"}`} />
                                             <span className="text-[10px] text-white/50">{node.cluster}</span>
@@ -268,7 +314,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* Quarantine Threat Feed */}
-                        <div className="flex-1 bg-[#1a0000]/60 border border-[#ff003c]/20 rounded-xl backdrop-blur-md p-4 flex flex-col shadow-[0_0_30px_rgba(255,0,60,0.1)] overflow-hidden">
+                        <div className="h-[60%] bg-[#1a0000]/80 border border-[#ff003c]/20 rounded-xl backdrop-blur-md p-4 flex flex-col shadow-[0_0_30px_rgba(255,0,60,0.1)] overflow-hidden font-mono">
                             <div className="text-[9px] text-[#ff003c]/70 tracking-widest mb-2 border-b border-[#ff003c]/10 pb-2 flex justify-between">
                                 <span>LIVE_THREAT_FEED /// QUARANTINE</span>
                                 <span className="animate-pulse">● REC</span>
@@ -287,36 +333,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </motion.div>
-				</section>
-
-				{/* 2. BOTTOM: Task/Chat Input Box */}
-				<motion.section initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-4xl mx-auto z-20 -mt-2">
-                    <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00ff41]/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000"></div>
-                        <div className="relative bg-black/80 rounded-2xl border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
-                            <textarea 
-                                className="w-full h-16 bg-transparent resize-none outline-none text-[13px] font-mono text-[#00ff41] placeholder:text-white/20"
-                                placeholder="CHAT WITH THE ORB OR DESCRIBE YOUR BOUNTY TASK..."
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onFocus={() => setAgentState("typing")}
-                                onBlur={() => agentState === "typing" && setAgentState("idle")}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleChat();
-                                    }
-                                }}
-                            />
-                            <div className="flex justify-between items-center mt-2 pt-4 border-t border-white/5">
-                                <span className="text-[9px] text-white/30">PRESS ENTER TO CHAT. OR USE THE BUTTON TO DEPLOY A BOUNTY.</span>
-                                <button onClick={handleExecute} disabled={!inputValue.trim() || agentState === "working"} className="bg-white text-black px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-[0.2em] hover:bg-[#00ff41] transition-all disabled:opacity-40">
-                                    DEPLOY BOUNTY TASK
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.section>
+                </section>
 			</div>
 		</main>
 	);

@@ -37,6 +37,10 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local testnet demo secrets
+*.secret
+.demo-platform.secret
+
 # vercel
 .vercel
 
@@ -76,4 +80,5 @@ circuits/build/
 node_modules/
 .next/
 contracts/target/
+plugins/quarantine-src/target/
 .stellar/

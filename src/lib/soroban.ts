@@ -9,7 +9,8 @@ const HORIZON_TESTNET_URL = "https://horizon-testnet.stellar.org";
 // Testnet USDC issuer (Example public issuer for hackathon testing)
 const USDC_ISSUER =
 	process.env.STELLAR_USDC_ISSUER ||
-	"GBBD47IF6LWK7P7MDEVSCWTTCJM4NTC3L3P6HZ2ZNGQ5ZCDNDGNQ5V5D";
+	// Circle's official Stellar Testnet USDC issuer.
+	"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 const PLATFORM_WALLET =
 	process.env.STELLAR_PLATFORM_WALLET || "GPLATFORM_WALLET_DEFAULT";
 

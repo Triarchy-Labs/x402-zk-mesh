@@ -95,7 +95,7 @@ app.post('/api/hire', (req, res) => {
             status: 'success',
             result,
             membership: membershipLeaf ? 'guild_verified' : 'public',
-            guild_registry: 'CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG',
+            guild_registry: 'CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB',
         });
 
         console.log('[GUILD AGENT] Response sent.\n');

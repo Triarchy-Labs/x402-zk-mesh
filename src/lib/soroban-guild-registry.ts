@@ -2,7 +2,7 @@ import { hashJson } from "./agent-receipt";
 
 export const GUILD_REGISTRY_CONTRACT_ID =
   process.env.ZK_GUILD_REGISTRY_CONTRACT_ID ||
-  "CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG";
+  "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB";
 
 export interface GuildRootArtifact {
   status: "prepared";

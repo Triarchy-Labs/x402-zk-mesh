@@ -18,24 +18,48 @@ export interface SandboxResult {
 	engine?: "extism_wasm" | "heuristic_fallback";
 }
 
-// Built-in heuristic ruleset (used when WASM plugin is not available)
+// Built-in heuristic ruleset (used when the WASM plugin is not available).
+// Kept in sync with plugins/quarantine-src/src/lib.rs (the Extism WASM plugin).
 const BANNED_TOKENS = [
+	// shell / process escapes
 	"bash",
+	"/bin/sh",
+	"/bin/bash",
+	"sh -c",
+	"nc -e",
+	"rm -rf",
+	"mkfifo",
 	"system(",
 	"exec(",
-	"<system>",
-	"fs.",
-	"process.env",
+	"execsync",
+	"child_process",
+	"spawn(",
+	"popen(",
+	// code evaluation
 	"eval(",
 	"require(",
 	"import(",
+	"function(",
+	"<system>",
+	// node / runtime internals
+	"process.env",
+	"fs.",
+	"globalthis",
+	"__dirname",
+	"module.exports",
+	// prototype pollution
 	"__proto__",
 	"constructor[",
-	"nc -e",
-	"/bin/sh",
-	"curl |",
-	"wget |",
-	"rm -rf",
+	"prototype[",
+	// network exfiltration / SSRF
+	"curl ",
+	"wget ",
+	"http://169.254",
+	"file://",
+	"://localhost",
+	// path traversal
+	"../../",
+	"..\\..\\",
 ];
 
 /**

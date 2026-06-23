@@ -12,11 +12,15 @@
  * without revealing the agent's identity.
  */
 
+import * as StellarSDK from "@stellar/stellar-sdk";
 import { validateSorobanPayment } from "./soroban";
 import { getTask, updateTask, getAgent, updateAgent } from "./guild-store";
 
-const HORIZON_TESTNET_URL = "https://horizon-testnet.stellar.org";
+const HORIZON_TESTNET_URL =
+	process.env.STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org";
 const PLATFORM_WALLET = process.env.STELLAR_PLATFORM_WALLET || "GPLATFORM_WALLET_DEFAULT";
+// Secret for the platform escrow wallet. When set, escrow releases settle on-chain.
+const PLATFORM_SECRET = process.env.STELLAR_PLATFORM_SECRET || "";
 
 export interface EscrowResult {
 	success: boolean;
@@ -24,6 +28,57 @@ export interface EscrowResult {
 	tx_hash?: string;
 	error?: string;
 	amount_usdc?: number;
+	/** Set when a payout was credited internally but not settled on-chain (honest degradation). */
+	payout_note?: string;
+}
+
+/** Resolve the payout asset: configured classic asset (e.g. USDC) or native XLM. */
+function payoutAsset(): StellarSDK.Asset {
+	const code = (process.env.STELLAR_PAYMENT_ASSET_CODE || "").trim();
+	const issuer = (
+		process.env.STELLAR_PAYMENT_ASSET_ISSUER ||
+		process.env.STELLAR_USDC_ISSUER ||
+		""
+	).trim();
+	if (code && !["XLM", "NATIVE"].includes(code.toUpperCase()) && issuer) {
+		return new StellarSDK.Asset(code, issuer);
+	}
+	return StellarSDK.Asset.native();
+}
+
+/**
+ * Settle an escrow payout on Stellar Testnet: platform wallet → agent wallet.
+ * Returns the real tx hash on success, or an error reason when an on-chain
+ * payout is not possible (no secret, agent without a trustline, etc.).
+ */
+async function submitPayout(
+	destination: string,
+	amount: number,
+): Promise<{ txHash?: string; error?: string }> {
+	if (!PLATFORM_SECRET) return { error: "STELLAR_PLATFORM_SECRET not configured" };
+	try {
+		const server = new StellarSDK.Horizon.Server(HORIZON_TESTNET_URL);
+		const kp = StellarSDK.Keypair.fromSecret(PLATFORM_SECRET);
+		const account = await server.loadAccount(kp.publicKey());
+		const tx = new StellarSDK.TransactionBuilder(account, {
+			fee: StellarSDK.BASE_FEE,
+			networkPassphrase: StellarSDK.Networks.TESTNET,
+		})
+			.addOperation(
+				StellarSDK.Operation.payment({
+					destination,
+					asset: payoutAsset(),
+					amount: amount.toFixed(7),
+				}),
+			)
+			.setTimeout(60)
+			.build();
+		tx.sign(kp);
+		const res = await server.submitTransaction(tx);
+		return { txHash: res.hash };
+	} catch (e) {
+		return { error: e instanceof Error ? e.message : "payout submission failed" };
+	}
 }
 
 /**
@@ -94,25 +149,34 @@ export async function releaseEscrow(
 	const platformFee = task.reward_usdc * (task.network_fee_pct / 100);
 	const agentPayout = task.reward_usdc - platformFee;
 
-	// If agent has a Stellar public key, attempt real payout
-	if (agent.public_key) {
-		// In production: build and submit a Stellar transaction
-		// For now: log the intent and track internally
-		const payoutRecord = {
-			type: "escrow_release",
-			task_id: taskId,
-			agent_id: agentId,
-			agent_wallet: agent.public_key,
-			platform_wallet: PLATFORM_WALLET,
-			gross_amount: task.reward_usdc,
-			platform_fee: platformFee,
-			net_payout: agentPayout,
-			timestamp: new Date().toISOString(),
-			// This would be the real tx hash after submitting to Stellar
-			payout_tx_hash: `pending_${taskId}_${Date.now()}`,
-		};
+	// Settle the payout on-chain (platform wallet -> agent). Falls back to an
+	// internal credit with an honest note when on-chain settlement isn't possible.
+	let payoutTxHash: string | undefined;
+	let payoutNote: string | undefined;
 
-		console.log("[ESCROW] Release intent:", JSON.stringify(payoutRecord));
+	if (agent.public_key) {
+		const payout = await submitPayout(agent.public_key, agentPayout);
+		if (payout.txHash) {
+			payoutTxHash = payout.txHash;
+			console.log(
+				"[ESCROW] On-chain payout settled:",
+				JSON.stringify({
+					task_id: taskId,
+					agent_id: agentId,
+					agent_wallet: agent.public_key,
+					platform_wallet: PLATFORM_WALLET,
+					gross_amount: task.reward_usdc,
+					platform_fee: platformFee,
+					net_payout: agentPayout,
+					tx_hash: payoutTxHash,
+				}),
+			);
+		} else {
+			payoutNote = `credited internally (no on-chain settlement: ${payout.error})`;
+			console.warn("[ESCROW] On-chain payout skipped:", payout.error);
+		}
+	} else {
+		payoutNote = "agent has no Stellar wallet; credited internal balance only";
 	}
 
 	// Update agent balance (internal tracking)
@@ -131,6 +195,8 @@ export async function releaseEscrow(
 		success: true,
 		escrow_status: "released",
 		amount_usdc: agentPayout,
+		tx_hash: payoutTxHash,
+		payout_note: payoutNote,
 	};
 }
 

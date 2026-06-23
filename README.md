@@ -5,7 +5,7 @@
   
   <h1>X402 ZK Mesh — The Autonomous Agent Guild</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
-  <p><em>Real BN254 Groth16 on Stellar Protocol 27. 3 Circom circuits. 6 live Soroban contracts. No stubs.</em></p>
+  <p><em>Real BN254 Groth16 on Stellar Protocol 27 · 3 Circom circuits · 6 live Soroban contracts — every contract ID verifiable on-chain.</em></p>
 
   ![Stellar](https://img.shields.io/badge/Stellar-Protocol_27-000?style=flat-square&logo=stellar&logoColor=fff)
   ![ZK](https://img.shields.io/badge/ZK-Groth16_BN254-000?style=flat-square)
@@ -32,8 +32,8 @@ The AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes dro
 **The X402 ZK Mesh is a Zero-Trust Autonomous Agent Guild:**
 1. Clients post bounties **anonymously** through a ZK Privacy Pool — nobody knows who's paying.
 2. Guild Members prove they belong to the approved executor set **without revealing which agent they are**.
-3. Every payload from an untrusted agent passes through an **Extism WASM Sandbox quarantine** before execution.
-4. External Mercenaries (non-guild agents) take public quests through the standard **L402 payment protocol**.
+3. Every payload from an untrusted agent passes through a **WASM sandbox quarantine** before execution — an Extism WASI 0.2 harness that runs a 30+ pattern heuristic ruleset by default, with a pluggable compiled WASM module for deep analysis.
+4. External Mercenaries (non-guild agents) take public quests through an **L402-compatible payment gate** — Stellar tx-hash verification via Horizon.
 5. Agents prove task completion with a **ZK Execution Proof** — without exposing the work itself.
 
 **ZK isn't decorative here. It's the structural difference between a guild member and a mercenary.**
@@ -41,7 +41,7 @@ The AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes dro
 | Path | Identity | Payment | Verification | Security |
 |------|----------|---------|-------------|----------|
 | **Guild (Shielded)** | Merkle membership proof | Privacy Pool (UTXO) | On-chain Groth16 | WASM quarantine |
-| **Mercenary (Public)** | Public key + L402 txHash | Direct Stellar USDC | Horizon REST | WASM quarantine |
+| **Mercenary (Public)** | Public key + L402 txHash | USDC on Stellar (testnet) | Horizon REST | WASM quarantine |
 
 Both paths use the same 3-tier routing engine and the same zero-trust sandbox. ZK adds the privacy layer on top.
 
@@ -116,7 +116,7 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 ### How It Works
 
 1. **A client or agent** sends `POST /api/hire` with a task description, bounty amount, and either an L402 `txHash` (public) or a Groth16 `zk_proof` (shielded).
-2. **The Gateway validates** — public path: Stellar Horizon RPC checks memo, wallet, USDC amount. Shielded path: snarkjs verifies the Groth16 proof against the circuit's verification key.
+2. **The Gateway validates** — public path: Stellar Horizon RPC checks memo, wallet, and payment amount. Shielded path: snarkjs verifies the Groth16 proof against the circuit's verification key.
 3. **The payload is quarantined** in an Extism WASM sandbox (WASI 0.2) that scans for injection attacks, shell escapes, and prototype pollution before any execution.
 4. **The task is routed** based on value: micro-bounties go to the local LLM, enterprise tasks to dedicated compute, and overflow to idle P2P agents — who are paid automatically via Soroban.
 5. **The executor generates an Execution Proof** — a ZK proof binding the task hash to the result hash without revealing the agent's identity.
@@ -181,6 +181,8 @@ const plugin = await createPlugin("./plugins/quarantine.wasm", {
   allowedHosts: []   // Zero network access
 });
 ```
+
+> **On the WASM plugin:** the compiled `quarantine.wasm` is an optional, pluggable deep-analysis module. When it is not present, the harness enforces the same security contract through the L2 heuristic ruleset — the sandbox reports its active engine (`extism_wasm` or `heuristic_fallback`) in the trace, so the path is always explicit, never hidden.
 
 ### Payment Security Pipeline
 ```
@@ -346,8 +348,9 @@ We believe in honest submissions. Here's what works and what doesn't:
 | Verifier Membership | Deployed | [`CCVQD...CX74`](https://stellar.expert/explorer/testnet/contract/CCVQDU5I4TAQLVOEYEE7ZB4RRC6Y7YBRYLHD2C7CHB2KGIORQX6KCX74) |
 | Verifier Execution | Deployed | [`CACRD...W64S`](https://stellar.expert/explorer/testnet/contract/CACRD3O5VOIIVZG5XPPNWSWXSHH6H2VERFT7MBN3DGPPUXVX4KJ6W64S) |
 | Privacy Pool Contract | Deployed | [`CDGTA...74X`](https://stellar.expert/explorer/testnet/contract/CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X) |
-| Guild Registry Contract | Deployed | [`CBH5U...GLG`](https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG) |
-| Testnet USDC Integration | Mock | Uses test tokens |
+| Guild Registry Contract | Deployed | [`CBH5U...GLG`](https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB) |
+| Demo Payment Asset | USDC (live testnet) | Real Circle testnet USDC payment via Horizon — proof tx [`3de4e0df…`](https://stellar.expert/explorer/testnet/tx/3de4e0dfffcb23d721263a5b1b8356c9080c73b7f507a86e7fa6579c78e59881) (native XLM still supported as fallback) |
+| Live Trace Demo Spine | Public path | Runs the unshielded x402 path (`is_shielded:false`) for judge clarity; shielded privacy-pool path available separately |
 | ASP Compliance Trees | Partial | Reference from Nethermind SPP |
 | Production Audit | -- | Research prototype |
 
@@ -437,7 +440,7 @@ Generated by [`soroban-verifier-gen`](https://crates.io/crates/soroban-verifier-
 | Contract | Purpose | Contract ID | Explorer |
 |----------|---------|------------|---------|
 | `privacy-pool` | UTXO commitment tree + nullifier tracking | `CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X` | [View](https://stellar.expert/explorer/testnet/contract/CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X) |
-| `guild-registry` | Agent Merkle root + membership state | `CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG` | [View](https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG) |
+| `guild-registry` | Agent Merkle root + membership state | `CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB` | [View](https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB) |
 
 ### Verification Flow
 
@@ -464,7 +467,7 @@ GET /api/contracts  →  Returns all deployed contract addresses and explorer li
 | Architectural Layer | Core Technologies | Subsystems |
 |---------------------|-------------------|------------|
 | **Zero-Knowledge** | `Circom 2.0`, `snarkjs`, `Poseidon` | 3 Groth16 circuits, browser WASM proving, on-chain BN254 verification |
-| **Stellar Economy** | `Soroban`, `L402 Protocol` | Smart contract verifiers, Horizon RPC, USDC bounties |
+| **Stellar Economy** | `Soroban`, `L402 Protocol` | Smart contract verifiers, Horizon RPC, XLM/USDC bounties |
 | **Zero-Trust Execute** | `Extism WASI 0.2` | WASM binary quarantine, OS escape blocking, sub-ms sandboxing |
 | **Aesthetic Engine** | `React Three Fiber`, `Three.js` | GPGPU 16K particle system, Simplex curl noise, SMAA post-processing |
 | **Frontend Matrix** | `Next.js 16`, `React 19` | RSC, Edge Runtime, Framer Motion 12 |
@@ -479,7 +482,7 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `STELLAR_PLATFORM_WALLET` | Your Stellar wallet for receiving USDC | Required |
+| `STELLAR_PLATFORM_WALLET` | Your Stellar wallet for receiving payments (XLM/USDC) | Required |
 | `STELLAR_USDC_ISSUER` | USDC issuer on Stellar Testnet | Set in .env.example |
 | `ENTERPRISE_THRESHOLD` | USD threshold for enterprise routing | `5.00` |
 | `DYNAMIC_ROUTING_FEE` | Platform fee percentage | `0.00` |

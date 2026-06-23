@@ -1,0 +1,17 @@
+[package]
+name = "quarantine"
+version = "0.1.0"
+edition = "2021"
+description = "Extism WASI quarantine plugin for X402 ZK Mesh — zero-trust foreign payload validator"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+extism-pdk = "1"
+serde = { version = "1", features = ["derive"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { initStore, getAgents, getGuildStats } from "@/lib/guild-store";
+import { GUILD_REGISTRY_CONTRACT_ID } from "@/lib/soroban-guild-registry";
 
 export const dynamic = "force-dynamic";
 
@@ -73,9 +74,9 @@ export async function GET(req: Request) {
 
 		// Contracts
 		contracts: {
-			guild_registry: "CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG",
+			guild_registry: GUILD_REGISTRY_CONTRACT_ID,
 			network: "stellar-testnet",
-			explorer: "https://stellar.expert/explorer/testnet/contract/CBH5UVNM6P4JMNRQ5NH4QNMOIZGWA4KQW2DI4G5EKJ5CZ3RXQSK7CGLG",
+			explorer: `https://stellar.expert/explorer/testnet/contract/${GUILD_REGISTRY_CONTRACT_ID}`,
 		},
 	});
 }

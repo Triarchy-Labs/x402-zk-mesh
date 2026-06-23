@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
       method: result.method,
       contractId: result.contractId || null,
       txHash: result.txHash || null,
+      explorer: (result as any).explorer || null,
       publicSignals: parsedSignals,
       timestamp: new Date().toISOString(),
     });

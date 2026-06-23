@@ -159,6 +159,11 @@ const GATEWAY_MANIFEST = {
 		},
 		discovery: {
 			manifest: { method: "GET", path: "/api/mcp", description: "This endpoint. Machine-readable capability manifest." },
+			demo_trace: {
+				method: "GET",
+				path: "/api/demo/trace",
+				description: "Returns the latest recorded x402 payment -> private membership proof -> worker delegation -> Soroban settlement trace.",
+			},
 		},
 	},
 	tiers: {

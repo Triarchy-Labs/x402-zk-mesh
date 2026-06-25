@@ -305,9 +305,9 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 	const [simUvs, colors] = useState(() => {
 		const uvs = new Float32Array(PARTICLE_COUNT * 2);
 		const col = new Float32Array(PARTICLE_COUNT * 3);
-		// Make both colors identical or extremely close so it looks like a unified plasma field
-		const baseColor = new THREE.Color("#ffe8a1");
-		const secondaryColor = new THREE.Color("#ffd700");
+		// Stark, clean, premium white-hot look to avoid 'muddy' or 'gypsy' gold
+		const baseColor = new THREE.Color("#ffffff");
+		const secondaryColor = new THREE.Color("#fcf8e8");
 
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
 			const x = (i % TEX_SIZE) / TEX_SIZE;
@@ -521,8 +521,8 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 		<group>
 			<ambientLight intensity={0.5} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
 			<directionalLight ref={dirLight} position={[10, 10, 10]} intensity={theme === "dark" ? 3 : 1.5} color={theme === "dark" ? "#c8bfae" : "#aaaaaa"} />
-			{/* Deep golden ambient glow for the background */}
-			<pointLight ref={ptLight} position={[-10, -10, -10]} intensity={theme === "dark" ? 8 : 2} color={theme === "dark" ? "#ff8800" : "#cccccc"} />
+			{/* Stark white/pale tungsten ambient glow to prevent muddy gradients */}
+			<pointLight ref={ptLight} position={[-10, -10, -10]} intensity={theme === "dark" ? 5 : 2} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
 		</group>
 	);
 }

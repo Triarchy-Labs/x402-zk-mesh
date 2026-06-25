@@ -73,7 +73,7 @@ export default function AgentDashboard() {
 						key={agent.id}
 						style={{
 							background: "rgba(0, 15, 0, 0.4)",
-							border: `1px solid ${agent.status === "active" ? "rgba(255, 255, 255, 0.4)" : agent.status === "quarantined" ? "rgba(255, 0, 60, 0.4)" : "rgba(100, 100, 100, 0.4)"}`,
+							border: `1px solid ${agent.status === "active" ? "rgba(255, 255, 255, 0.4)" : agent.status === "quarantined" ? "rgba(255, 85, 0, 0.4)" : "rgba(100, 100, 100, 0.4)"}`,
 							borderRadius: "4px",
 							padding: "1.5rem",
 							backdropFilter: "blur(10px)",
@@ -103,12 +103,12 @@ export default function AgentDashboard() {
 										agent.status === "active"
 											? "rgba(255,255,255,0.85)"
 											: agent.status === "quarantined"
-												? "#ff003c"
+												? "#ff5500"
 												: "#888",
 									textTransform: "uppercase",
 									fontSize: "1.2rem",
 									padding: "0.2rem 0.5rem",
-									border: `1px solid ${agent.status === "active" ? "rgba(255,255,255,0.85)" : agent.status === "quarantined" ? "#ff003c" : "#888"}`,
+									border: `1px solid ${agent.status === "active" ? "rgba(255,255,255,0.85)" : agent.status === "quarantined" ? "#ff5500" : "#888"}`,
 								}}
 							>
 								{agent.status}

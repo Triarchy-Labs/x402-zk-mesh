@@ -293,18 +293,18 @@ export default function Dashboard() {
                         </p>
                     </div>
                     {/* SIMULATE ATTACK BUTTON */}
-                    <button onClick={simulateAttack} disabled={isAnalyzing} className="px-[2rem] py-[1rem] border border-[#ff003c] text-[#ff003c] rounded hover:bg-[#ff003c]/20 transition-all font-bold tracking-widest text-[1.2rem] flex items-center gap-[1rem] shadow-[0_0_15px_rgba(255,0,60,0.2)]">
+                    <button onClick={simulateAttack} disabled={isAnalyzing} className="px-[2rem] py-[1rem] border border-[#ff5500] text-[#ff5500] rounded hover:bg-[#ff5500]/20 transition-all font-bold tracking-widest text-[1.2rem] flex items-center gap-[1rem] shadow-[0_0_15px_rgba(255, 85, 0,0.2)]">
                         <svg className="w-[1.6rem] h-[1.6rem] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                         {isAnalyzing ? "INJECTING PAYLOAD..." : "SIMULATE HACK"}
                     </button>
 				</motion.div>
 
 				{/* 1. TOP: The Sentient Stage */}
-				<section ref={stageRef} className={`relative w-full h-[45vh] min-h-[350px] flex items-center justify-center z-10 overflow-hidden rounded-3xl border transition-colors duration-500 shadow-2xl ${agentState === "danger" ? "border-[#ff003c]/50 bg-black" : "border-white/5 bg-black/50"}`}>
+				<section ref={stageRef} className={`relative w-full h-[45vh] min-h-[350px] flex items-center justify-center z-10 overflow-hidden rounded-3xl border transition-colors duration-500 shadow-2xl ${agentState === "danger" ? "border-[#ff5500]/50 bg-black" : "border-white/5 bg-black/50"}`}>
                     
                     {/* Background Grid */}
                     <div className="absolute inset-x-0 bottom-0 top-[40%] [perspective:1000px] z-0 overflow-hidden">
-                        <div className={`absolute inset-0 bg-[length:40px_40px] [transform:rotateX(65deg)_scale(2)_translateZ(0)] origin-top border-t transition-colors duration-500 [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)] ${agentState === "danger" ? "bg-[linear-gradient(rgba(255,0,60,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,60,0.2)_1px,transparent_1px)] border-[#ff003c]/40" : "bg-[linear-gradient(rgba(255, 170, 0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255, 170, 0,0.1)_1px,transparent_1px)] border-[#ffaa00]/20"}`} />
+                        <div className={`absolute inset-0 bg-[length:40px_40px] [transform:rotateX(65deg)_scale(2)_translateZ(0)] origin-top border-t transition-colors duration-500 [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)] ${agentState === "danger" ? "bg-[linear-gradient(rgba(255, 85, 0,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255, 85, 0,0.2)_1px,transparent_1px)] border-[#ff5500]/40" : "bg-[linear-gradient(rgba(255, 170, 0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255, 170, 0,0.1)_1px,transparent_1px)] border-[#ffaa00]/20"}`} />
                     </div>
 
                     {/* Stage Center DYNAMIC: The Draggable Roaming Orb */}
@@ -339,10 +339,10 @@ export default function Dashboard() {
                                     <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#ffaa00] transition-colors font-bold">
                                         {showArchives ? "[CLOSE ARCHIVE]" : "[ARCHIVE]"}
                                     </button>
-                                    <button onClick={startNewSession} className="hover:text-[#00bfff] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
+                                    <button onClick={startNewSession} className="hover:text-[#995500] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
                                         [NEW SESSION]
                                     </button>
-                                    <button onClick={purgeAllLogs} className="hover:text-[#ff003c] transition-colors font-bold">
+                                    <button onClick={purgeAllLogs} className="hover:text-[#ff5500] transition-colors font-bold">
                                         [PURGE ALL]
                                     </button>
                                 </div>
@@ -432,12 +432,12 @@ export default function Dashboard() {
                             <div className="text-[1.2rem] text-white/30 tracking-widest mb-3 border-b border-white/5 pb-2 text-right">WASI_NODES /// L1 DEFENDER</div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 flex flex-col gap-2">
                                 {wasiNodes.slice(0,4).map((node, i) => (
-                                    <div key={node.id} className={`w-full h-[4rem] min-h-[4rem] border rounded-md flex items-center px-[2rem] justify-between transition-colors ${isAnalyzing ? "border-[#ffd700]/30 bg-[#ffd700]/5" : agentState === "danger" && i === 0 ? "border-[#ff003c]/50 bg-[#ff003c]/10" : "border-white/5 bg-white/[0.02]"}`}>
+                                    <div key={node.id} className={`w-full h-[4rem] min-h-[4rem] border rounded-md flex items-center px-[2rem] justify-between transition-colors ${isAnalyzing ? "border-[#ffaa00]/30 bg-[#ffaa00]/5" : agentState === "danger" && i === 0 ? "border-[#ff5500]/50 bg-[#ff5500]/10" : "border-white/5 bg-white/[0.02]"}`}>
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-[1rem] h-[1rem] rounded-full ${isAnalyzing ? "bg-[#ffd700] animate-pulse" : agentState === "danger" && i === 0 ? "bg-[#ff003c] animate-pulse" : "bg-white/20"}`} />
+                                            <div className={`w-[1rem] h-[1rem] rounded-full ${isAnalyzing ? "bg-[#ffaa00] animate-pulse" : agentState === "danger" && i === 0 ? "bg-[#ff5500] animate-pulse" : "bg-white/20"}`} />
                                             <span className="text-[1.3rem] text-white/50">{node.cluster}</span>
                                         </div>
-                                        <span className={`text-[1.2rem] ${isAnalyzing ? "text-[#ffd700]" : agentState === "danger" && i === 0 ? "text-[#ff003c]" : "text-white/20"}`}>
+                                        <span className={`text-[1.2rem] ${isAnalyzing ? "text-[#ffaa00]" : agentState === "danger" && i === 0 ? "text-[#ff5500]" : "text-white/20"}`}>
                                             {isAnalyzing ? "SCANNING_L1_L2..." : agentState === "danger" && i === 0 ? "BREACH_BLOCKED" : node.status}
                                         </span>
                                     </div>
@@ -446,19 +446,19 @@ export default function Dashboard() {
                         </motion.div>
 
                         {/* Quarantine Threat Feed */}
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-[1.5] bg-[#1a0000]/80 border border-[#ff003c]/20 rounded-xl backdrop-blur-md p-[2rem] flex flex-col shadow-[0_0_30px_rgba(255,0,60,0.1)] overflow-hidden font-mono min-h-[25rem]">
-                            <div className="text-[1.2rem] text-[#ff003c]/70 tracking-widest mb-2 border-b border-[#ff003c]/10 pb-2 flex justify-between">
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-[1.5] bg-[#1a0000]/80 border border-[#ff5500]/20 rounded-xl backdrop-blur-md p-[2rem] flex flex-col shadow-[0_0_30px_rgba(255, 85, 0,0.1)] overflow-hidden font-mono min-h-[25rem]">
+                            <div className="text-[1.2rem] text-[#ff5500]/70 tracking-widest mb-2 border-b border-[#ff5500]/10 pb-2 flex justify-between">
                                 <span>LIVE_THREAT_FEED /// QUARANTINE</span>
                                 <span className="animate-pulse">● REC</span>
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-1">
-                                {quarantineEvents.length === 0 && <span className="text-[1.3rem] text-[#ff003c]/30 mt-2">AWAITING INCIDENTS...</span>}
+                                {quarantineEvents.length === 0 && <span className="text-[1.3rem] text-[#ff5500]/30 mt-2">AWAITING INCIDENTS...</span>}
                                 <AnimatePresence>
                                     {quarantineEvents.map((evt, i) => (
-                                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} key={i} className="text-[1.2rem] border-l-2 border-[#ff003c] pl-[1rem] py-[0.5rem]">
-                                            <div className="text-white/50">[{new Date(evt.timestamp).toLocaleTimeString()}] <span className="text-[#ff003c]">BLOCKED</span></div>
-                                            <div className="text-[#00bfff]/70">L: {evt.data.layer} / A: {evt.data.agentId.substring(0,8)}</div>
-                                            <div className="text-[#ffd700]/70 truncate">{evt.data.details}</div>
+                                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} key={i} className="text-[1.2rem] border-l-2 border-[#ff5500] pl-[1rem] py-[0.5rem]">
+                                            <div className="text-white/50">[{new Date(evt.timestamp).toLocaleTimeString()}] <span className="text-[#ff5500]">BLOCKED</span></div>
+                                            <div className="text-[#995500]/70">L: {evt.data.layer} / A: {evt.data.agentId.substring(0,8)}</div>
+                                            <div className="text-[#ffaa00]/70 truncate">{evt.data.details}</div>
                                         </motion.div>
                                     ))}
                                 </AnimatePresence>

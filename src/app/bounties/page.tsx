@@ -33,16 +33,16 @@ interface GuildStats {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-	S: "#ff003c", A: "#ff6b00", B: "#ffd700", C: "#ffaa00", D: "#00bfff",
+	S: "#ff5500", A: "#ffaa00", B: "#ffaa00", C: "#ffaa00", D: "#995500",
 };
 
 const DIFFICULTY_GLOW: Record<string, string> = {
-	S: "0 0 12px rgba(255,0,60,0.6)", A: "0 0 12px rgba(255,107,0,0.5)", B: "0 0 12px rgba(255,215,0,0.4)", C: "0 0 10px rgba(255, 170, 0,0.3)", D: "0 0 8px rgba(0,191,255,0.3)",
+	S: "0 0 12px rgba(255, 85, 0,0.6)", A: "0 0 12px rgba(255, 170, 0,0.5)", B: "0 0 12px rgba(255, 170, 0,0.4)", C: "0 0 10px rgba(255, 170, 0,0.3)", D: "0 0 8px rgba(153, 85, 0,0.3)",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-	OPEN: "#ffaa00", CLAIMED: "#ffd700", IN_PROGRESS: "#ff6b00", SUBMITTED: "#00bfff", UNDER_REVIEW: "#a855f7",
-	REVISION: "#ff6b00", APPROVED: "#ffaa00", PAID: "#ffaa00", REJECTED: "#ff003c", EXPIRED: "#666", DISPUTED: "#ff003c", CANCELLED: "#666",
+	OPEN: "#ffaa00", CLAIMED: "#ffaa00", IN_PROGRESS: "#ffaa00", SUBMITTED: "#995500", UNDER_REVIEW: "#cc7700",
+	REVISION: "#ffaa00", APPROVED: "#ffaa00", PAID: "#ffaa00", REJECTED: "#ff5500", EXPIRED: "#666", DISPUTED: "#ff5500", CANCELLED: "#666",
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -165,8 +165,8 @@ const BountiesPage = () => {
 						{[
 							{ label: "TOTAL TASKS", value: stats.total, color: "#fff" },
 							{ label: "ACTIVE NOW", value: stats.active, color: "#ffaa00" },
-							{ label: "COMPLETED", value: stats.completed, color: "#ffd700" },
-							{ label: "USDC PAID", value: `$${stats.total_paid_usdc.toLocaleString()}`, color: "#00bfff" },
+							{ label: "COMPLETED", value: stats.completed, color: "#ffaa00" },
+							{ label: "USDC PAID", value: `$${stats.total_paid_usdc.toLocaleString()}`, color: "#995500" },
 						].map((kpi, i) => (
 							<motion.div
 								key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -200,7 +200,7 @@ const BountiesPage = () => {
 							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterStatus === "OPEN" ? "#ffaa00" : "transparent", color: filterStatus === "OPEN" ? "#000" : "#ffaa00", border: "1px solid #ffaa00" }}
 						>OPEN</button>
 						<button onClick={() => setFilterSOS(!filterSOS)}
-							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterSOS ? "#ff003c" : "transparent", color: filterSOS ? "#fff" : "#ff003c", border: "1px solid #ff003c" }}
+							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterSOS ? "#ff5500" : "transparent", color: filterSOS ? "#fff" : "#ff5500", border: "1px solid #ff5500" }}
 						>🆘 SOS</button>
 					</div>
 
@@ -294,7 +294,7 @@ const BountiesPage = () => {
 										<span style={{ fontSize: "1.5rem", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
 											{CATEGORY_ICONS[task.category] || "📌"} {task.title}
 										</span>
-										{task.is_shielded && <span style={{ fontSize: "1rem", padding: "2px 6px", background: "rgba(168,85,247,0.2)", color: "#a855f7", borderRadius: "3px", border: "1px solid rgba(168,85,247,0.3)" }}>ZK</span>}
+										{task.is_shielded && <span style={{ fontSize: "1rem", padding: "2px 6px", background: "rgba(204, 119, 0,0.2)", color: "#cc7700", borderRadius: "3px", border: "1px solid rgba(204, 119, 0,0.3)" }}>ZK</span>}
 										{task.sos_active && <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} style={{ fontSize: "1.1rem" }}>🆘</motion.span>}
 									</div>
 									<div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>

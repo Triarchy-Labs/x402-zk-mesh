@@ -31,12 +31,12 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 	const isMark53 = agent.id === "mark_53_sarcophagus";
 	
 	let borderColor = isQuarantined 
-		? "#ff003c" 
+		? "#ff5500" 
 		: hovered 
 			? (theme === "dark" ? "rgba(255, 170, 0,0.5)" : "rgba(0,100,34,0.4)")
 			: (theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)");
 	const statusColor = isQuarantined 
-		? "#ff003c" 
+		? "#ff5500" 
 		: hovered 
 			? (theme === "dark" ? "#ffaa00" : "#006622")
 			: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
@@ -86,7 +86,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				cursor: "crosshair",
 				transition: "background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease",
 				boxShadow: isMark53 
-					? "0 0 60px rgba(255, 215, 0, 0.05)"
+					? "0 0 60px rgba(255, 170, 0, 0.05)"
 					: hovered 
 						? "0 20px 40px rgba(255, 170, 0,0.08)" 
 						: "none",

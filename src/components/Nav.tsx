@@ -165,9 +165,9 @@ export function Nav() {
 						backdropFilter: "blur(12px)",
 					}}
 					onMouseEnter={(e) => { 
-						e.currentTarget.style.backgroundColor = "rgba(168, 85, 247, 0.15)";
-						e.currentTarget.style.color = "#a855f7";
-						e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.4)";
+						e.currentTarget.style.backgroundColor = "rgba(204, 119, 0, 0.15)";
+						e.currentTarget.style.color = "#cc7700";
+						e.currentTarget.style.borderColor = "rgba(204, 119, 0, 0.4)";
 					}}
 					onMouseLeave={(e) => { 
 						e.currentTarget.style.backgroundColor = "transparent";
@@ -223,9 +223,9 @@ export function Nav() {
 						backdropFilter: "blur(12px)",
 					}}
 					onMouseEnter={(e) => { 
-						e.currentTarget.style.backgroundColor = "rgba(0, 191, 255, 0.15)";
-						e.currentTarget.style.color = "#00bfff";
-						e.currentTarget.style.borderColor = "rgba(0, 191, 255, 0.4)";
+						e.currentTarget.style.backgroundColor = "rgba(153, 85, 0, 0.15)";
+						e.currentTarget.style.color = "#995500";
+						e.currentTarget.style.borderColor = "rgba(153, 85, 0, 0.4)";
 					}}
 					onMouseLeave={(e) => { 
 						e.currentTarget.style.backgroundColor = "transparent";
@@ -259,13 +259,13 @@ export function Nav() {
                             position: "absolute",
                             top: "100%",
                             right: 0,
-                            background: "rgba(255, 0, 60, 0.1)",
-                            border: "1px solid rgba(255, 0, 60, 0.5)",
+                            background: "rgba(255, 85, 0, 0.1)",
+                            border: "1px solid rgba(255, 85, 0, 0.5)",
                             backdropFilter: "blur(12px)",
                             padding: "8px 16px",
                             borderRadius: "12px",
                             cursor: "pointer",
-                            color: "#ff003c"
+                            color: "#ff5500"
                         }}
                         onClick={handleDisconnect}
                     >

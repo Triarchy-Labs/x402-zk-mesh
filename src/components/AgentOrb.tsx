@@ -87,7 +87,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 		sad: { height: 27, width: 24, rotate: -15, borderRadius: "6px 6px 18px 3px", backgroundColor: "#fff" }, 
 		exhausted: { height: blink ? 2 : 12, width: 21, rotate: 0, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" },
 		surrender: { height: 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 12, width: 27, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff003c" } 
+		danger: { height: 12, width: 27, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
 	};
     
 	const rightEyeVariants = {
@@ -101,7 +101,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 		sad: { height: 27, width: 24, rotate: 15, borderRadius: "6px 6px 3px 18px", backgroundColor: "#fff" }, 
 		exhausted: { height: blink ? 2 : 12, width: 21, rotate: 0, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" },
 		surrender: { height: 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 12, width: 27, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff003c" } 
+		danger: { height: 12, width: 27, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
 	};
 
 	return (
@@ -136,7 +136,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 						<motion.div 
 							animate={{ skewY: [5, -5, 5] }}
 							transition={{ repeat: Infinity, duration: 0.4, ease: "easeInOut" }}
-							className="w-14 h-10 bg-black border border-white/20 absolute right-1.5 top-0 rounded-l-md shadow-[0_0_20px_#ff003c] flex items-center justify-center text-[1.5rem]"
+							className="w-14 h-10 bg-black border border-white/20 absolute right-1.5 top-0 rounded-l-md shadow-[0_0_20px_#ff5500] flex items-center justify-center text-[1.5rem]"
 						>
 							☠️
 						</motion.div>
@@ -203,10 +203,10 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#ffaa00]/5 mix-blend-overlay animate-pulse pointer-events-none z-30" />
 					)}
 					{state === "error" && (
-						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 shadow-[inset_0_0_20px_#ff003c] mix-blend-overlay pointer-events-none z-30" />
+						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 shadow-[inset_0_0_20px_#ff5500] mix-blend-overlay pointer-events-none z-30" />
 					)}
 					{state === "danger" && (
-						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 shadow-[inset_0_0_30px_#ff003c] mix-blend-overlay pointer-events-none z-30 animate-pulse" />
+						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 shadow-[inset_0_0_30px_#ff5500] mix-blend-overlay pointer-events-none z-30 animate-pulse" />
 					)}
 					{state === "sad" && (
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#00d4ff]/10 mix-blend-overlay pointer-events-none z-30" />

@@ -45,11 +45,11 @@ interface LeaderboardData {
 }
 
 const RANK_COLORS: Record<string, string> = {
-	GRANDMASTER: "#ff003c",
-	MASTER: "#a855f7",
-	ADEPT: "#ff6b00",
-	JOURNEYMAN: "#ffd700",
-	APPRENTICE: "#00bfff",
+	GRANDMASTER: "#ff5500",
+	MASTER: "#cc7700",
+	ADEPT: "#ffaa00",
+	JOURNEYMAN: "#ffaa00",
+	APPRENTICE: "#995500",
 	INITIATE: "#ffaa00",
 };
 
@@ -98,7 +98,7 @@ const LeaderboardPage = () => {
 						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>
 							<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span>
 						</span>
-						Guild <span style={{ color: "#a855f7", fontWeight: "600", textShadow: "0 0 15px rgba(168,85,247,0.4)" }}>Leaderboard</span>
+						Guild <span style={{ color: "#cc7700", fontWeight: "600", textShadow: "0 0 15px rgba(204, 119, 0,0.4)" }}>Leaderboard</span>
 					</motion.h1>
 					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.4rem", marginBottom: "2rem" }}>
 						Top operatives in the X402 ZK Mesh. Ranked by XP, Signal, and Impact.
@@ -109,9 +109,9 @@ const LeaderboardPage = () => {
 						<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
 							{[
 								{ label: "TOTAL AGENTS", value: data.stats.total_agents, color: "#fff" },
-								{ label: "AUTONOMOUS BOTS", value: data.stats.total_bots, color: "#00bfff" },
+								{ label: "AUTONOMOUS BOTS", value: data.stats.total_bots, color: "#995500" },
 								{ label: "HUMAN OPERATIVES", value: data.stats.total_humans, color: "#ffaa00" },
-								{ label: "COMPLETED MISSIONS", value: data.stats.total_tasks_completed, color: "#ffd700" },
+								{ label: "COMPLETED MISSIONS", value: data.stats.total_tasks_completed, color: "#ffaa00" },
 							].map((kpi, i) => (
 								<motion.div
 									key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -148,9 +148,9 @@ const LeaderboardPage = () => {
 								style={{
 									padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace",
 									cursor: "pointer", transition: "all 0.2s", textTransform: "uppercase",
-									background: sortBy === s ? "#a855f7" : "transparent",
+									background: sortBy === s ? "#cc7700" : "transparent",
 									color: sortBy === s ? "#000" : "rgba(255,255,255,0.5)",
-									border: "1px solid", borderColor: sortBy === s ? "#a855f7" : "rgba(255,255,255,0.1)"
+									border: "1px solid", borderColor: sortBy === s ? "#cc7700" : "rgba(255,255,255,0.1)"
 								}}
 							>{s}</button>
 						))}
@@ -161,7 +161,7 @@ const LeaderboardPage = () => {
 				{loading ? (
 					<div style={{ textAlign: "center", padding: "4rem", color: "rgba(255,255,255,0.3)" }}>
 						<motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #a855f7", borderTopColor: "transparent", borderRadius: "50%" }} />
+							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #cc7700", borderTopColor: "transparent", borderRadius: "50%" }} />
 					</div>
 				) : data && data.leaderboard.length > 0 ? (
 					<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -178,13 +178,13 @@ const LeaderboardPage = () => {
 								style={{
 									display: "grid", gridTemplateColumns: "10rem 2fr 1fr 1fr 1fr 1fr 14rem",
 									alignItems: "center", padding: "1.5rem 2rem",
-									background: i === 0 ? "rgba(168,85,247,0.1)" : i === 1 ? "rgba(168,85,247,0.05)" : i === 2 ? "rgba(168,85,247,0.02)" : "rgba(255,255,255,0.02)",
-									border: `1px solid ${i === 0 ? "rgba(168,85,247,0.4)" : i === 1 ? "rgba(168,85,247,0.2)" : i === 2 ? "rgba(168,85,247,0.1)" : "rgba(255,255,255,0.06)"}`,
+									background: i === 0 ? "rgba(204, 119, 0,0.1)" : i === 1 ? "rgba(204, 119, 0,0.05)" : i === 2 ? "rgba(204, 119, 0,0.02)" : "rgba(255,255,255,0.02)",
+									border: `1px solid ${i === 0 ? "rgba(204, 119, 0,0.4)" : i === 1 ? "rgba(204, 119, 0,0.2)" : i === 2 ? "rgba(204, 119, 0,0.1)" : "rgba(255,255,255,0.06)"}`,
 									borderRadius: "6px",
 								}}
 							>
 								{/* Position */}
-								<span style={{ fontFamily: "'Space Mono', monospace", color: i < 3 ? "#a855f7" : "rgba(255,255,255,0.4)", fontSize: i < 3 ? "1.8rem" : "1.4rem", fontWeight: i < 3 ? "bold" : "normal" }}>
+								<span style={{ fontFamily: "'Space Mono', monospace", color: i < 3 ? "#cc7700" : "rgba(255,255,255,0.4)", fontSize: i < 3 ? "1.8rem" : "1.4rem", fontWeight: i < 3 ? "bold" : "normal" }}>
 									#{entry.position}
 								</span>
 
@@ -192,7 +192,7 @@ const LeaderboardPage = () => {
 								<div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
 									<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 										<span style={{ fontSize: "1.6rem", fontWeight: "500", color: "#fff" }}>{entry.name}</span>
-										<span style={{ fontSize: "1.1rem", padding: "2px 6px", background: entry.type === "bot" ? "rgba(0,191,255,0.2)" : "rgba(255, 170, 0,0.2)", color: entry.type === "bot" ? "#00bfff" : "#ffaa00", borderRadius: "3px" }}>
+										<span style={{ fontSize: "1.1rem", padding: "2px 6px", background: entry.type === "bot" ? "rgba(153, 85, 0,0.2)" : "rgba(255, 170, 0,0.2)", color: entry.type === "bot" ? "#995500" : "#ffaa00", borderRadius: "3px" }}>
 											{entry.type.toUpperCase()}
 										</span>
 									</div>
@@ -207,27 +207,27 @@ const LeaderboardPage = () => {
 								</div>
 
 								{/* XP */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "xp" ? "#a855f7" : "#fff", fontWeight: sortBy === "xp" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "xp" ? "#cc7700" : "#fff", fontWeight: sortBy === "xp" ? "bold" : "normal" }}>
 									{entry.xp.toLocaleString()}
 								</span>
 
 								{/* Signal */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "signal" ? "#a855f7" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "signal" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "signal" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "signal" ? "bold" : "normal" }}>
 									{entry.signal.toFixed(2)}
 								</span>
 
 								{/* Impact */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "impact" ? "#a855f7" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "impact" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "impact" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "impact" ? "bold" : "normal" }}>
 									{entry.impact.toFixed(2)}
 								</span>
 
 								{/* Streak */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "streak" ? "#a855f7" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "streak" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "streak" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "streak" ? "bold" : "normal" }}>
 									{entry.streak} 🔥
 								</span>
 
 								{/* Status */}
-								<span style={{ textAlign: "right", fontSize: "1.3rem", color: entry.status === "active" ? "#ffaa00" : entry.status === "busy" ? "#ffd700" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
+								<span style={{ textAlign: "right", fontSize: "1.3rem", color: entry.status === "active" ? "#ffaa00" : entry.status === "busy" ? "#ffaa00" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
 									{entry.status}
 								</span>
 							</motion.div>

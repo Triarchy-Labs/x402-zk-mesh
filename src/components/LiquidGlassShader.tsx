@@ -195,6 +195,8 @@ uniform float u_windStrMul;
 uniform float u_mouseStrength;        // DEFAULT: 0.2 (line 155)
 uniform float u_mouseMoveIntensity;   // Lerped mouse delta (line 158)
 uniform vec3 u_screenBounds;          // Screen projection bounds (line 161)
+uniform sampler2D u_screenPaintTexture; // Fluid simulation texture
+uniform float u_hasPaintTexture;        // Feral reviewer fix: prevent unbound texture crash
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
@@ -229,10 +231,17 @@ void main() {
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
 
-  // Mouse velocity injection
+  // Mouse velocity injection via ScreenPaint fluid buffer (Lusion exact Canon!)
   vec2 posUv = posToUv(positionLife.xyz);
-  vec3 mouseFinalVel = vec3(0.0);
-  mouseFinalVel *= u_mouseMoveIntensity * u_mouseStrength;
+  vec4 fluidData = texture2D(u_screenPaintTexture, posUv);
+  
+  // fluidData.xy is stored as (vel + 0.5). Subtract 0.5 to get true velocity
+  // Feral Reviewer Fix: u_hasPaintTexture prevents unbound (0,0) reading as (-1,-1) velocity!
+  vec2 fluidVel = (fluidData.xy - 0.5) * 2.0 * u_hasPaintTexture;
+  
+  // Inject fluid advection directly into particle velocity
+  vec3 mouseFinalVel = vec3(fluidVel * 50.0, 0.0);
+  mouseFinalVel *= u_mouseStrength;
   velInfo.xyz += mouseFinalVel;
 
   // Curl noise displacement — Lusion canon: apply to Velocity, not Position!
@@ -289,7 +298,7 @@ void main() {
 
 // ── LiquidNebula: GPGPU Particle Component ──
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- particleCount reserved for dynamic tier switching
-function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" | "light"; particleCount: number }) {
+function LiquidNebula({ theme, particleCount: _particleCount, paintTexture }: { theme: "dark" | "light"; particleCount: number; paintTexture: THREE.Texture | null }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const materialRef = useRef<THREE.ShaderMaterial>(null);
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
@@ -380,6 +389,8 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		velVar.material.uniforms.u_mouseStrength = { value: 0.2 };  // Lusion exact (line 155)
 		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };  // Lusion exact (line 158)
 		velVar.material.uniforms.u_screenBounds = { value: new THREE.Vector3(4.0, 3.8, 1.0) };
+		velVar.material.uniforms.u_screenPaintTexture = { value: paintTexture };
+		velVar.material.uniforms.u_hasPaintTexture = { value: paintTexture ? 1.0 : 0.0 };
 
 		// Wrapping for seamless noise
 		posVar.wrapS = THREE.RepeatWrapping;
@@ -414,7 +425,7 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 			window.removeEventListener('wheel', onWheel);
 			window.removeEventListener('mousemove', onMouseMove);
 		};
-	}, [gl]);
+	}, [gl, paintTexture]);
 
 	// Render uniforms
 	const uniforms = useMemo(() => ({
@@ -434,6 +445,8 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		posVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
 		velVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
 		velVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
+		velVarRef.current.material.uniforms.u_screenPaintTexture.value = paintTexture;
+		velVarRef.current.material.uniforms.u_hasPaintTexture.value = paintTexture ? 1.0 : 0.0;
 
 		// Scroll wheel → wind.y + curlStrength.y — Lusion exact (line 194)
 		const wd = lerpedWheelDelta.current * 0.0144;
@@ -537,7 +550,7 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
  * Low:  Minimal pipeline (SMAA LOW + FSR RCAS + LusionFinal only)
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- paintTexture reserved for ScreenPaintDistortion re-enable
-function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
+function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" | "light"; tier: DeviceTier; paintTexture: THREE.Texture | null }) {
 	const cfg = TIER_CONFIG[tier];
 
 	if (tier === "low") {
@@ -564,7 +577,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { 
 					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
 				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
-				{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
+				{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
 			</EffectComposer>
 		);
 	}
@@ -584,7 +597,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture: _paintTexture }: { 
 			{/* Noise REMOVED — was adding grainy film grain overlay. Lusion uses
 		    1-bit dithering in final pass (already in LusionFinalPass), NOT noise overlay */}
 			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
-			{/* ScreenPaintDistortion disabled — too aggressive for our scene */}
+			{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
 		</EffectComposer>
 	);
 }
@@ -627,7 +640,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				<VoltageLights theme={theme} />
 
 				{/* Stars REMOVED — drei Stars cannot individually drift */}
-				<LiquidNebula theme={theme} particleCount={cfg.particles} />
+				<LiquidNebula theme={theme} particleCount={cfg.particles} paintTexture={paintTexture} />
 				
 				{/* RefractiveCore: DISABLED — MeshTransmission at z=5 causes 6x render pass lag */}
 				{/* {tier !== "low" && <RefractiveCore tier={tier} />} */}

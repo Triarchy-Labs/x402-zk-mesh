@@ -305,8 +305,8 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 	const [simUvs, colors] = useState(() => {
 		const uvs = new Float32Array(PARTICLE_COUNT * 2);
 		const col = new Float32Array(PARTICLE_COUNT * 3);
-		const baseColor = new THREE.Color("#e8dcc8");
-		const secondaryColor = new THREE.Color("#0fa33a");
+		const baseColor = new THREE.Color("#ffd700");
+		const secondaryColor = new THREE.Color("#ffaa00");
 
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
 			const x = (i % TEX_SIZE) / TEX_SIZE;
@@ -520,7 +520,7 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 		<group>
 			<ambientLight intensity={0.5} color={theme === "dark" ? "#ffffff" : "#cccccc"} />
 			<directionalLight ref={dirLight} position={[10, 10, 10]} intensity={theme === "dark" ? 3 : 1.5} color={theme === "dark" ? "#c8bfae" : "#aaaaaa"} />
-			<pointLight ref={ptLight} position={[-10, -10, -10]} intensity={theme === "dark" ? 5 : 2} color={theme === "dark" ? "#0fa33a" : "#cccccc"} />
+			<pointLight ref={ptLight} position={[-10, -10, -10]} intensity={theme === "dark" ? 5 : 2} color={theme === "dark" ? "#ffaa00" : "#cccccc"} />
 		</group>
 	);
 }

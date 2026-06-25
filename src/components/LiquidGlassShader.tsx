@@ -305,10 +305,9 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 	const [simUvs, colors] = useState(() => {
 		const uvs = new Float32Array(PARTICLE_COUNT * 2);
 		const col = new Float32Array(PARTICLE_COUNT * 3);
-		// Bright incandescent core
-		const baseColor = new THREE.Color("#ffffff");
-		// Warm golden halo/filament
-		const secondaryColor = new THREE.Color("#ffcc44");
+		// Make both colors identical or extremely close so it looks like a unified plasma field
+		const baseColor = new THREE.Color("#ffe8a1");
+		const secondaryColor = new THREE.Color("#ffd700");
 
 		for (let i = 0; i < PARTICLE_COUNT; i++) {
 			const x = (i % TEX_SIZE) / TEX_SIZE;

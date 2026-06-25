@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/LDR_RGB1_0.png" alt="X402 ZK Mesh" width="120" />
+  <img src="./public/logo.jpg" alt="X402 ZK Mesh" width="180" style="border-radius: 20px;" />
   
   <br/><br/>
   
@@ -13,12 +13,9 @@
   ![WASM](https://img.shields.io/badge/WASM-Extism-000?style=flat-square)
   ![Circom](https://img.shields.io/badge/Circom-3_Circuits-000?style=flat-square)
 
-  <br/>
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#zk-modules">ZK Modules</a> •
-  <a href="#contracts">Live Contracts</a> •
-  <a href="#demo">Demo</a>
+  <br/><br/>
+  
+  [Quick Start](#quick-start) • [Architecture](#architecture) • [ZK Modules](#zk-modules) • [Live Contracts](#contracts) • [Demo](#demo)
 </div>
 
 <br/>

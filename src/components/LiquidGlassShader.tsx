@@ -237,13 +237,12 @@ void main() {
   vec2 posUv = posToUv(positionLife.xyz);
   vec4 fluidData = texture2D(u_screenPaintTexture, posUv);
   
-  // fluidData.xy is stored as (vel + 0.5). Subtract 0.5 to get true velocity
-  // Feral Reviewer Fix: u_hasPaintTexture prevents unbound (0,0) reading as (-1,-1) velocity!
+  // CRITICAL FIX 3: Feral reviewer math analysis.
+  // velInfo has a damping of 0.985. The max velocity converges to: Force / (1 - 0.985) = Force / 0.015.
+  // If Force was 300.0 * 0.016 (4.8), max vel was 320.0 (crosses entire screen in 0.05s).
+  // Changing multiplier to 15.0 gives max velocity of ~16.0 units/sec, a perfect flowing liquid speed!
   vec2 fluidVel = (fluidData.xy - 0.5) * 2.0 * u_hasPaintTexture;
-  
-  // Feral Reviewer Fix: Fluid advection is an ACCELERATION field! 
-  // It MUST be multiplied by u_deltaTime, otherwise particles explode to infinity in 3 frames.
-  vec3 mouseFinalVel = vec3(fluidVel * 300.0, 0.0) * u_deltaTime;
+  vec3 mouseFinalVel = vec3(fluidVel * 15.0, 0.0) * u_deltaTime;
   mouseFinalVel *= u_mouseStrength;
   velInfo.xyz += mouseFinalVel;
 

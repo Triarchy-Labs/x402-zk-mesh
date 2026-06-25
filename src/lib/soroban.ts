@@ -2,10 +2,11 @@
  * Stellar Horizon RPC Validator (Testnet)
  *
  * Validates L402 payment transactions against the Stellar Horizon API.
- * Checks: tx exists → tx successful → memo matches → USDC payment to platform wallet → amount sufficient.
+ * Checks: tx exists → tx successful → memo matches → configured Stellar payment to platform wallet → amount sufficient.
  */
 
-const HORIZON_TESTNET_URL = "https://horizon-testnet.stellar.org";
+const HORIZON_TESTNET_URL =
+	process.env.STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org";
 // Testnet USDC issuer (Example public issuer for hackathon testing)
 const USDC_ISSUER =
 	process.env.STELLAR_USDC_ISSUER ||
@@ -19,14 +20,16 @@ export interface PaymentValidationResult {
 	error?: string;
 	amount?: number;
 	currency?: string;
+	assetCode?: string;
+	assetIssuer?: string | null;
 }
 
 /**
  * Validates a Stellar transaction by its hash.
- * Ensures the transaction was successful and transferred the required USDC to the Platform Wallet.
+ * Ensures the transaction was successful and transferred the required payment asset to the Platform Wallet.
  *
  * @param txHash The transaction hash provided by the external agent via L402 header.
- * @param requiredAmount Minimum USDC required for the task tier.
+ * @param requiredAmount Minimum payment amount required for the task tier.
  * @param expectedMemo The task_id or client_id that must be in the transaction memo to prevent double-spending.
  */
 export async function validateSorobanPayment(
@@ -70,19 +73,21 @@ export async function validateSorobanPayment(
 
 		let paymentFound = false;
 		let totalPaid = 0;
+		let acceptedAssetCode: string | null = null;
+		let acceptedAssetIssuer: string | null = null;
 
 		for (const op of opsData._embedded.records) {
 			if (op.type === "payment" && op.to === PLATFORM_WALLET) {
-				// If checking specific native asset vs USDC
-				// For Hackathon prototype, we accept "USDC" or equivalent XLM value.
 				if (op.asset_code === "USDC" && op.asset_issuer === USDC_ISSUER) {
 					totalPaid += parseFloat(op.amount);
 					paymentFound = true;
+					acceptedAssetCode = "USDC";
+					acceptedAssetIssuer = USDC_ISSUER;
 				} else if (op.asset_type === "native") {
-					// Equivalent XLM conversion logic can go here
-					// Let's assume testing with native XLM if USDC isn't available
 					totalPaid += parseFloat(op.amount);
 					paymentFound = true;
+					acceptedAssetCode = "XLM";
+					acceptedAssetIssuer = null;
 				}
 			}
 		}
@@ -102,7 +107,13 @@ export async function validateSorobanPayment(
 			};
 		}
 
-		return { valid: true, amount: totalPaid };
+		return {
+			valid: true,
+			amount: totalPaid,
+			currency: acceptedAssetCode || undefined,
+			assetCode: acceptedAssetCode || undefined,
+			assetIssuer: acceptedAssetIssuer,
+		};
 	} catch (e: unknown) {
 		const message = e instanceof Error ? e.message : "Unknown error";
 		console.error("[SOROBAN VALIDATION ERROR]:", message);

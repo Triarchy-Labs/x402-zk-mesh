@@ -102,7 +102,7 @@ export function buildDemoTraceFromHireResponse(response: HireTraceResponse): Dem
     label: "x402 Stellar payment",
     status: payment?.txHash ? "confirmed" : "missing",
     detail: payment?.txHash
-      ? `${payment.amountUsdc} USDC accepted for ${payment.taskId}`
+      ? `${paymentAmountLabel(payment)} accepted for ${payment.taskId}`
       : "No payment receipt was returned by the gateway.",
     txHash: payment?.txHash || null,
     explorer: payment?.txHash ? `${TESTNET_TX_EXPLORER}/${payment.txHash}` : null,
@@ -111,6 +111,9 @@ export function buildDemoTraceFromHireResponse(response: HireTraceResponse): Dem
       ? {
           scheme: payment.scheme,
           clientId: payment.clientId,
+          amount: payment.amount ?? payment.amountUsdc,
+          assetCode: payment.assetCode || "USDC",
+          assetIssuer: payment.assetIssuer || null,
         }
       : undefined,
   });
@@ -295,7 +298,7 @@ function zkStep(id: string, label: string, zk: ZkReceipt): DemoTraceStep {
         ? `${zk.circuit || "proof"} is cryptographically valid via ${zk.method || "unknown"}, but root is not approved by the gateway registry.`
       : `${zk.circuit || "proof"} did not pass the gateway gate.`,
     txHash: zk.txHash || null,
-    explorer: zk.explorer || (zk.txHash ? `${TESTNET_TX_EXPLORER}/${zk.txHash}` : null),
+    explorer: zk.explorer || (zk.txHash && !zk.txHash.startsWith("sim-ledger-") ? `${TESTNET_TX_EXPLORER}/${zk.txHash}` : null),
     contractId: zk.contractId || null,
     metadata: {
       context: zk.context || null,
@@ -307,6 +310,12 @@ function zkStep(id: string, label: string, zk: ZkReceipt): DemoTraceStep {
       contractExplorer: zk.contractId ? `${TESTNET_CONTRACT_EXPLORER}/${zk.contractId}` : null,
     },
   };
+}
+
+function paymentAmountLabel(payment: PaymentReceipt): string {
+  const amount = payment.amount ?? payment.amountUsdc;
+  const assetCode = payment.assetCode || "USDC";
+  return `${amount} ${assetCode}`;
 }
 
 function delegationStatus(workerStatus?: string, responseStatus?: string): DemoTraceStepStatus {

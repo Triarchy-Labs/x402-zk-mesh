@@ -45,7 +45,15 @@ export class StellarTransactor {
     /**
      * @brief Validates state and conditions (Horizon RPC + WASM Sandbox).
      */
-    static async preclaim(ctx: TransactorContext): Promise<{ valid: boolean; error?: string; refundedUsdc?: number; details?: string }> {
+    static async preclaim(ctx: TransactorContext): Promise<{
+        valid: boolean;
+        error?: string;
+        refundedUsdc?: number;
+        details?: string;
+        amount?: number;
+        assetCode?: string;
+        assetIssuer?: string | null;
+    }> {
         const expectedMemo = ctx.clientId || ctx.taskId || "demo";
         
         // 1. Soroban Validation (Testnet validation)
@@ -68,7 +76,12 @@ export class StellarTransactor {
             };
         }
 
-        return { valid: true };
+        return {
+            valid: true,
+            amount: validation.amount,
+            assetCode: validation.assetCode || validation.currency,
+            assetIssuer: validation.assetIssuer ?? null,
+        };
     }
 
     /**

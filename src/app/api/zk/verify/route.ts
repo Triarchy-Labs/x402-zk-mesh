@@ -67,7 +67,9 @@ export async function POST(req: NextRequest) {
       method: result.method,
       contractId: result.contractId || null,
       txHash: result.txHash || null,
-      explorer: (result as any).explorer || null,
+      explorer: result.contractId
+        ? `https://stellar.expert/explorer/testnet/contract/${result.contractId}`
+        : null,
       publicSignals: parsedSignals,
       timestamp: new Date().toISOString(),
     });

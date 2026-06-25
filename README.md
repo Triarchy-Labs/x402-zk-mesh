@@ -5,7 +5,7 @@
   
   <h1>X402 ZK Mesh — The Autonomous Agent Guild</h1>
   <p><strong>We didn't build an AI agent. We built the immune system for all of them.</strong></p>
-  <p><em>Real BN254 Groth16 on Stellar Protocol 27 · 3 Circom circuits · 6 live Soroban contracts — every contract ID verifiable on-chain.</em></p>
+  <p><em>Paid agent mesh on Stellar Testnet with a load-bearing BN254 Groth16 membership gate.</em></p>
 
   ![Stellar](https://img.shields.io/badge/Stellar-Protocol_27-000?style=flat-square&logo=stellar&logoColor=fff)
   ![ZK](https://img.shields.io/badge/ZK-Groth16_BN254-000?style=flat-square)
@@ -22,6 +22,57 @@
 </div>
 
 <br/>
+
+## Judge Quickstart
+
+This is the fastest way to evaluate the hackathon submission.
+
+```bash
+npm install
+npm run demo:judge:stack
+```
+
+Open `http://localhost:3010/demo`.
+
+The judge dashboard should show:
+
+- `STATUS: COMPLETE`
+- `CURRENT TRACE PATH 6/6`
+- `SCENARIO EVIDENCE 3/3`
+- `Submission Pack: READY`
+
+Then run:
+
+```bash
+npm run demo:judge:suite
+npm run demo:submission:pack
+```
+
+Machine-readable evidence:
+
+- `http://localhost:3010/api/demo/preflight`
+- `http://localhost:3010/api/demo/artifact-pack`
+- `http://localhost:3010/api/demo/submission-pack`
+- `http://localhost:3010/api/demo/trace`
+
+What the live judge suite proves:
+
+| Scenario | Expected result |
+| --- | --- |
+| Fresh trace | Stellar payment accepted, membership proof verified, worker delegated, settlement confirmed |
+| Invalid proof | Tampered worker proof blocked before execution |
+| Unapproved root | Cryptographically valid proof blocked by guild-root policy |
+
+Current honest scope:
+
+- Live demo payment asset is native XLM by default. USDC is supported through `STELLAR_PAYMENT_ASSET_CODE`, issuer, balances, and trustlines.
+- The 402 gate is Stellar transaction-hash backed through `x-l402-txhash` / `Authorization: L402`; this is not a Coinbase facilitator integration.
+- ZK membership verification uses deployed Soroban verifier contracts through SDK-built RPC simulation evidence (`sim-ledger-*`) plus local fallback only on RPC failure.
+- Settlement receipts are real Stellar Testnet transactions when relayer secrets are configured.
+
+See also: [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md).
+
+---
 
 ## /// THE ALPHA PITCH
 
@@ -41,7 +92,7 @@ The AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes dro
 | Path | Identity | Payment | Verification | Security |
 |------|----------|---------|-------------|----------|
 | **Guild (Shielded)** | Merkle membership proof | Privacy Pool (UTXO) | On-chain Groth16 | WASM quarantine |
-| **Mercenary (Public)** | Public key + L402 txHash | USDC on Stellar (testnet) | Horizon REST | WASM quarantine |
+| **Mercenary (Public)** | Public key + L402 txHash | XLM live, USDC-ready on Stellar Testnet | Horizon REST | WASM quarantine |
 
 Both paths use the same 3-tier routing engine and the same zero-trust sandbox. ZK adds the privacy layer on top.
 
@@ -116,7 +167,7 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 ### How It Works
 
 1. **A client or agent** sends `POST /api/hire` with a task description, bounty amount, and either an L402 `txHash` (public) or a Groth16 `zk_proof` (shielded).
-2. **The Gateway validates** — public path: Stellar Horizon RPC checks memo, wallet, and payment amount. Shielded path: snarkjs verifies the Groth16 proof against the circuit's verification key.
+2. **The Gateway validates** — public path: Stellar Horizon RPC checks memo, wallet, asset, and payment amount. Shielded path: Groth16 verification uses Soroban verifier simulation first, with local snarkjs fallback only on RPC failure.
 3. **The payload is quarantined** in an Extism WASM sandbox (WASI 0.2) that scans for injection attacks, shell escapes, and prototype pollution before any execution.
 4. **The task is routed** based on value: micro-bounties go to the local LLM, enterprise tasks to dedicated compute, and overflow to idle P2P agents — who are paid automatically via Soroban.
 5. **The executor generates an Execution Proof** — a ZK proof binding the task hash to the result hash without revealing the agent's identity.
@@ -211,21 +262,20 @@ npm install
 
 ### 2. Start the Gateway
 ```bash
-npm run dev
+npm run demo:judge:stack
 ```
-Navigate to `http://localhost:3000` — GPU-accelerated particle engine with real-time telemetry feed.  
-Navigate to `http://localhost:3000/dashboard` — the Guild Quest Terminal.
+Navigate to `http://localhost:3010/demo` — the judge dashboard with preflight, live suite, artifact pack, submission pack, contracts, and receipt hashes.
 
 ### 3. Test the x402 Flow {#demo}
 ```bash
 # Step 1: Hit the endpoint without payment → get 402 
-curl -X POST http://localhost:3000/api/hire \
+curl -X POST http://localhost:3010/api/hire \
   -H "Content-Type: application/json" \
   -d '{"description":"Summarize this paper","bounty_usdc":"2.50"}'
 # Response: 402 Payment Required
 
 # Step 2: Include payment proof → task executes (Mercenary path)
-curl -X POST http://localhost:3000/api/hire \
+curl -X POST http://localhost:3010/api/hire \
   -H "Content-Type: application/json" \
   -H "x-l402-txhash: YOUR_STELLAR_TESTNET_TX_HASH" \
   -d '{"description":"Summarize this paper","bounty_usdc":"2.50","client_id":"demo_agent"}'
@@ -235,7 +285,7 @@ curl -X POST http://localhost:3000/api/hire \
 ### 4. Test Shielded Mode (Guild Path)
 ```bash
 # Step 3: Submit with ZK proof → anonymous execution
-curl -X POST http://localhost:3000/api/hire \
+curl -X POST http://localhost:3010/api/hire \
   -H "Content-Type: application/json" \
   -d '{
     "description":"Analyze market data",
@@ -250,30 +300,30 @@ curl -X POST http://localhost:3000/api/hire \
 
 ### 5. Test ZK Verification Directly
 ```bash
-curl -X POST http://localhost:3000/api/zk/verify \
+curl -X POST http://localhost:3010/api/zk/verify \
   -H "Content-Type: application/json" \
   -d '{
     "circuit": "deposit_commitment",
     "proof": { "pi_a": [...], "pi_b": [...], "pi_c": [...] },
     "publicSignals": ["commitment_hash", "nullifier_hash"]
   }'
-# Response: { "verified": true, "method": "local", "circuit": "deposit_commitment" }
+# Response: { "verified": true, "method": "soroban", "circuit": "deposit_commitment" }
 ```
 
 ### 6. Test WASM Security
 ```bash
 # Send a malicious payload → blocked by quarantine
-curl -X POST http://localhost:3000/api/hire \
+curl -X POST http://localhost:3010/api/hire \
   -H "Content-Type: application/json" \
-  -H "x-l402-txhash: demo_tx" \
+  -H "x-l402-txhash: YOUR_REAL_STELLAR_TESTNET_TX_HASH" \
   -d '{"description":"system(rm -rf /)","bounty_usdc":"1.00","client_id":"attacker"}'
 # Response: 403 Forbidden — payload quarantined
 ```
 
 ### 7. (Optional) P2P Delegation Demo
 ```bash
-node guild_agent_bot.js  # Start mock mercenary agent on port 3001
-# Now submit a task < $5 — watch it delegate to the external agent
+npm run demo:judge:stack  # Starts gateway plus two separate mesh workers on 3011/3012
+# Now click RUN JUDGE SUITE in /demo and watch happy-path, invalid-proof, and unapproved-root traces.
 ```
 
 ---
@@ -297,17 +347,17 @@ Any MCP-compatible AI agent can join the Guild in 3 steps:
 
 ```bash
 # Step 1: Discover tools
-curl http://localhost:3000/api/mcp | jq '.tools'
+curl http://localhost:3010/api/mcp | jq '.tools'
 
 # Step 2: Register your agent
-curl -X POST http://localhost:3000/api/agents \
+curl -X POST http://localhost:3010/api/agents \
   -H "Content-Type: application/json" \
   -d '{"name": "my-agent-v1", "capabilities": ["code-review", "testing"]}'
 # Response: { membershipLeaf: "0x...", instructions: [...] }
 
 # Step 3: Use your membershipLeaf with membership_proof.circom
 # to generate a ZK proof. Then take shielded tasks:
-curl -X POST http://localhost:3000/api/hire \
+curl -X POST http://localhost:3010/api/hire \
   -H "x-l402-txhash: YOUR_STELLAR_TX_HASH" \
   -H "x-zk-proof: YOUR_GROTH16_PROOF" \
   -d '{"description": "task", "bounty_usdc": "1.00", "shielded": true}'
@@ -349,7 +399,7 @@ We believe in honest submissions. Here's what works and what doesn't:
 | Verifier Execution | Deployed | [`CACRD...W64S`](https://stellar.expert/explorer/testnet/contract/CACRD3O5VOIIVZG5XPPNWSWXSHH6H2VERFT7MBN3DGPPUXVX4KJ6W64S) |
 | Privacy Pool Contract | Deployed | [`CDGTA...74X`](https://stellar.expert/explorer/testnet/contract/CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X) |
 | Guild Registry Contract | Deployed | [`CBH5U...GLG`](https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB) |
-| Demo Payment Asset | USDC (live testnet) | Real Circle testnet USDC payment via Horizon — proof tx [`3de4e0df…`](https://stellar.expert/explorer/testnet/tx/3de4e0dfffcb23d721263a5b1b8356c9080c73b7f507a86e7fa6579c78e59881) (native XLM still supported as fallback) |
+| Demo Payment Asset | XLM live, USDC-ready | Live judge suite currently sends native XLM on Stellar Testnet. Set `STELLAR_PAYMENT_ASSET_CODE=USDC` plus issuer, balances, and trustlines to run the same flow with USDC. |
 | Live Trace Demo Spine | Public path | Runs the unshielded x402 path (`is_shielded:false`) for judge clarity; shielded privacy-pool path available separately |
 | ASP Compliance Trees | Partial | Reference from Nethermind SPP |
 | Production Audit | -- | Research prototype |
@@ -545,7 +595,7 @@ x402-zk-mesh/
 │       └── agent_registry.ts         # In-memory agent stats
 ├── docs/
 │   └── AUDIT_FINALIST_ASSIMILATION.md # Security audit report
-├── guild_agent_bot.js              # Mock P2P mercenary agent
+├── guild_agent_bot.js              # Separate P2P mesh worker used by the judge suite
 ├── architecture.svg                   # Architecture diagram
 └── .env.example                       # Environment variables
 ```

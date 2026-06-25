@@ -446,6 +446,9 @@ export async function POST(req: Request) {
 			scheme: isShielded ? "shielded-zk-stellar" : "stellar-l402-header",
 			txHash: ctx.txHash,
 			amountUsdc: price,
+			amount: preclaim.amount ?? price,
+			assetCode: preclaim.assetCode || "UNKNOWN",
+			assetIssuer: preclaim.assetIssuer ?? null,
 			clientId: client_id || "anonymous",
 			taskId: receiptTaskId,
 		};

@@ -14,6 +14,9 @@ export interface DemoArtifactScenario {
   createdAt: string | null;
   proofValid: boolean | null;
   approvedRoot: boolean | null;
+  paymentAmount: number | null;
+  paymentAssetCode: string | null;
+  paymentAssetIssuer: string | null;
   paymentTx: string | null;
   paymentExplorer: string | null;
   proofTx: string | null;
@@ -99,7 +102,7 @@ export function buildDemoArtifactPack(input: {
   const evidence = buildScenarioEvidence(input.traces);
   const scenarios = SCENARIO_SPECS.map((spec) => scenarioFromTrace(spec, evidence[spec.key]));
   const recorded = scenarios.filter((scenario) => scenario.recorded).length;
-  const latest = input.traces[0] || null;
+  const latest = preferredCurrentTrace(input.traces);
   const hardPathPassed = latest ? hardPathPassCount(latest) : 0;
   const status = recorded === SCENARIO_SPECS.length ? "ready" : "incomplete";
   const pack: Omit<DemoArtifactPack, "copyText"> = {
@@ -196,6 +199,9 @@ function scenarioFromTrace(
     createdAt: trace?.createdAt || null,
     proofValid: spec.key === "invalid-proof" ? proofValid ?? false : proofValid,
     approvedRoot: spec.key === "invalid-proof" ? null : approvedRoot,
+    paymentAmount: metadataNumber(payment, "amount"),
+    paymentAssetCode: metadataString(payment, "assetCode"),
+    paymentAssetIssuer: metadataString(payment, "assetIssuer"),
     paymentTx: payment?.txHash || null,
     paymentExplorer: payment?.explorer || null,
     proofTx: workerZk?.txHash || null,
@@ -219,9 +225,23 @@ function traceStep(trace: DemoTrace, id: string): DemoTraceStep | undefined {
   return trace.steps.find((step) => step.id === id);
 }
 
+function preferredCurrentTrace(traces: DemoTrace[]): DemoTrace | null {
+  return traces.find((trace) => trace.status === "complete") || traces[0] || null;
+}
+
 function metadataBoolean(step: DemoTraceStep | undefined, key: string): boolean | null {
   const value = step?.metadata?.[key];
   return typeof value === "boolean" ? value : null;
+}
+
+function metadataNumber(step: DemoTraceStep | undefined, key: string): number | null {
+  const value = step?.metadata?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function metadataString(step: DemoTraceStep | undefined, key: string): string | null {
+  const value = step?.metadata?.[key];
+  return typeof value === "string" && value ? value : null;
 }
 
 function buildCopyText(pack: Omit<DemoArtifactPack, "copyText">): string {
@@ -242,6 +262,9 @@ function buildCopyText(pack: Omit<DemoArtifactPack, "copyText">): string {
       `- ${scenario.title}: ${scenario.recorded ? scenario.traceStatus : "missing"}; decision=${scenario.decision}; proof=${proofCopy(scenario.proofValid)}; root=${rootCopy(scenario)}; task=${scenario.taskId || "none"}`,
     );
     if (scenario.paymentTx) {
+      if (scenario.paymentAmount !== null && scenario.paymentAssetCode) {
+        lines.push(`  payment=${scenario.paymentAmount} ${scenario.paymentAssetCode}`);
+      }
       lines.push(`  payment_tx=${scenario.paymentTx}`);
     }
     if (scenario.proofTx) {

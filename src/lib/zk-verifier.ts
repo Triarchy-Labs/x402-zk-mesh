@@ -8,11 +8,14 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import * as StellarSDK from "@stellar/stellar-sdk";
+import { Spec } from "@stellar/stellar-sdk/contract";
 // @ts-expect-error snarkjs doesn't ship proper TS types
 import * as snarkjs from "snarkjs";
 import type { CircuitName, ZKProof } from "./zk-prover";
 
 const VK_DIR = path.join(process.cwd(), "circuits", "keys");
+const VERIFIER_WASM_DIR = path.join(process.cwd(), "contracts", "target", "wasm32v1-none", "release");
 
 /**
  * Deployed Soroban contract IDs on Stellar Testnet (Protocol 27)
@@ -20,15 +23,20 @@ const VK_DIR = path.join(process.cwd(), "circuits", "keys");
  * Each contract has its circuit's VK hardcoded and calls bn254.pairing_check()
  */
 const CONTRACT_IDS: Record<string, string> = {
-  deposit_commitment: "CAEWGDTGCIDBFKLSYW5EYANR227JXO7G4WGGHYD5WTGZMYL7YNPP44UE",
-  membership_proof: "CCVQDU5I4TAQLVOEYEE7ZB4RRC6Y7YBRYLHD2C7CHB2KGIORQX6KCX74",
-  execution_proof: "CACRD3O5VOIIVZG5XPPNWSWXSHH6H2VERFT7MBN3DGPPUXVX4KJ6W64S",
+  deposit_commitment: process.env.ZK_VERIFIER_DEPOSIT || "CAEWGDTGCIDBFKLSYW5EYANR227JXO7G4WGGHYD5WTGZMYL7YNPP44UE",
+  membership_proof: process.env.ZK_VERIFIER_MEMBERSHIP || "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y",
+  execution_proof: process.env.ZK_VERIFIER_EXECUTION || "CCJRM2X4Y7RPUHL5GE6LXSPWQH2LLBV6LGHB4CXPJ4SCWXL5PP6JIQKQ",
 };
 
 const PRIVACY_POOL_ID = "CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X";
 const GUILD_REGISTRY_ID = "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB";
 
-const SOROBAN_RPC = "https://soroban-testnet.stellar.org";
+const SOROBAN_RPC = process.env.STELLAR_RPC_URL || process.env.SOROBAN_RPC_URL || "https://soroban-testnet.stellar.org:443";
+const VERIFIER_WASM: Record<string, string> = {
+  deposit_commitment: "verifier_deposit.wasm",
+  membership_proof: "verifier_membership.wasm",
+  execution_proof: "verifier_execution.wasm",
+};
 
 /**
  * Load a verification key from the filesystem.
@@ -59,8 +67,7 @@ export async function verifyProof(
   // Try on-chain verification first
   if (contractId && process.env.ZK_VERIFY_ON_CHAIN !== "false") {
     try {
-      const result = await verifySoroban(circuit, proof, publicSignals);
-      return result;
+      return await verifySoroban(circuit, proof, publicSignals);
     } catch {
       // Soroban call failed — fall back to local
       console.warn(`[zk-verifier] Soroban call failed for ${circuit}, using local fallback`);
@@ -79,9 +86,10 @@ export async function verifyProof(
 }
 
 /**
- * Verify proof on-chain via Soroban verifier contract.
+ * Verify proof via Soroban verifier contract simulation.
  *
- * Uses Stellar Testnet RPC simulateTransaction to invoke verify_proof.
+ * Uses Stellar SDK to build a real invokeHostFunction transaction XDR and
+ * Stellar Testnet RPC simulateTransaction to invoke verify_proof.
  * The contract does real BN254 g1_mul → g1_add → pairing_check.
  *
  * If simulate fails (network issue, budget exceeded), caller falls back to local.
@@ -97,90 +105,105 @@ async function verifySoroban(
   txHash: string;
 }> {
   const contractId = CONTRACT_IDS[circuit];
-
-  // Convert snarkjs proof format → Soroban contract args
-  // proof.pi_a = [x, y, 1], proof.pi_b = [[x0,x1],[y0,y1],[1,0]], proof.pi_c = [x, y, 1]
-  function toBigEndianHex(val: string): string {
-    return BigInt(val).toString(16).padStart(64, "0");
-  }
-
-  // G1 point: 64 bytes = x (32 BE) || y (32 BE)
-  const aHex = toBigEndianHex(proof.pi_a[0]) + toBigEndianHex(proof.pi_a[1]);
-  // G2 point: 128 bytes = x1 (32 BE) || x0 (32 BE) || y1 (32 BE) || y0 (32 BE)
-  // Note: snarkjs uses [x0, x1] ordering, Soroban expects [x1, x0] (big-endian Fp2)
-  const bHex =
-    toBigEndianHex(proof.pi_b[0][1]) + toBigEndianHex(proof.pi_b[0][0]) +
-    toBigEndianHex(proof.pi_b[1][1]) + toBigEndianHex(proof.pi_b[1][0]);
-  const cHex = toBigEndianHex(proof.pi_c[0]) + toBigEndianHex(proof.pi_c[1]);
-
-  // Public signals → Fr scalars (32 bytes each, big-endian)
-  const signalsHex = publicSignals.map(s => toBigEndianHex(s));
-
-  // Build Soroban invoke args using SCVal JSON representation
-  const invokeArgs = {
-    type: "invokeHostFunction",
-    function: "invokeContract",
-    contract: contractId,
-    method: "verify_proof",
-    args: [
-      // Proof struct: { a: BytesN<64>, b: BytesN<128>, c: BytesN<64> }
-      {
-        type: "map",
-        value: [
-          { key: { type: "symbol", value: "a" }, val: { type: "bytes", value: aHex } },
-          { key: { type: "symbol", value: "b" }, val: { type: "bytes", value: bHex } },
-          { key: { type: "symbol", value: "c" }, val: { type: "bytes", value: cHex } },
-        ],
-      },
-      // pub_signals: Vec<BytesN<32>>
-      {
-        type: "vec",
-        value: signalsHex.map(s => ({ type: "bytes", value: s })),
-      },
-    ],
-  };
-
-  // Call Soroban RPC simulateTransaction
-  // This executes the contract in a sandbox — no fees, no signing needed
-  const response = await fetch(SOROBAN_RPC, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "simulateTransaction",
-      params: {
-        transaction: JSON.stringify(invokeArgs),
-        resourceConfig: { instructionLeeway: 3000000 },
-      },
-    }),
+  const spec = loadVerifierSpec(circuit);
+  const args = spec.funcArgsToScVals("verify_proof", {
+    proof: proofToContractInput(proof),
+    pub_signals: publicSignals.map(String),
   });
 
-  const data = await response.json();
+  const server = new StellarSDK.rpc.Server(SOROBAN_RPC);
+  const source = new StellarSDK.Account(getSimulationSource(), "0");
+  const contract = new StellarSDK.Contract(contractId);
+  const tx = new StellarSDK.TransactionBuilder(source, {
+    fee: process.env.STELLAR_SIMULATION_FEE || "100000",
+    networkPassphrase: StellarSDK.Networks.TESTNET,
+  })
+    .addOperation(contract.call("verify_proof", ...args))
+    .setTimeout(30)
+    .build();
 
-  // Check simulation result
-  if (data?.error || data?.result?.error) {
-    const errMsg = data?.error?.message || data?.result?.error || "Unknown simulation error";
-    console.error(`[zk-verifier] Soroban simulation failed: ${errMsg}`);
-    // Don't claim success — throw so caller falls back to local
-    throw new Error(`Soroban simulation failed: ${errMsg}`);
+  const simulation = await server.simulateTransaction(tx);
+
+  if (StellarSDK.rpc.Api.isSimulationError(simulation)) {
+    throw new Error(`Soroban simulation failed: ${simulation.error}`);
   }
 
-  // Parse the return value from simulation
-  // The contract returns Result<bool, Groth16Error>
-  const returnVal = data?.result?.results?.[0]?.xdr;
-  const latestLedger = data?.result?.latestLedger;
+  const returnVal = simulation.result?.retval;
+  if (!returnVal) {
+    throw new Error("Soroban simulation did not return a verifier result.");
+  }
 
-  // If simulation succeeded, the contract executed verify_proof
-  // and the pairing_check returned a boolean
-  const valid = returnVal ? !returnVal.includes("Error") : false;
+  const result = spec.funcResToNative("verify_proof", returnVal);
+  const valid = normalizeSorobanBool(result);
 
   return {
     valid,
     method: "soroban",
     contractId,
-    txHash: latestLedger?.toString() || `sim-${Date.now()}`,
+    txHash: `sim-ledger-${simulation.latestLedger}`,
   };
+}
+
+function loadVerifierSpec(circuit: CircuitName): Spec {
+  const wasmName = VERIFIER_WASM[circuit];
+  if (!wasmName) {
+    throw new Error(`No verifier WASM configured for ${circuit}`);
+  }
+  const wasmPath = path.join(VERIFIER_WASM_DIR, wasmName);
+  return Spec.fromWasm(fs.readFileSync(wasmPath));
+}
+
+function proofToContractInput(proof: ZKProof["proof"]) {
+  return {
+    a: g1ToBase64(proof.pi_a),
+    b: g2ToBase64(proof.pi_b),
+    c: g1ToBase64(proof.pi_c),
+  };
+}
+
+function g1ToBase64(point: [string, string] | string[]): string {
+  return Buffer.from(toBigEndianHex(point[0]) + toBigEndianHex(point[1]), "hex").toString("base64");
+}
+
+function g2ToBase64(point: [[string, string], [string, string]] | string[][]): string {
+  return Buffer.from(
+    toBigEndianHex(point[0][1]) +
+      toBigEndianHex(point[0][0]) +
+      toBigEndianHex(point[1][1]) +
+      toBigEndianHex(point[1][0]),
+    "hex",
+  ).toString("base64");
+}
+
+function toBigEndianHex(val: string): string {
+  return BigInt(val).toString(16).padStart(64, "0");
+}
+
+function getSimulationSource(): string {
+  const candidates = [
+    process.env.STELLAR_DEMO_SIM_SOURCE,
+    process.env.STELLAR_PLATFORM_WALLET,
+    process.env.ZK_VERIFIER_RELAYER_PUBLIC_KEY,
+  ].filter((value): value is string => !!value && value.startsWith("G"));
+  return candidates[0] || "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
+}
+
+function normalizeSorobanBool(result: unknown): boolean {
+  if (typeof result === "boolean") {
+    return result;
+  }
+  if (result && typeof result === "object") {
+    if ("value" in result) {
+      return normalizeSorobanBool((result as { value: unknown }).value);
+    }
+    if ("ok" in result) {
+      return normalizeSorobanBool((result as { ok: unknown }).ok);
+    }
+  }
+  if (result instanceof StellarSDK.xdr.ScVal) {
+    return normalizeSorobanBool(StellarSDK.scValToNative(result));
+  }
+  throw new Error(`Unexpected Soroban verifier return value: ${JSON.stringify(result)}`);
 }
 
 /**

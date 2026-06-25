@@ -4,6 +4,9 @@ export interface PaymentReceipt {
   scheme: "stellar-l402-header" | "shielded-zk-stellar";
   txHash: string;
   amountUsdc: number;
+  amount?: number;
+  assetCode?: string;
+  assetIssuer?: string | null;
   clientId: string;
   taskId: string;
 }

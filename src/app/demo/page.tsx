@@ -225,14 +225,14 @@ const statusCopy: Record<StepStatus, string> = {
 };
 
 const statusClasses: Record<StepStatus, string> = {
-  confirmed: "border-emerald-300/50 bg-emerald-300/10 text-emerald-200",
-  verified: "border-cyan-300/50 bg-cyan-300/10 text-cyan-200",
-  delegated: "border-violet-300/50 bg-violet-300/10 text-violet-200",
-  prepared: "border-amber-300/50 bg-amber-300/10 text-amber-200",
+  confirmed: "border-amber-400/50 bg-amber-400/10 text-amber-200",
+  verified: "border-yellow-500/50 bg-yellow-500/10 text-yellow-300",
+  delegated: "border-orange-500/50 bg-orange-500/10 text-orange-300",
+  prepared: "border-yellow-600/50 bg-yellow-600/10 text-amber-200",
   skipped: "border-zinc-300/40 bg-zinc-300/10 text-zinc-200",
-  failed: "border-red-400/50 bg-red-400/10 text-red-200",
-  pending: "border-blue-300/50 bg-blue-300/10 text-blue-200",
-  blocked: "border-red-400/50 bg-red-400/10 text-red-200",
+  failed: "border-orange-600/50 bg-orange-600/10 text-orange-400",
+  pending: "border-amber-600/50 bg-amber-600/10 text-amber-400",
+  blocked: "border-orange-600/50 bg-orange-600/10 text-orange-400",
   missing: "border-zinc-500/50 bg-zinc-500/10 text-zinc-300",
 };
 
@@ -339,9 +339,9 @@ function hardPathState(step?: DemoTraceStep): HardPathState {
 }
 
 function hardPathClass(state: HardPathState) {
-  if (state === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-  if (state === "fail") return "border-red-400/45 bg-red-400/10 text-red-100";
-  return "border-amber-300/35 bg-amber-300/10 text-amber-100";
+  if (state === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+  if (state === "fail") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
+  return "border-yellow-600/35 bg-yellow-600/10 text-amber-100";
 }
 
 function hardPathCopy(state: HardPathState) {
@@ -352,9 +352,9 @@ function hardPathCopy(state: HardPathState) {
 
 function evidenceClass(tone: "pass" | "fail" | "warn", recorded: boolean) {
   if (!recorded) return "border-zinc-500/40 bg-zinc-500/10 text-zinc-200";
-  if (tone === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-  if (tone === "warn") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
-  return "border-red-400/40 bg-red-400/10 text-red-100";
+  if (tone === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+  if (tone === "warn") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
+  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
 }
 
 function metadataValue(value: unknown, key?: string): string {
@@ -435,47 +435,47 @@ function buildPendingSuiteRuns(): JudgeSuiteRun[] {
 }
 
 function suiteRunClass(status: JudgeSuiteRunStatus) {
-  if (status === "passed") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
-  if (status === "failed") return "border-red-400/45 bg-red-400/10 text-red-100";
-  if (status === "running") return "border-cyan-300/45 bg-cyan-300/10 text-cyan-100";
+  if (status === "passed") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
+  if (status === "failed") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
+  if (status === "running") return "border-yellow-500/45 bg-yellow-500/10 text-cyan-100";
   return "border-white/10 bg-white/[0.03] text-white/45";
 }
 
 function suiteVerdictClass(status: "ready" | "running" | "passed" | "failed") {
-  if (status === "passed") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
-  if (status === "failed") return "border-red-400/45 bg-red-400/10 text-red-100";
-  if (status === "running") return "border-cyan-300/45 bg-cyan-300/10 text-cyan-100";
+  if (status === "passed") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
+  if (status === "failed") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
+  if (status === "running") return "border-yellow-500/45 bg-yellow-500/10 text-cyan-100";
   return "border-white/10 bg-black text-white/55";
 }
 
 function artifactStatusClass(status: ArtifactPackResponse["status"]) {
-  if (status === "ready") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
-  return "border-amber-300/45 bg-amber-300/10 text-amber-100";
+  if (status === "ready") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
+  return "border-yellow-600/45 bg-yellow-600/10 text-amber-100";
 }
 
 function preflightStatusClass(status: PreflightReport["status"]) {
-  if (status === "ready") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
-  if (status === "warning") return "border-amber-300/45 bg-amber-300/10 text-amber-100";
-  return "border-red-400/45 bg-red-400/10 text-red-100";
+  if (status === "ready") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
+  if (status === "warning") return "border-yellow-600/45 bg-yellow-600/10 text-amber-100";
+  return "border-orange-600/45 bg-orange-600/10 text-orange-200";
 }
 
 function preflightCheckClass(status: PreflightCheck["status"]) {
-  if (status === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-  if (status === "warn") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
-  return "border-red-400/40 bg-red-400/10 text-red-100";
+  if (status === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+  if (status === "warn") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
+  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
 }
 
 function claimClass(status: "real" | "scoped" | "prototype") {
-  if (status === "real") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-  if (status === "scoped") return "border-cyan-300/40 bg-cyan-300/10 text-cyan-100";
-  return "border-amber-300/40 bg-amber-300/10 text-amber-100";
+  if (status === "real") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+  if (status === "scoped") return "border-yellow-500/40 bg-yellow-500/10 text-cyan-100";
+  return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
 }
 
 function artifactScenarioClass(scenario: ArtifactScenario) {
   if (!scenario.recorded) return "border-zinc-500/40 bg-zinc-500/10 text-zinc-200";
-  if (scenario.key === "fresh") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-  if (scenario.key === "unapproved-root") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
-  return "border-red-400/40 bg-red-400/10 text-red-100";
+  if (scenario.key === "fresh") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
+  if (scenario.key === "unapproved-root") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
+  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
 }
 
 function artifactProofRoot(scenario: ArtifactScenario): string {
@@ -621,7 +621,7 @@ function TraceStepRow({ step, index }: { step: DemoTraceStep; index: number }) {
             <div className="min-w-0 break-all">
               <span className="text-white/75">tx:</span>{" "}
               {step.explorer ? (
-                <a className="text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
+                <a className="text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
                   {shortValue(step.txHash)}
                 </a>
               ) : (
@@ -715,7 +715,7 @@ function LoadBearingZkPanel({ step }: { step?: DemoTraceStep }) {
           <span className="text-white/70">{metadataValue((metadata as Record<string, unknown>).approvedRoot)}</span>
         </div>
         {step?.txHash && (
-          <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={step.explorer || undefined} target="_blank" rel="noreferrer">
+          <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={step.explorer || undefined} target="_blank" rel="noreferrer">
             zk tx: {shortValue(step.txHash)}
           </a>
         )}
@@ -735,10 +735,10 @@ function DecisionMatrix() {
               <div className="text-[1.1rem] uppercase tracking-[0.14em] text-white/75">{item.scenario}</div>
               <div className={`border px-[0.7rem] py-[0.4rem] text-[0.95rem] uppercase tracking-[0.12em] ${
                 item.tone === "pass"
-                  ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+                  ? "border-amber-400/40 bg-amber-400/10 text-amber-100"
                   : item.tone === "warn"
-                    ? "border-amber-300/40 bg-amber-300/10 text-amber-100"
-                    : "border-red-400/40 bg-red-400/10 text-red-100"
+                    ? "border-yellow-600/40 bg-yellow-600/10 text-amber-100"
+                    : "border-orange-600/40 bg-orange-600/10 text-orange-200"
               }`}>
                 {item.decision}
               </div>
@@ -803,7 +803,7 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
                   <span className="text-white/70">{settlement ? statusCopy[settlement.status] : "none"}</span>
                 </div>
                 {payment?.txHash && (
-                  <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
+                  <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
                     tx: {shortValue(payment.txHash)}
                   </a>
                 )}
@@ -861,7 +861,7 @@ function JudgeSuitePanel({
             </div>
             <div className="grid gap-[0.45rem] text-[1.05rem] text-white/45">
               {run.error ? (
-                <div className="break-all text-red-100">{run.error}</div>
+                <div className="break-all text-orange-200">{run.error}</div>
               ) : (
                 <>
                   <div className="flex justify-between gap-[1rem]">
@@ -877,7 +877,7 @@ function JudgeSuitePanel({
                     <span className="text-white/70">{run.settlement || "none"}</span>
                   </div>
                   {run.txHash && (
-                    <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
+                    <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
                       tx: {shortValue(run.txHash)}
                     </a>
                   )}
@@ -1027,7 +1027,7 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
           </span>
           <button
             onClick={copyArtifactPack}
-            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-yellow-500/50 hover:text-yellow-300"
           >
             {copied ? "COPIED" : "COPY PACK"}
           </button>
@@ -1075,17 +1075,17 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
                 <span className="break-all text-white/70">{shortValue(scenario.taskId)}</span>
               </div>
               {scenario.paymentExplorer && scenario.paymentTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
                   payment tx: {shortValue(scenario.paymentTx)}
                 </a>
               )}
               {scenario.proofExplorer && scenario.proofTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
                   proof tx: {shortValue(scenario.proofTx)}
                 </a>
               )}
               {scenario.settlementExplorer && scenario.settlementTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
                   settlement tx: {shortValue(scenario.settlementTx)}
                 </a>
               )}
@@ -1098,11 +1098,11 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
       </div>
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-2">
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-yellow-300 hover:border-yellow-500/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">membership verifier</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.membershipVerifier.id}</div>
         </a>
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-yellow-300 hover:border-yellow-500/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">guild registry</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.guildRegistry.id}</div>
         </a>
@@ -1284,34 +1284,34 @@ export default function DemoPage() {
                 <button
                   onClick={runJudgeSuite}
                   disabled={busy}
-                  className="border border-cyan-300/50 bg-cyan-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-cyan-100 transition hover:border-cyan-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-yellow-500/50 bg-yellow-500/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-cyan-100 transition hover:border-yellow-300 disabled:cursor-wait disabled:opacity-50"
                 >
                   {suiteRunning ? "SUITE RUNNING" : "RUN JUDGE SUITE"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("happy-path")}
                   disabled={busy}
-                  className="border border-emerald-300/45 bg-emerald-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-emerald-100 transition hover:border-emerald-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-amber-400/45 bg-amber-400/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   {running ? "RUNNING" : "RUN FRESH TRACE"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("tampered-worker-proof")}
                   disabled={busy}
-                  className="border border-red-300/45 bg-red-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-red-100 transition hover:border-red-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-red-300/45 bg-red-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-orange-200 transition hover:border-orange-400 disabled:cursor-wait disabled:opacity-50"
                 >
                   RUN BLOCKED TRACE
                 </button>
                 <button
                   onClick={() => runTraceScenario("unapproved-worker-root")}
                   disabled={busy}
-                  className="border border-amber-300/45 bg-amber-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-yellow-600/45 bg-yellow-600/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   RUN UNAPPROVED ROOT
                 </button>
                 <button
                   onClick={refresh}
-                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-yellow-500/50 hover:text-yellow-300"
                 >
                   REFRESH
                 </button>
@@ -1362,26 +1362,26 @@ export default function DemoPage() {
           <JudgeArtifactPack pack={artifactPack} />
 
           {error && (
-            <div className="border border-red-400/30 bg-red-400/10 p-[1.6rem] text-[1.3rem] text-red-100">
+            <div className="border border-orange-600/30 bg-orange-600/10 p-[1.6rem] text-[1.3rem] text-orange-200">
               Trace API error: {error}
             </div>
           )}
 
           {runError && (
-            <div className="mb-[1.2rem] border border-amber-300/30 bg-amber-300/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-amber-100">
+            <div className="mb-[1.2rem] border border-yellow-600/30 bg-yellow-600/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-amber-100">
               Fresh trace did not start: {runError}
             </div>
           )}
 
           {running && (
-            <div className="mb-[1.2rem] border border-cyan-300/30 bg-cyan-300/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-cyan-100">
+            <div className="mb-[1.2rem] border border-yellow-500/30 bg-yellow-500/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-cyan-100">
               Live run in progress: payment, ZK gate, delegation and settlement are executing.
             </div>
           )}
 
           {runResult && !running && (
-            <div className="mb-[1.2rem] border border-emerald-300/30 bg-emerald-300/10 p-[1.6rem] text-[1.15rem] text-emerald-50">
-              <div className="flex flex-wrap gap-[1rem] uppercase tracking-[0.14em] text-emerald-100">
+            <div className="mb-[1.2rem] border border-amber-400/30 bg-amber-400/10 p-[1.6rem] text-[1.15rem] text-emerald-50">
+              <div className="flex flex-wrap gap-[1rem] uppercase tracking-[0.14em] text-amber-100">
                 <span>LAST RUN: {runResult.status || "submitted"}</span>
                 <span>{formatDuration(runResult.elapsedMs)}</span>
                 <span>{formatTime(runResult.completedAt)}</span>
@@ -1391,7 +1391,7 @@ export default function DemoPage() {
                 <div className="min-w-0 break-all">
                   tx:{" "}
                   {runResult.payment?.explorer && runResult.payment.txHash ? (
-                    <a className="text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={runResult.payment.explorer} target="_blank" rel="noreferrer">
+                    <a className="text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={runResult.payment.explorer} target="_blank" rel="noreferrer">
                       {shortValue(runResult.payment.txHash)}
                     </a>
                   ) : (
@@ -1437,13 +1437,13 @@ export default function DemoPage() {
             <div className="mt-[1.2rem] grid gap-[0.9rem] text-[1.2rem]">
               <div className="flex justify-between gap-[1rem]">
                 <span className="text-white/45">ZK verifier</span>
-                <span className={data?.relayers.zkVerifier ? "text-emerald-200" : "text-amber-200"}>
+                <span className={data?.relayers.zkVerifier ? "text-amber-200" : "text-amber-200"}>
                   {data?.relayers.zkVerifier ? "enabled" : "disabled"}
                 </span>
               </div>
               <div className="flex justify-between gap-[1rem]">
                 <span className="text-white/45">Guild registry</span>
-                <span className={data?.relayers.guildRegistry ? "text-emerald-200" : "text-amber-200"}>
+                <span className={data?.relayers.guildRegistry ? "text-amber-200" : "text-amber-200"}>
                   {data?.relayers.guildRegistry ? "enabled" : "disabled"}
                 </span>
               </div>
@@ -1454,13 +1454,13 @@ export default function DemoPage() {
             <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Contracts</h2>
             <div className="mt-[1.2rem] grid gap-[1rem] text-[1.15rem]">
               {data?.contracts.membershipVerifier && (
-                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-cyan-200 hover:border-cyan-300/40" href={data.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
+                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-yellow-300 hover:border-yellow-500/40" href={data.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
                   <div className="text-white/35">membership verifier</div>
                   <div className="mt-[0.5rem] break-all">{data.contracts.membershipVerifier.id}</div>
                 </a>
               )}
               {data?.contracts.guildRegistry && (
-                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-cyan-200 hover:border-cyan-300/40" href={data.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
+                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-yellow-300 hover:border-yellow-500/40" href={data.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
                   <div className="text-white/35">guild registry</div>
                   <div className="mt-[0.5rem] break-all">{data.contracts.guildRegistry.id}</div>
                 </a>

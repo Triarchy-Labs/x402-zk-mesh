@@ -269,7 +269,7 @@ export default function Dashboard() {
     }, [progress, agentState]);
 
 	return (
-		<main className={`min-h-screen font-mono selection:bg-[#00ff41] selection:text-black flex flex-col pt-[12rem] pb-[4rem] overflow-hidden transition-colors duration-500 ${agentState === "danger" ? "bg-[#1a0000]" : "bg-transparent text-[#ededed]"}`}>
+		<main className={`min-h-screen font-mono selection:bg-[#ffaa00] selection:text-black flex flex-col pt-[12rem] pb-[4rem] overflow-hidden transition-colors duration-500 ${agentState === "danger" ? "bg-[#1a0000]" : "bg-transparent text-[#ededed]"}`}>
 			<Nav />
 			
 			{/* Glitch Overlay on Danger */}
@@ -286,7 +286,7 @@ export default function Dashboard() {
 					<div>
                         <motion.h1 variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="text-[4rem] md:text-[5rem] font-light mb-[2rem] tracking-tight text-gray-300">
                             <span className="text-gray-500 mr-[2rem]"><motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span></span>
-                            Sovereign <span className="text-[#00ff41] font-bold tracking-tight shadow-[#00ff41]/20 drop-shadow-[0_0_15px_rgba(0,255,65,0.4)]">Dashboard</span>
+                            Sovereign <span className="text-[#ffaa00] font-bold tracking-tight shadow-[#ffaa00]/20 drop-shadow-[0_0_15px_rgba(255, 170, 0,0.4)]">Dashboard</span>
                         </motion.h1>
                         <p className="text-gray-400 max-w-2xl text-[1.4rem] leading-relaxed tracking-wide mt-[1rem]">
                             The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Nemotron 550B Semantic Firewall.
@@ -304,7 +304,7 @@ export default function Dashboard() {
                     
                     {/* Background Grid */}
                     <div className="absolute inset-x-0 bottom-0 top-[40%] [perspective:1000px] z-0 overflow-hidden">
-                        <div className={`absolute inset-0 bg-[length:40px_40px] [transform:rotateX(65deg)_scale(2)_translateZ(0)] origin-top border-t transition-colors duration-500 [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)] ${agentState === "danger" ? "bg-[linear-gradient(rgba(255,0,60,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,60,0.2)_1px,transparent_1px)] border-[#ff003c]/40" : "bg-[linear-gradient(rgba(0,255,65,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.1)_1px,transparent_1px)] border-[#00ff41]/20"}`} />
+                        <div className={`absolute inset-0 bg-[length:40px_40px] [transform:rotateX(65deg)_scale(2)_translateZ(0)] origin-top border-t transition-colors duration-500 [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)] ${agentState === "danger" ? "bg-[linear-gradient(rgba(255,0,60,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,60,0.2)_1px,transparent_1px)] border-[#ff003c]/40" : "bg-[linear-gradient(rgba(255, 170, 0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255, 170, 0,0.1)_1px,transparent_1px)] border-[#ffaa00]/20"}`} />
                     </div>
 
                     {/* Stage Center DYNAMIC: The Draggable Roaming Orb */}
@@ -334,9 +334,9 @@ export default function Dashboard() {
                         {/* Chat Log */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-[2rem] flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[30rem]">
                             <div className="flex justify-between items-center text-[1.2rem] text-white/30 tracking-widest mb-[1.5rem] border-b border-white/5 pb-[1rem]">
-                                <span>SYS_LOG /// NEMOTRON 30B (ORB) {walletId !== "guest" && <span className="text-[#00ff41] ml-2">[{walletId.substring(0,6)}...{walletId.substring(walletId.length-4)}]</span>}</span>
+                                <span>SYS_LOG /// NEMOTRON 30B (ORB) {walletId !== "guest" && <span className="text-[#ffaa00] ml-2">[{walletId.substring(0,6)}...{walletId.substring(walletId.length-4)}]</span>}</span>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#00ff41] transition-colors font-bold">
+                                    <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#ffaa00] transition-colors font-bold">
                                         {showArchives ? "[CLOSE ARCHIVE]" : "[ARCHIVE]"}
                                     </button>
                                     <button onClick={startNewSession} className="hover:text-[#00bfff] transition-colors font-bold" disabled={chatHistory.length === 0} style={{ opacity: chatHistory.length === 0 ? 0.3 : 1 }}>
@@ -354,8 +354,8 @@ export default function Dashboard() {
                                         <div className="text-white/30 text-[1.2rem] italic">No archived sessions.</div>
                                     ) : (
                                         archivedSessions.map(session => (
-                                            <div key={session.id} className="p-[1rem] border border-white/10 rounded-lg hover:border-[#00ff41]/50 cursor-pointer transition-colors bg-black/50" onClick={() => loadSession(session.id)}>
-                                                <div className="text-[#00ff41] text-[1.2rem] font-bold">{session.date}</div>
+                                            <div key={session.id} className="p-[1rem] border border-white/10 rounded-lg hover:border-[#ffaa00]/50 cursor-pointer transition-colors bg-black/50" onClick={() => loadSession(session.id)}>
+                                                <div className="text-[#ffaa00] text-[1.2rem] font-bold">{session.date}</div>
                                                 <div className="text-white/60 text-[1.3rem] mt-1 line-clamp-2">{session.preview}</div>
                                             </div>
                                         ))
@@ -363,13 +363,13 @@ export default function Dashboard() {
                                 </div>
                             ) : (
                             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-3 text-[1.3rem]" data-lenis-prevent>
-                                <span className="text-[#00ff41]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
+                                <span className="text-[#ffaa00]">{">"} SOVEREIGN ORB ONLINE. HOW CAN I ASSIST?</span>
                                 {chatHistory.map((msg, i) => (
-                                    <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#00ff41]"}>
+                                    <div key={i} className={msg.role === "user" ? "text-white/60" : "text-[#ffaa00]"}>
                                         {msg.role === "assistant" ? (
                                             <details className="group" open={openMessageIndex === i}>
                                                 <summary 
-                                                    className="cursor-pointer list-none text-[#00ff41] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2"
+                                                    className="cursor-pointer list-none text-[#ffaa00] font-bold focus:outline-none hover:text-[#b3ffc4] transition-colors flex items-center gap-2"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         setOpenMessageIndex(openMessageIndex === i ? -1 : i);
@@ -378,7 +378,7 @@ export default function Dashboard() {
                                                     <span className="text-[1rem] opacity-50 group-open:rotate-90 transition-transform">▶</span>
                                                     [ORB]:
                                                 </summary>
-                                                <div className="mt-2 space-y-1 prose-lg prose-invert prose-p:leading-tight prose-a:text-[#00ff41] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left pl-3 border-l border-white/10 ml-[4px]">
+                                                <div className="mt-2 space-y-1 prose-lg prose-invert prose-p:leading-tight prose-a:text-[#ffaa00] prose-strong:text-white prose-table:border-collapse prose-td:border prose-td:border-white/10 prose-td:px-2 prose-th:border prose-th:border-white/10 prose-th:px-2 prose-th:text-left pl-3 border-l border-white/10 ml-[4px]">
                                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                         {msg.content}
                                                     </ReactMarkdown>
@@ -392,17 +392,17 @@ export default function Dashboard() {
                                         )}
                                     </div>
                                 ))}
-                                {agentState === "thinking" && !isAnalyzing && <span className="text-[#00ff41] animate-pulse">...</span>}
+                                {agentState === "thinking" && !isAnalyzing && <span className="text-[#ffaa00] animate-pulse">...</span>}
                             </div>
                             )}
                         </motion.div>
 
                         {/* Input Box */}
                         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative group w-full flex-none">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00ff41]/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000"></div>
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ffaa00]/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000"></div>
                             <div className="relative bg-black/80 rounded-2xl border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
                                 <textarea 
-                                    className="w-full h-[12rem] bg-transparent resize-none outline-none text-[1.5rem] font-mono text-[#00ff41] placeholder:text-white/20 custom-scrollbar"
+                                    className="w-full h-[12rem] bg-transparent resize-none outline-none text-[1.5rem] font-mono text-[#ffaa00] placeholder:text-white/20 custom-scrollbar"
                                     placeholder="CHAT WITH THE ORB OR DESCRIBE YOUR BOUNTY TASK..."
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
@@ -417,7 +417,7 @@ export default function Dashboard() {
                                 />
                                 <div className="flex justify-between items-center mt-2 pt-4 border-t border-white/5">
                                     <span className="text-[1.2rem] text-white/30">PRESS ENTER TO CHAT. OR USE THE BUTTON TO DEPLOY A BOUNTY.</span>
-                                    <button onClick={handleExecute} disabled={!inputValue.trim() || agentState === "working"} className="bg-white text-black px-[3rem] py-[1.5rem] rounded-lg text-[1.3rem] font-bold tracking-[0.2em] hover:bg-[#00ff41] transition-all disabled:opacity-40">
+                                    <button onClick={handleExecute} disabled={!inputValue.trim() || agentState === "working"} className="bg-white text-black px-[3rem] py-[1.5rem] rounded-lg text-[1.3rem] font-bold tracking-[0.2em] hover:bg-[#ffaa00] transition-all disabled:opacity-40">
                                         DEPLOY BOUNTY TASK
                                     </button>
                                 </div>

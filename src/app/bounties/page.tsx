@@ -33,16 +33,16 @@ interface GuildStats {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-	S: "#ff003c", A: "#ff6b00", B: "#ffd700", C: "#00ff41", D: "#00bfff",
+	S: "#ff003c", A: "#ff6b00", B: "#ffd700", C: "#ffaa00", D: "#00bfff",
 };
 
 const DIFFICULTY_GLOW: Record<string, string> = {
-	S: "0 0 12px rgba(255,0,60,0.6)", A: "0 0 12px rgba(255,107,0,0.5)", B: "0 0 12px rgba(255,215,0,0.4)", C: "0 0 10px rgba(0,255,65,0.3)", D: "0 0 8px rgba(0,191,255,0.3)",
+	S: "0 0 12px rgba(255,0,60,0.6)", A: "0 0 12px rgba(255,107,0,0.5)", B: "0 0 12px rgba(255,215,0,0.4)", C: "0 0 10px rgba(255, 170, 0,0.3)", D: "0 0 8px rgba(0,191,255,0.3)",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-	OPEN: "#00ff41", CLAIMED: "#ffd700", IN_PROGRESS: "#ff6b00", SUBMITTED: "#00bfff", UNDER_REVIEW: "#a855f7",
-	REVISION: "#ff6b00", APPROVED: "#00ff41", PAID: "#00ff41", REJECTED: "#ff003c", EXPIRED: "#666", DISPUTED: "#ff003c", CANCELLED: "#666",
+	OPEN: "#ffaa00", CLAIMED: "#ffd700", IN_PROGRESS: "#ff6b00", SUBMITTED: "#00bfff", UNDER_REVIEW: "#a855f7",
+	REVISION: "#ff6b00", APPROVED: "#ffaa00", PAID: "#ffaa00", REJECTED: "#ff003c", EXPIRED: "#666", DISPUTED: "#ff003c", CANCELLED: "#666",
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -154,7 +154,7 @@ const BountiesPage = () => {
 						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>
 							<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span>
 						</span>
-						Guild <span style={{ color: "#00ff41", fontWeight: "600", textShadow: "0 0 15px rgba(0,255,65,0.4)" }}>Quest Board</span>
+						Guild <span style={{ color: "#ffaa00", fontWeight: "600", textShadow: "0 0 15px rgba(255, 170, 0,0.4)" }}>Quest Board</span>
 					</motion.h1>
 					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.4rem", marginBottom: "3rem" }}>
 						Post bounties, claim tasks, earn XP, rank up. Humans and AI agents welcome.
@@ -164,7 +164,7 @@ const BountiesPage = () => {
 					<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
 						{[
 							{ label: "TOTAL TASKS", value: stats.total, color: "#fff" },
-							{ label: "ACTIVE NOW", value: stats.active, color: "#00ff41" },
+							{ label: "ACTIVE NOW", value: stats.active, color: "#ffaa00" },
 							{ label: "COMPLETED", value: stats.completed, color: "#ffd700" },
 							{ label: "USDC PAID", value: `$${stats.total_paid_usdc.toLocaleString()}`, color: "#00bfff" },
 						].map((kpi, i) => (
@@ -197,7 +197,7 @@ const BountiesPage = () => {
 							>{d}-TIER</button>
 						))}
 						<button onClick={() => setFilterStatus(filterStatus === "OPEN" ? null : "OPEN")}
-							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterStatus === "OPEN" ? "#00ff41" : "transparent", color: filterStatus === "OPEN" ? "#000" : "#00ff41", border: "1px solid #00ff41" }}
+							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterStatus === "OPEN" ? "#ffaa00" : "transparent", color: filterStatus === "OPEN" ? "#000" : "#ffaa00", border: "1px solid #ffaa00" }}
 						>OPEN</button>
 						<button onClick={() => setFilterSOS(!filterSOS)}
 							style={{ padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: filterSOS ? "#ff003c" : "transparent", color: filterSOS ? "#fff" : "#ff003c", border: "1px solid #ff003c" }}
@@ -205,7 +205,7 @@ const BountiesPage = () => {
 					</div>
 
 					<button onClick={() => setShowCreate(!showCreate)}
-						style={{ padding: "1.2rem 3rem", borderRadius: "4px", fontSize: "1.3rem", fontWeight: "bold", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: showCreate ? "#00ff41" : "rgba(0,255,65,0.1)", color: showCreate ? "#000" : "#00ff41", border: "1px solid #00ff41", transition: "all 0.3s" }}
+						style={{ padding: "1.2rem 3rem", borderRadius: "4px", fontSize: "1.3rem", fontWeight: "bold", fontFamily: "'Space Mono', monospace", cursor: "pointer", background: showCreate ? "#ffaa00" : "rgba(255, 170, 0,0.1)", color: showCreate ? "#000" : "#ffaa00", border: "1px solid #ffaa00", transition: "all 0.3s" }}
 					>{showCreate ? "CANCEL" : "+ POST BOUNTY"}</button>
 				</div>
 
@@ -216,7 +216,7 @@ const BountiesPage = () => {
 							initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
 							style={{ marginBottom: "2rem", overflow: "hidden" }}
 						>
-							<div style={{ padding: "1.5rem", background: "rgba(0,255,65,0.03)", border: "1px solid rgba(0,255,65,0.2)", borderRadius: "8px" }}>
+							<div style={{ padding: "1.5rem", background: "rgba(255, 170, 0,0.03)", border: "1px solid rgba(255, 170, 0,0.2)", borderRadius: "8px" }}>
 								<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
 									<input placeholder="Task title..." value={newTitle} onChange={e => setNewTitle(e.target.value)}
 										style={{ padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "4px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", outline: "none" }} />
@@ -237,9 +237,9 @@ const BountiesPage = () => {
 									<input placeholder="Skills: Rust, ZK, Soroban" value={newSkills} onChange={e => setNewSkills(e.target.value)}
 										style={{ flex: 2, padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "4px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", outline: "none" }} />
 									<input placeholder="USDC Reward" type="number" value={newReward} onChange={e => setNewReward(e.target.value)}
-										style={{ flex: 1, padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid #00ff41", borderRadius: "4px", color: "#00ff41", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", outline: "none", textAlign: "right" }} />
+										style={{ flex: 1, padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid #ffaa00", borderRadius: "4px", color: "#ffaa00", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", outline: "none", textAlign: "right" }} />
 									<button onClick={handleCreate} disabled={createStatus === "working" || !newTitle.trim()}
-										style={{ padding: "1.6rem 3rem", background: createStatus === "success" ? "#00ff41" : "rgba(0,255,65,0.15)", color: createStatus === "success" ? "#000" : "#00ff41", border: "1px solid #00ff41", borderRadius: "4px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", cursor: createStatus === "working" ? "wait" : "pointer" }}
+										style={{ padding: "1.6rem 3rem", background: createStatus === "success" ? "#ffaa00" : "rgba(255, 170, 0,0.15)", color: createStatus === "success" ? "#000" : "#ffaa00", border: "1px solid #ffaa00", borderRadius: "4px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", cursor: createStatus === "working" ? "wait" : "pointer" }}
 									>{createStatus === "working" ? "..." : createStatus === "success" ? "✓" : "DEPLOY"}</button>
 								</div>
 							</div>
@@ -251,7 +251,7 @@ const BountiesPage = () => {
 				{loading ? (
 					<div style={{ textAlign: "center", padding: "4rem", color: "rgba(255,255,255,0.3)" }}>
 						<motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #00ff41", borderTopColor: "transparent", borderRadius: "50%" }} />
+							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #ffaa00", borderTopColor: "transparent", borderRadius: "50%" }} />
 					</div>
 				) : (
 					<div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -269,8 +269,8 @@ const BountiesPage = () => {
 								style={{
 									display: "grid", gridTemplateColumns: "7rem 4rem 1fr 12rem 10rem 8rem",
 									alignItems: "center", padding: "1.6rem 2rem", cursor: "pointer", transition: "all 0.2s",
-									background: selectedTask === task.id ? "rgba(0,255,65,0.05)" : "rgba(255,255,255,0.02)",
-									border: `1px solid ${selectedTask === task.id ? "rgba(0,255,65,0.3)" : "rgba(255,255,255,0.06)"}`,
+									background: selectedTask === task.id ? "rgba(255, 170, 0,0.05)" : "rgba(255,255,255,0.02)",
+									border: `1px solid ${selectedTask === task.id ? "rgba(255, 170, 0,0.3)" : "rgba(255,255,255,0.06)"}`,
 									borderRadius: "6px",
 								}}
 							>
@@ -306,7 +306,7 @@ const BountiesPage = () => {
 								</div>
 
 								{/* Reward */}
-								<span style={{ color: "#00ff41", fontFamily: "'Space Mono', monospace", fontWeight: "bold", fontSize: "1.4rem" }}>
+								<span style={{ color: "#ffaa00", fontFamily: "'Space Mono', monospace", fontWeight: "bold", fontSize: "1.4rem" }}>
 									${task.reward_usdc.toLocaleString()}
 								</span>
 
@@ -314,7 +314,7 @@ const BountiesPage = () => {
 								<span style={{
 									fontFamily: "'Space Mono', monospace", fontSize: "1.2rem",
 									color: STATUS_COLORS[task.status] || "#999",
-									textShadow: task.status === "OPEN" ? "0 0 8px rgba(0,255,65,0.4)" : "none",
+									textShadow: task.status === "OPEN" ? "0 0 8px rgba(255, 170, 0,0.4)" : "none",
 								}}>[{task.status}]</span>
 
 								{/* Slots */}
@@ -353,7 +353,7 @@ const BountiesPage = () => {
 					style={{ marginTop: "5rem", padding: "2.4rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "8px" }}
 				>
 					<h4 style={{ margin: "0 0 1.5rem", color: "rgba(255,255,255,0.4)", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em" }}>BOT API / MCP INGESTION</h4>
-					<pre style={{ background: "rgba(0,0,0,0.6)", padding: "1.6rem", borderRadius: "4px", fontSize: "1.2rem", color: "#00ff41", overflowX: "auto", margin: 0 }}>
+					<pre style={{ background: "rgba(0,0,0,0.6)", padding: "1.6rem", borderRadius: "4px", fontSize: "1.2rem", color: "#ffaa00", overflowX: "auto", margin: 0 }}>
 						<code>{`# Register as agent
 curl -X POST /api/agents \\
   -d '{"name":"my-bot","type":"bot","capabilities":["Rust","ZK"]}'

@@ -33,12 +33,12 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 	let borderColor = isQuarantined 
 		? "#ff003c" 
 		: hovered 
-			? (theme === "dark" ? "rgba(0,255,65,0.5)" : "rgba(0,100,34,0.4)")
+			? (theme === "dark" ? "rgba(255, 170, 0,0.5)" : "rgba(0,100,34,0.4)")
 			: (theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)");
 	const statusColor = isQuarantined 
 		? "#ff003c" 
 		: hovered 
-			? (theme === "dark" ? "#00ff41" : "#006622")
+			? (theme === "dark" ? "#ffaa00" : "#006622")
 			: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
 
 	if (isMark53) {
@@ -88,7 +88,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				boxShadow: isMark53 
 					? "0 0 60px rgba(255, 215, 0, 0.05)"
 					: hovered 
-						? "0 20px 40px rgba(0,255,65,0.08)" 
+						? "0 20px 40px rgba(255, 170, 0,0.08)" 
 						: "none",
                 minHeight: index === 0 || index === 3 || index === 6 ? "240px" : "320px",
                 justifyContent: "space-between",
@@ -105,7 +105,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					fontWeight: 500, 
 					fontSize: "1.8rem", 
 					letterSpacing: "0.02em",
-					color: hovered ? "#00ff41" : "#fff",
+					color: hovered ? "#ffaa00" : "#fff",
 					transition: lusionTransition,
 				}}>
 					{agent.id}

@@ -35,7 +35,7 @@ const RANK_COLORS: Record<string, string> = {
 	ADEPT: "#ff6b00",
 	JOURNEYMAN: "#ffd700",
 	APPRENTICE: "#00bfff",
-	INITIATE: "#00ff41",
+	INITIATE: "#ffaa00",
 };
 
 const ProfilePage = () => {
@@ -137,7 +137,7 @@ const ProfilePage = () => {
 				<Nav />
 				<div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
 					<motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-						style={{ display: "inline-block", width: "32px", height: "32px", border: "2px solid #00ff41", borderTopColor: "transparent", borderRadius: "50%" }} />
+						style={{ display: "inline-block", width: "32px", height: "32px", border: "2px solid #ffaa00", borderTopColor: "transparent", borderRadius: "50%" }} />
 				</div>
 			</div>
 		);
@@ -151,7 +151,7 @@ const ProfilePage = () => {
 				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
 					<h1 style={{ fontSize: "4.5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
 						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>_</span>
-						Operative <span style={{ color: "#00ff41", fontWeight: "600", textShadow: "0 0 15px rgba(0,255,65,0.4)" }}>Profile</span>
+						Operative <span style={{ color: "#ffaa00", fontWeight: "600", textShadow: "0 0 15px rgba(255, 170, 0,0.4)" }}>Profile</span>
 					</h1>
 					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.4rem", marginBottom: "3rem" }}>
 						Your cryptographic identity and reputation on the X402 ZK Mesh.
@@ -182,7 +182,7 @@ const ProfilePage = () => {
 									<label style={{ display: "block", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>ENTITY TYPE</label>
 									<div style={{ display: "flex", gap: "1rem" }}>
 										<button onClick={() => setRegType("human")}
-											style={{ flex: 1, padding: "10px", border: `1px solid ${regType === "human" ? "#00ff41" : "rgba(255,255,255,0.2)"}`, background: regType === "human" ? "rgba(0,255,65,0.1)" : "transparent", color: regType === "human" ? "#00ff41" : "#fff", borderRadius: "4px", fontFamily: "'Space Mono', monospace", cursor: "pointer" }}
+											style={{ flex: 1, padding: "10px", border: `1px solid ${regType === "human" ? "#ffaa00" : "rgba(255,255,255,0.2)"}`, background: regType === "human" ? "rgba(255, 170, 0,0.1)" : "transparent", color: regType === "human" ? "#ffaa00" : "#fff", borderRadius: "4px", fontFamily: "'Space Mono', monospace", cursor: "pointer" }}
 										>HUMAN</button>
 										<button onClick={() => setRegType("bot")}
 											style={{ flex: 1, padding: "10px", border: `1px solid ${regType === "bot" ? "#00bfff" : "rgba(255,255,255,0.2)"}`, background: regType === "bot" ? "rgba(0,191,255,0.1)" : "transparent", color: regType === "bot" ? "#00bfff" : "#fff", borderRadius: "4px", fontFamily: "'Space Mono', monospace", cursor: "pointer" }}
@@ -196,7 +196,7 @@ const ProfilePage = () => {
 								</div>
 								<button
 									onClick={handleRegister} disabled={registering || !regName.trim()}
-									style={{ marginTop: "1rem", width: "100%", padding: "14px", background: registering ? "rgba(0,255,65,0.3)" : "#00ff41", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", cursor: registering ? "wait" : "pointer" }}
+									style={{ marginTop: "1rem", width: "100%", padding: "14px", background: registering ? "rgba(255, 170, 0,0.3)" : "#ffaa00", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", cursor: registering ? "wait" : "pointer" }}
 								>{registering ? "INITIALIZING..." : "JOIN TRIARCHY MESH"}</button>
 								{error && <div style={{ color: "#ff003c", fontSize: "1.2rem", textAlign: "center", marginTop: "0.5rem" }}>{error}</div>}
 							</div>
@@ -210,13 +210,13 @@ const ProfilePage = () => {
 							<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
 								{/* Identity Card */}
 								<div style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", position: "relative", overflow: "hidden" }}>
-									<div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: `linear-gradient(90deg, ${RANK_COLORS[profile.rank] || "#00ff41"}, transparent)` }} />
+									<div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: `linear-gradient(90deg, ${RANK_COLORS[profile.rank] || "#ffaa00"}, transparent)` }} />
 									
 									<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
 										<div>
 											<h2 style={{ margin: "0 0 0.5rem", fontSize: "3rem", display: "flex", alignItems: "center", gap: "1rem" }}>
 												{profile.name}
-												<span style={{ fontSize: "1.3rem", padding: "4px 8px", background: profile.type === "bot" ? "rgba(0,191,255,0.2)" : "rgba(0,255,65,0.2)", color: profile.type === "bot" ? "#00bfff" : "#00ff41", borderRadius: "4px", border: `1px solid ${profile.type === "bot" ? "rgba(0,191,255,0.4)" : "rgba(0,255,65,0.4)"}`, fontFamily: "'Space Mono', monospace" }}>
+												<span style={{ fontSize: "1.3rem", padding: "4px 8px", background: profile.type === "bot" ? "rgba(0,191,255,0.2)" : "rgba(255, 170, 0,0.2)", color: profile.type === "bot" ? "#00bfff" : "#ffaa00", borderRadius: "4px", border: `1px solid ${profile.type === "bot" ? "rgba(0,191,255,0.4)" : "rgba(255, 170, 0,0.4)"}`, fontFamily: "'Space Mono', monospace" }}>
 													{profile.type.toUpperCase()}
 												</span>
 											</h2>
@@ -280,7 +280,7 @@ const ProfilePage = () => {
 									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>FINANCIALS</h3>
 									<div style={{ marginBottom: "1rem" }}>
 										<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>USDC BALANCE</div>
-										<div style={{ fontSize: "2.4rem", color: "#00ff41", fontFamily: "'Space Mono', monospace" }}>${profile.balance_usdc.toLocaleString()}</div>
+										<div style={{ fontSize: "2.4rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>${profile.balance_usdc.toLocaleString()}</div>
 									</div>
 									<div>
 										<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>TOTAL EARNED</div>
@@ -292,7 +292,7 @@ const ProfilePage = () => {
 									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>MISSION LOG</h3>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Completed</span>
-										<span style={{ color: "#00ff41", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_completed}</span>
+										<span style={{ color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_completed}</span>
 									</div>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Failed</span>

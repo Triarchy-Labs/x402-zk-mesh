@@ -8,39 +8,39 @@ const FONT_BODY = "'Inter', 'DM Sans', sans-serif";
 // ============================================================
 // LUSION HOVER SYSTEM:
 // Default = Monochrome premium (white-on-dark)
-// Hover  = Original green (#00ff41) bleeds in as "reward"
+// Hover  = Original green (#ffaa00) bleeds in as "reward"
 // ============================================================
 const palette = {
 	dark: {
 		accent: "rgba(255,255,255,0.9)",
-		accentHover: "#00ff41",               // 🟢 LUSION: green reveal
+		accentHover: "#ffaa00",               // 🟢 LUSION: green reveal
 		accentMuted: "rgba(255,255,255,0.5)",
 		border: "rgba(255,255,255,0.12)",
-		borderHover: "rgba(0,255,65,0.4)",    // 🟢
+		borderHover: "rgba(255, 170, 0,0.4)",    // 🟢
 		glassBg: "rgba(20,20,28,0.45)",
 		glassBgHover: "rgba(0,15,0,0.5)",     // 🟢
 		glow: "rgba(255,255,255,0.06)",
-		glowHover: "rgba(0,255,65,0.25)",     // 🟢
+		glowHover: "rgba(255, 170, 0,0.25)",     // 🟢
 		text: "#fff",
 		textMuted: "#888",
 		btnBg: "#fff",
-		btnBgHover: "#00ff41",                // 🟢
+		btnBgHover: "#ffaa00",                // 🟢
 		btnText: "#0a0a0a",
 	},
 	light: {
 		accent: "#fff",
-		accentHover: "#00ff41",
+		accentHover: "#ffaa00",
 		accentMuted: "rgba(255,255,255,0.5)",
 		border: "rgba(255,255,255,0.12)",
-		borderHover: "rgba(0,255,65,0.4)",
+		borderHover: "rgba(255, 170, 0,0.4)",
 		glassBg: "rgba(10,10,10,0.85)",
 		glassBgHover: "rgba(0,15,0,0.9)",
 		glow: "rgba(255,255,255,0.06)",
-		glowHover: "rgba(0,255,65,0.25)",
+		glowHover: "rgba(255, 170, 0,0.25)",
 		text: "#fff",
 		textMuted: "#aaa",
 		btnBg: "#fff",
-		btnBgHover: "#00ff41",
+		btnBgHover: "#ffaa00",
 		btnText: "#0a0a0a",
 	},
 };
@@ -159,7 +159,7 @@ function ScrollToTop({ theme }: { theme: "dark" | "light" }) {
 						fontSize: "1.2rem",
 						fontFamily: "'SF Mono', monospace",
 						boxShadow: hovered 
-							? `0 0 50px ${p.glowHover}, inset 0 0 20px rgba(0,255,65,0.3)` 
+							? `0 0 50px ${p.glowHover}, inset 0 0 20px rgba(255, 170, 0,0.3)` 
 							: `0 20px 40px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05)`,
 						transition: "all 0.6s cubic-bezier(0.1, 0.8, 0.2, 1)",
 						transform: `scale(${hovered ? 1.15 : 1})`,
@@ -171,14 +171,14 @@ function ScrollToTop({ theme }: { theme: "dark" | "light" }) {
 					<div style={{
 						position: "absolute",
 						top: "10%", left: "10%", right: "10%", bottom: "10%",
-						background: hovered ? "radial-gradient(circle, rgba(0,255,65,0.4) 0%, transparent 70%)" : "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+						background: hovered ? "radial-gradient(circle, rgba(255, 170, 0,0.4) 0%, transparent 70%)" : "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
 						filter: "blur(10px)",
 						borderRadius: "50%",
 						zIndex: 0,
 						transition: "all 0.6s ease",
 					}} />
 					
-					<span style={{ position: "relative", zIndex: 1, filter: hovered ? "drop-shadow(0 0 8px rgba(0,255,65,0.8))" : "none" }}>
+					<span style={{ position: "relative", zIndex: 1, filter: hovered ? "drop-shadow(0 0 8px rgba(255, 170, 0,0.8))" : "none" }}>
 						↑
 					</span>
 				</motion.button>
@@ -562,7 +562,7 @@ export default function Page() {
 							left: "20%",
 							right: "20%",
 							height: "1px",
-							background: `linear-gradient(90deg, transparent, ${theme === "dark" ? "rgba(0,255,65,0.3)" : "rgba(0,100,34,0.2)"}, transparent)`,
+							background: `linear-gradient(90deg, transparent, ${theme === "dark" ? "rgba(255, 170, 0,0.3)" : "rgba(0,100,34,0.2)"}, transparent)`,
 						}} />
 						<div style={{ width: "100%", padding: "0 5vw", margin: "0 auto", textAlign: "center" }}>
 							<h2 style={{ 
@@ -612,7 +612,7 @@ export default function Page() {
 						left: "3%",
 						right: "3%",
 						height: "10px",
-						background: `radial-gradient(ellipse at center bottom, ${theme === "dark" ? "rgba(0,255,65,0.35)" : "rgba(0,100,34,0.2)"}, transparent 80%)`,
+						background: `radial-gradient(ellipse at center bottom, ${theme === "dark" ? "rgba(255, 170, 0,0.35)" : "rgba(0,100,34,0.2)"}, transparent 80%)`,
 						filter: "blur(6px)",
 						pointerEvents: "none",
 						animation: "infinityPulse 4s ease-in-out infinite",

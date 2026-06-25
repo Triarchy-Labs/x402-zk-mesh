@@ -136,9 +136,9 @@ export function Nav() {
 						backdropFilter: "blur(12px)",
 					}}
 					onMouseEnter={(e) => { 
-						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.15)";
-						e.currentTarget.style.color = "#00ff41";
-						e.currentTarget.style.borderColor = "rgba(0, 255, 65, 0.4)";
+						e.currentTarget.style.backgroundColor = "rgba(255, 170, 0, 0.15)";
+						e.currentTarget.style.color = "#ffaa00";
+						e.currentTarget.style.borderColor = "rgba(255, 170, 0, 0.4)";
 					}}
 					onMouseLeave={(e) => { 
 						e.currentTarget.style.backgroundColor = "transparent";
@@ -194,9 +194,9 @@ export function Nav() {
 						backdropFilter: "blur(12px)",
 					}}
 					onMouseEnter={(e) => { 
-						e.currentTarget.style.backgroundColor = "rgba(0, 255, 65, 0.15)";
-						e.currentTarget.style.color = "#00ff41";
-						e.currentTarget.style.borderColor = "rgba(0, 255, 65, 0.4)";
+						e.currentTarget.style.backgroundColor = "rgba(255, 170, 0, 0.15)";
+						e.currentTarget.style.color = "#ffaa00";
+						e.currentTarget.style.borderColor = "rgba(255, 170, 0, 0.4)";
 					}}
 					onMouseLeave={(e) => { 
 						e.currentTarget.style.backgroundColor = "rgba(10,10,10,0.7)";

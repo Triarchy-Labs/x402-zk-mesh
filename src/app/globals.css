@@ -120,15 +120,15 @@ body {
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 255, 65, 0.3);
+    background-color: rgba(255, 170, 0, 0.3);
     border-radius: 4px;
 }
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 255, 65, 0.6);
+    background-color: rgba(255, 170, 0, 0.6);
 }
 .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 255, 65, 0.3) transparent;
+    scrollbar-color: rgba(255, 170, 0, 0.3) transparent;
 }
 
 /* React Lenis Core Fixes */
@@ -172,8 +172,8 @@ html.lenis, html.lenis body {
     background: rgba(20,20,28,0.4);
   }
   50% { 
-    border-color: rgba(0,255,65,0.25);
-    box-shadow: 0 0 12px rgba(0,255,65,0.1);
+    border-color: rgba(255, 170, 0,0.25);
+    box-shadow: 0 0 12px rgba(255, 170, 0,0.1);
     background: rgba(0,15,0,0.3);
   }
 }
@@ -219,9 +219,9 @@ html.lenis, html.lenis body {
     from var(--snake-angle),
     transparent 0%,
     transparent 75%,
-    rgba(0,255,65,0.5) 85%,
-    rgba(0,255,65,0.8) 90%,
-    rgba(0,255,65,0.5) 95%,
+    rgba(255, 170, 0,0.5) 85%,
+    rgba(255, 170, 0,0.8) 90%,
+    rgba(255, 170, 0,0.5) 95%,
     transparent 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -254,7 +254,7 @@ html.lenis, html.lenis body {
     90deg,
     rgba(255,255,255,0.4) 0%,
     rgba(255,255,255,0.4) 35%,
-    #00ff41 50%,
+    #ffaa00 50%,
     rgba(255,255,255,0.4) 65%,
     rgba(255,255,255,0.4) 100%
   );
@@ -270,7 +270,7 @@ html.lenis, html.lenis body {
     90deg,
     rgba(136,136,136,1) 0%,
     rgba(136,136,136,1) 35%,
-    #00ff41 50%,
+    #ffaa00 50%,
     rgba(136,136,136,1) 65%,
     rgba(136,136,136,1) 100%
   );
@@ -300,9 +300,9 @@ html.lenis, html.lenis body {
     from var(--snake-angle),
     transparent 0%,
     transparent 80%,
-    rgba(0,255,65,0.3) 88%,
-    rgba(0,255,65,0.9) 95%,
-    rgba(0,255,65,0.3) 100%
+    rgba(255, 170, 0,0.3) 88%,
+    rgba(255, 170, 0,0.9) 95%,
+    rgba(255, 170, 0,0.3) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -347,9 +347,9 @@ html.lenis, html.lenis body {
   
   /* LEFT-BOTTOM IMPULSE: Bias toward the bottom left */
   15% { 
-    box-shadow: inset 10px -10px 15px -10px #00ff41, -5px 5px 10px -5px #00ff41; 
+    box-shadow: inset 10px -10px 15px -10px #ffaa00, -5px 5px 10px -5px #ffaa00; 
     border-color: rgba(255, 255, 255, 0.2);
-    border-left-color: #00ff41; 
+    border-left-color: #ffaa00; 
   }
   25% { 
     box-shadow: none; 
@@ -358,9 +358,9 @@ html.lenis, html.lenis body {
 
   /* RIGHT-TOP IMPULSE: Bias toward the top right */
   50% { 
-    box-shadow: inset -10px 10px 15px -10px #00ff41, 5px -5px 10px -5px #00ff41; 
+    box-shadow: inset -10px 10px 15px -10px #ffaa00, 5px -5px 10px -5px #ffaa00; 
     border-color: rgba(255, 255, 255, 0.2);
-    border-right-color: #00ff41; 
+    border-right-color: #ffaa00; 
   }
   60% { 
     box-shadow: none; 
@@ -373,8 +373,8 @@ html.lenis, html.lenis body {
   }
 }
 @keyframes text-breathe {
-  0%, 100% { text-shadow: 0 0 4px rgba(0,255,65,0.4); color: #00ff41; }
-  50% { text-shadow: 0 0 12px rgba(0,255,65,0.9); color: #b3ffc4; }
+  0%, 100% { text-shadow: 0 0 4px rgba(255, 170, 0,0.4); color: #ffaa00; }
+  50% { text-shadow: 0 0 12px rgba(255, 170, 0,0.9); color: #b3ffc4; }
 }
 
 .connect-btn-base {
@@ -397,9 +397,9 @@ html.lenis, html.lenis body {
 }
 
 .connect-state-true {
-  background: rgba(0, 255, 65, 0.1);
-  color: #00ff41;
-  border: 1px solid rgba(0, 255, 65, 0.5);
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 170, 0, 0.5);
 }
 
 .connect-btn-hover-fx:hover {

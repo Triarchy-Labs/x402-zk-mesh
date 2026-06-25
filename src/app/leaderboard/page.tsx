@@ -50,7 +50,7 @@ const RANK_COLORS: Record<string, string> = {
 	ADEPT: "#ff6b00",
 	JOURNEYMAN: "#ffd700",
 	APPRENTICE: "#00bfff",
-	INITIATE: "#00ff41",
+	INITIATE: "#ffaa00",
 };
 
 const LeaderboardPage = () => {
@@ -110,7 +110,7 @@ const LeaderboardPage = () => {
 							{[
 								{ label: "TOTAL AGENTS", value: data.stats.total_agents, color: "#fff" },
 								{ label: "AUTONOMOUS BOTS", value: data.stats.total_bots, color: "#00bfff" },
-								{ label: "HUMAN OPERATIVES", value: data.stats.total_humans, color: "#00ff41" },
+								{ label: "HUMAN OPERATIVES", value: data.stats.total_humans, color: "#ffaa00" },
 								{ label: "COMPLETED MISSIONS", value: data.stats.total_tasks_completed, color: "#ffd700" },
 							].map((kpi, i) => (
 								<motion.div
@@ -192,7 +192,7 @@ const LeaderboardPage = () => {
 								<div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
 									<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 										<span style={{ fontSize: "1.6rem", fontWeight: "500", color: "#fff" }}>{entry.name}</span>
-										<span style={{ fontSize: "1.1rem", padding: "2px 6px", background: entry.type === "bot" ? "rgba(0,191,255,0.2)" : "rgba(0,255,65,0.2)", color: entry.type === "bot" ? "#00bfff" : "#00ff41", borderRadius: "3px" }}>
+										<span style={{ fontSize: "1.1rem", padding: "2px 6px", background: entry.type === "bot" ? "rgba(0,191,255,0.2)" : "rgba(255, 170, 0,0.2)", color: entry.type === "bot" ? "#00bfff" : "#ffaa00", borderRadius: "3px" }}>
 											{entry.type.toUpperCase()}
 										</span>
 									</div>
@@ -227,7 +227,7 @@ const LeaderboardPage = () => {
 								</span>
 
 								{/* Status */}
-								<span style={{ textAlign: "right", fontSize: "1.3rem", color: entry.status === "active" ? "#00ff41" : entry.status === "busy" ? "#ffd700" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
+								<span style={{ textAlign: "right", fontSize: "1.3rem", color: entry.status === "active" ? "#ffaa00" : entry.status === "busy" ? "#ffd700" : "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
 									{entry.status}
 								</span>
 							</motion.div>

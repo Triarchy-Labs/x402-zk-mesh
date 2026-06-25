@@ -557,9 +557,9 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				<FsrEasuPass sharpness={0.2} />
 				<FsrRcasPass sharpness={1.0} />
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			</EffectComposer>
 		);
 	}
@@ -568,16 +568,15 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<FsrEasuPass sharpness={0.2} />
-				<FsrRcasPass sharpness={1.0} />
-				{/* Bloom disabled — causes full overexposure without aggressive vignette */}
-				{/* LensHaloPass disabled — creates center overexposure on our scene */}
+				<Bloom intensity={0.5} luminanceThreshold={0.5} mipmapBlur />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
+				<FsrEasuPass sharpness={0.2} />
+				<FsrRcasPass sharpness={1.0} />
 			</EffectComposer>
 		);
 	}
@@ -586,18 +585,15 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
-			<FsrEasuPass sharpness={0.2} />
-			<FsrRcasPass sharpness={1.0} />
-			{/* Bloom disabled — causes full overexposure without aggressive vignette */}
-			{/* LensHaloPass disabled */}
+			<Bloom intensity={0.8} luminanceThreshold={0.2} mipmapBlur />
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}
 			/>
-			{/* Noise REMOVED — was adding grainy film grain overlay. Lusion uses
-		    1-bit dithering in final pass (already in LusionFinalPass), NOT noise overlay */}
-			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
+			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
+			<FsrEasuPass sharpness={0.2} />
+			<FsrRcasPass sharpness={1.0} />
 		</EffectComposer>
 	);
 }

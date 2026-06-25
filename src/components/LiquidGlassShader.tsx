@@ -3,6 +3,7 @@
 // All particles now unified in LiquidNebula with CPU-side animation
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
+	Bloom,
 	ChromaticAberration,
 	EffectComposer,
 	SMAA,
@@ -18,6 +19,7 @@ import ScreenPaint from "./ScreenPaint";
 import LusionFinalPass from "./LusionFinalPass";
 import FsrRcasPass from "./FsrRcasPass";
 import FsrEasuPass from "./FsrEasuPass";
+import ScreenPaintDistortion from "./ScreenPaintDistortion";
 
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
@@ -559,7 +561,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				<SMAA preset={cfg.smaa} />
 				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				<FsrEasuPass sharpness={0.2} />
-				<FsrRcasPass sharpness={1.0} />
+				{ <FsrRcasPass sharpness={1.0} /> as any }
 			</EffectComposer>
 		);
 	}
@@ -573,10 +575,10 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
-				{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
+				{ (paintTexture ? <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} /> : null) as any }
 				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				<FsrEasuPass sharpness={0.2} />
-				<FsrRcasPass sharpness={1.0} />
+				{ <FsrRcasPass sharpness={1.0} /> as any }
 			</EffectComposer>
 		);
 	}
@@ -590,10 +592,10 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}
 			/>
-			{paintTexture && <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} />}
+			{ (paintTexture ? <ScreenPaintDistortion paintTexture={paintTexture} amount={0.5} /> : null) as any }
 			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			<FsrEasuPass sharpness={0.2} />
-			<FsrRcasPass sharpness={1.0} />
+			{ <FsrRcasPass sharpness={1.0} /> as any }
 		</EffectComposer>
 	);
 }

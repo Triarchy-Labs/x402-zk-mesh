@@ -353,67 +353,122 @@ export default function Page() {
 								x402 Protocol / ZK Mesh / Sovereign Matrix
 							</motion.p>
 
-							{/* MAIN CTA — Gateway to Bounty Board */}
-							<motion.button
-								whileTap={{ scale: 0.95 }}
-								onMouseEnter={() => setHoverCTA(true)}
-								onMouseLeave={() => setHoverCTA(false)}
-								onClick={() => window.location.href = "/bounties"}
-								className="snake-border"
-								style={{
-									marginTop: "4rem",
-									padding: "1.5rem 4rem",
-									border: `1px solid ${hoverCTA ? p.borderHover : p.border}`,
-									borderRadius: "12px",
-									background: hoverCTA ? p.glassBgHover : p.glassBg,
-									backdropFilter: "blur(24px) saturate(1.2)",
-									WebkitBackdropFilter: "blur(24px) saturate(1.2)",
-									cursor: "pointer",
-									position: "relative",
-									overflow: "hidden",
-									boxShadow: hoverCTA ? `0 0 40px ${p.glowHover}` : "none",
-									transition: lusionTransition,
-									transform: hoverCTA ? "scale(1.02)" : "scale(1)",
-								}}
-							>
-								<div
+							{/* CTA BUTTONS */}
+							<div style={{ display: "flex", gap: "2rem", marginTop: "4rem", flexWrap: "wrap", justifyContent: "center" }}>
+								<motion.button
+									whileTap={{ scale: 0.95 }}
+									onMouseEnter={() => setHoverCTA(true)}
+									onMouseLeave={() => setHoverCTA(false)}
+									onClick={() => window.location.href = "/bounties"}
+									className="snake-border"
 									style={{
-										position: "absolute",
-										top: 0,
-										left: 0,
-										right: 0,
-										height: "1px",
-										background: `linear-gradient(90deg, transparent, ${hoverCTA ? p.accentHover : p.border}, transparent)`,
-										transition: lusionTransition,
-									}}
-								/>
-								<div
-									style={{
-										position: "absolute",
-										bottom: 0,
-										left: 0,
-										right: 0,
-										height: "1px",
-										background: `linear-gradient(90deg, transparent, ${hoverCTA ? p.accentHover : p.border}, transparent)`,
-										transition: lusionTransition,
-									}}
-								/>
-								<p
-									style={{
-										color: hoverCTA ? p.accentHover : p.text,
-										fontFamily: FONT_HEADING,
-										textAlign: "center",
-										margin: 0,
-										fontWeight: 500,
-										letterSpacing: "0.15em",
-										fontSize: "1.1rem",
-										transition: lusionTransition,
-										textShadow: hoverCTA ? `0 0 15px ${p.glowHover}` : "none",
+										padding: "1.5rem 3rem",
+										border: `1px solid ${hoverCTA ? p.borderHover : p.border}`,
+										borderRadius: "12px",
+										background: hoverCTA ? p.glassBgHover : p.glassBg,
+										backdropFilter: "blur(24px) saturate(1.2)",
+										WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+										cursor: "pointer",
+										position: "relative",
+										overflow: "hidden",
+										boxShadow: hoverCTA ? `0 0 40px ${p.glowHover}` : "none",
+										transition: "all 0.6s cubic-bezier(0.1, 0.8, 0.2, 1)",
+										transform: hoverCTA ? "scale(1.02)" : "scale(1)",
 									}}
 								>
-									[ ACCESS BOUNTY BOARD ]
-								</p>
-							</motion.button>
+									<div
+										style={{
+											position: "absolute",
+											top: 0,
+											left: 0,
+											right: 0,
+											height: "1px",
+											background: `linear-gradient(90deg, transparent, ${hoverCTA ? p.accentHover : p.border}, transparent)`,
+											transition: "all 0.6s ease",
+										}}
+									/>
+									<div
+										style={{
+											position: "absolute",
+											bottom: 0,
+											left: 0,
+											right: 0,
+											height: "1px",
+											background: `linear-gradient(90deg, transparent, ${hoverCTA ? p.accentHover : p.border}, transparent)`,
+											transition: "all 0.6s ease",
+										}}
+									/>
+									<p
+										style={{
+											color: hoverCTA ? p.accentHover : p.text,
+											fontFamily: FONT_HEADING,
+											textAlign: "center",
+											margin: 0,
+											fontWeight: 500,
+											letterSpacing: "0.15em",
+											fontSize: "1.1rem",
+											transition: "all 0.6s ease",
+											textShadow: hoverCTA ? `0 0 15px ${p.glowHover}` : "none",
+										}}
+									>
+										[ ACCESS BOUNTY BOARD ]
+									</p>
+								</motion.button>
+
+								{/* SECONDARY CTA — Judge Live Trace Demo */}
+								<motion.button
+									whileTap={{ scale: 0.95 }}
+									onMouseEnter={(e) => {
+										e.currentTarget.style.borderColor = p.accentHover;
+										e.currentTarget.style.boxShadow = `0 0 40px ${p.glowHover}`;
+										e.currentTarget.style.transform = "scale(1.02)";
+										const text = e.currentTarget.querySelector("p");
+										if (text) {
+											text.style.color = p.accentHover;
+											text.style.textShadow = `0 0 15px ${p.glowHover}`;
+										}
+									}}
+									onMouseLeave={(e) => {
+										e.currentTarget.style.borderColor = p.border;
+										e.currentTarget.style.boxShadow = "none";
+										e.currentTarget.style.transform = "scale(1)";
+										const text = e.currentTarget.querySelector("p");
+										if (text) {
+											text.style.color = p.textMuted;
+											text.style.textShadow = "none";
+										}
+									}}
+									onClick={() => window.location.href = "/demo"}
+									style={{
+										padding: "1.5rem 3rem",
+										border: `1px solid ${p.border}`,
+										borderRadius: "12px",
+										background: "transparent",
+										backdropFilter: "blur(24px)",
+										WebkitBackdropFilter: "blur(24px)",
+										cursor: "pointer",
+										position: "relative",
+										overflow: "hidden",
+										transition: "all 0.6s cubic-bezier(0.1, 0.8, 0.2, 1)",
+										transform: "scale(1)",
+									}}
+								>
+									<p
+										style={{
+											color: p.textMuted,
+											fontFamily: FONT_HEADING,
+											textAlign: "center",
+											margin: 0,
+											fontWeight: 400,
+											letterSpacing: "0.15em",
+											fontSize: "1.1rem",
+											transition: "all 0.6s ease",
+										}}
+									>
+										[ LAUNCH LIVE TRACE ]
+									</p>
+								</motion.button>
+							</div>
 
 							{/* Live stats row — green sweep animation */}
 							<motion.div

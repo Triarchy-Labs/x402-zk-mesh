@@ -241,8 +241,9 @@ void main() {
   // Feral Reviewer Fix: u_hasPaintTexture prevents unbound (0,0) reading as (-1,-1) velocity!
   vec2 fluidVel = (fluidData.xy - 0.5) * 2.0 * u_hasPaintTexture;
   
-  // Inject fluid advection directly into particle velocity
-  vec3 mouseFinalVel = vec3(fluidVel * 50.0, 0.0);
+  // Feral Reviewer Fix: Fluid advection is an ACCELERATION field! 
+  // It MUST be multiplied by u_deltaTime, otherwise particles explode to infinity in 3 frames.
+  vec3 mouseFinalVel = vec3(fluidVel * 300.0, 0.0) * u_deltaTime;
   mouseFinalVel *= u_mouseStrength;
   velInfo.xyz += mouseFinalVel;
 
@@ -570,7 +571,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<Bloom intensity={0.5} luminanceThreshold={0.5} mipmapBlur />
+				<Bloom intensity={1.2} luminanceThreshold={0.9} mipmapBlur />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
@@ -587,7 +588,7 @@ function AdaptivePostProcessing({ theme, tier, paintTexture }: { theme: "dark" |
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
-			<Bloom intensity={0.8} luminanceThreshold={0.2} mipmapBlur />
+			<Bloom intensity={1.2} luminanceThreshold={0.9} mipmapBlur />
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}

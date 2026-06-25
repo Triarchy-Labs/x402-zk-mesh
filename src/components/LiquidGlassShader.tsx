@@ -164,7 +164,7 @@ void main() {
   vec4 velInfo = texture2D(textureVelocity, uv);
 
   // Life decay (GOES DOWN: 1.0 → 0.0) — Lusion exact
-  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01 * (1.0 + velInfo.w);
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
 
   // Respawn when life < 0
   if (positionLife.w < 0.0) {
@@ -173,19 +173,13 @@ void main() {
     positionLife.w = 1.0;
   }
 
-  // Kill bounds via step() multiplication — Lusion exact
+  // Kill bounds via step() multiplication
   vec3 boundCheck = step(positionLife.xyz, u_bounds);
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
   // Velocity integration
   positionLife.xyz += velInfo.xyz * u_deltaTime;
-
-  // Curl noise displacement — applied to POSITION (stop-motion)
-  vec3 curlStr = u_curlStrength * u_curlStrMul;
-  vec3 curlScale = u_curlNoiseScale;
-  vec3 curlVel = curl(positionLife.xyz * curlScale, u_time * u_simSpeed, 0.02) * curlStr * u_deltaTime;
-  positionLife.xyz += curlVel;
 
   gl_FragColor = positionLife;
 }
@@ -228,21 +222,25 @@ void main() {
     velInfo.w = 0.0;
   }
 
-  // Damping 0.975 — Lusion exact
-  velInfo.xyz *= 0.975;
+  // Damping 0.985 — Lusion exact (velocityDissipation)
+  velInfo.xyz *= 0.985;
 
-  // Wind force — Lusion exact
+  // Wind force
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
 
-  // Mouse velocity injection — Lusion exact (lines 75-80)
-  // Without ScreenPaint FBO, we simulate mouse push via screenBounds projection
+  // Mouse velocity injection
   vec2 posUv = posToUv(positionLife.xyz);
-  // u_mouseMoveIntensity drives the strength (lerped mouse delta)
-  // Applied as radial push from cursor position
   vec3 mouseFinalVel = vec3(0.0);
   mouseFinalVel *= u_mouseMoveIntensity * u_mouseStrength;
   velInfo.xyz += mouseFinalVel;
+
+  // Curl noise displacement — Lusion canon: apply to Velocity, not Position!
+  // u_curlNoiseScale = 0.1, u_curlStrength = 5.0 (Lusion constants from SKILL.md)
+  vec3 curlStr = vec3(5.0); 
+  vec3 curlScale = vec3(0.1);
+  vec3 curlForce = curl(positionLife.xyz * curlScale, u_time * 0.5, 0.02) * curlStr * u_deltaTime;
+  velInfo.xyz += curlForce;
 
   gl_FragColor = velInfo;
 }
@@ -269,6 +267,8 @@ void main() {
   
   // Read position + life from GPGPU FBO texture
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
+  
+  // Apply true Lusion life decay to size (fade in / out curve)
   float lifeSize = sizeFromLife(positionLife.w);
   vec3 pos = positionLife.xyz;
   
@@ -279,7 +279,7 @@ void main() {
   float coef = abs(-mvPosition.z - dist) * 0.3 + pow(max(0.0, -mvPosition.z - dist), 2.5) * 0.5;
   
   vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
-  vOpacity = ${U_OPACITY} * lifeSize;
+  vOpacity = ${U_OPACITY} * lifeSize; // Opacity strictly follows lifeSize curve!
   
   gl_Position = projectionMatrix * mvPosition;
   float pSize = (coef * 200.0 * ${U_P_SIZE_MUL}) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;

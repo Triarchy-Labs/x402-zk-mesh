@@ -22,7 +22,7 @@ import FsrEasuPass from "./FsrEasuPass";
 // Lusion-grade adaptive constants per device tier
 const TIER_CONFIG = {
 	high: { particles: 16384, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [0.75, 1.0] as [number, number], enableChroma: true },
-	mid:  { particles: 8192,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [0.5, 0.75] as [number, number], enableChroma: true },
+	mid:  { particles: 9216,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [0.5, 0.75] as [number, number], enableChroma: true },
 	low:  { particles: 4096,  smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [0.5, 0.5] as [number, number], enableChroma: false },
 };
 
@@ -168,7 +168,6 @@ void main() {
 
   // Respawn when life < 0
   if (positionLife.w < 0.0) {
-    vec3 h = hash33(vec3(uv, u_time));
     positionLife.xyz = texture2D(u_defaultPosTex, uv).xyz;
     positionLife.w = 1.0;
   }
@@ -178,11 +177,11 @@ void main() {
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
-  // Velocity integration
-  positionLife.xyz += velInfo.xyz * u_deltaTime;
+  // Velocity integration scaled by simSpeed
+  positionLife.xyz += velInfo.xyz * u_simSpeed * u_deltaTime;
 
-  // Curl noise displacement applied directly to position (Lusion stop-motion style)
-  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_deltaTime;
+  // Curl noise displacement with strength multiplier and simSpeed scaling
+  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul * u_deltaTime;
   positionLife.xyz += curlForce;
 
   gl_FragColor = positionLife;
@@ -211,7 +210,6 @@ void main() {
   // Life decay check for respawn / reset velocity
   positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
   if (positionLife.w < 0.0) {
-    vec3 h = hash33(vec3(uv, u_time));
     velInfo.xyz = vec3(0.0);
     velInfo.w = 0.0;
   }
@@ -231,6 +229,9 @@ void main() {
 const gpgpuVertexShader = /* glsl */ `
 uniform sampler2D u_currPosTex;
 uniform vec2 uResolution;
+uniform float u_opacity;
+uniform float u_pSizeMul;
+uniform float u_pSoftMul;
 attribute vec2 a_simUv;
 attribute vec3 customColor;
 varying vec3 vColor;
@@ -259,18 +260,17 @@ void main() {
   float dist = ${U_FOCUS_DIST} * 10.0;
   float coef = abs(-mvPosition.z - dist) * 0.3 + pow(max(0.0, -mvPosition.z - dist), 2.5) * 0.5;
   
-  vSoftness = coef * ${U_P_SOFT_MUL} * 10.0;
-  vOpacity = ${U_OPACITY} * lifeSize; // Opacity strictly follows lifeSize curve!
+  vSoftness = coef * u_pSoftMul * 10.0;
+  vOpacity = u_opacity * lifeSize; // Opacity strictly follows lifeSize curve!
   
   gl_Position = projectionMatrix * mvPosition;
-  float pSize = (coef * 200.0 * ${U_P_SIZE_MUL}) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+  float pSize = (coef * 200.0 * u_pSizeMul) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
   gl_PointSize = pSize * lifeSize;
 }
 `;
 
 // ── LiquidNebula: GPGPU Particle Component ──
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- particleCount reserved for dynamic tier switching
-function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" | "light"; particleCount: number }) {
+function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; particleCount: number }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const materialRef = useRef<THREE.ShaderMaterial>(null);
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
@@ -279,20 +279,25 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 	// Scroll tracking ref — Lusion exact (lines 190-215)
 	const lerpedWheelDelta = useRef(0);
 	const { gl, size } = useThree();
+	const tier = useDeviceTier();
 
-	// Create sim UVs + colors (immutable, initialized once)
-	const [simUvs, colors] = useState(() => {
-		const uvs = new Float32Array(PARTICLE_COUNT * 2);
-		const col = new Float32Array(PARTICLE_COUNT * 3);
+	// Calculate texture dimensions from particle count
+	const texSize = Math.round(Math.sqrt(particleCount));
+	const actualParticleCount = texSize * texSize;
+
+	// Create sim UVs + colors (immutable, initialized once per particleCount change)
+	const [simUvs, colors] = useMemo(() => {
+		const uvs = new Float32Array(actualParticleCount * 2);
+		const col = new Float32Array(actualParticleCount * 3);
 		// Stark, clean, premium white-hot look to avoid 'muddy' or 'gypsy' gold
 		const baseColor = new THREE.Color("#ffffff");
 		const secondaryColor = new THREE.Color("#fcf8e8");
 
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			const x = (i % TEX_SIZE) / TEX_SIZE;
-			const y = Math.floor(i / TEX_SIZE) / TEX_SIZE;
-			uvs[i * 2] = x + 0.5 / TEX_SIZE;
-			uvs[i * 2 + 1] = y + 0.5 / TEX_SIZE;
+		for (let i = 0; i < actualParticleCount; i++) {
+			const x = (i % texSize) / texSize;
+			const y = Math.floor(i / texSize) / texSize;
+			uvs[i * 2] = x + 0.5 / texSize;
+			uvs[i * 2 + 1] = y + 0.5 / texSize;
 
 			const c = Math.random() > 0.5 ? baseColor : secondaryColor;
 			col[i * 3] = c.r;
@@ -300,25 +305,25 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 			col[i * 3 + 2] = c.b;
 		}
 		return [uvs, col];
-	})[0];
+	}, [texSize, actualParticleCount]);
 
 	// FBO seed positions (vertex shader reads from FBO, not from position attribute)
-	const fboSeedPositions = useMemo(() => new Float32Array(PARTICLE_COUNT * 3), []);
+	const fboSeedPositions = useMemo(() => new Float32Array(actualParticleCount * 3), [actualParticleCount]);
 
 	// Initialize GPUComputationRenderer
 	useEffect(() => {
-		const gpu = new GPUComputationRenderer(TEX_SIZE, TEX_SIZE, gl);
+		const gpu = new GPUComputationRenderer(texSize, texSize, gl);
 
 		// Position texture: xyz = spawn position, w = life (starts at 1.0, decays to 0)
 		const posTex = gpu.createTexture();
 		const posData = posTex.image.data as Float32Array;
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
+		for (let i = 0; i < actualParticleCount; i++) {
 			// Lusion EXACT spawn (line 219): pow(rand,4) for X clusters to center
 			posData[i * 4]     = (Math.pow(Math.random(), 4) * 2 - 1) * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
 			posData[i * 4 + 1] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
 			posData[i * 4 + 2] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
 			// Lusion EXACT life init (line 111): linear i/N, not random
-			posData[i * 4 + 3] = i / PARTICLE_COUNT;
+			posData[i * 4 + 3] = i / actualParticleCount;
 		}
 
 		// Default position texture for respawn (Lusion exact: texture2D(u_defaultPosTex, uv))
@@ -326,7 +331,7 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		const defaultPosData = defaultPosTex.image.data as Float32Array;
 		defaultPosData.set(posData); // copy initial positions
 		const defaultPosDataTex = new THREE.DataTexture(
-			defaultPosData, TEX_SIZE, TEX_SIZE, THREE.RGBAFormat, THREE.FloatType
+			defaultPosData, texSize, texSize, THREE.RGBAFormat, THREE.FloatType
 		);
 		defaultPosDataTex.needsUpdate = true;
 
@@ -367,11 +372,14 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		const err = gpu.init();
 		if (err !== null) {
 			console.error("GPUComputationRenderer init error:", err);
+			if (posVar.material) posVar.material.dispose();
+			if (velVar.material) velVar.material.dispose();
 			gpu.dispose();
+			defaultPosDataTex.dispose();
 			return;
 		}
 
-		console.log("GPGPU initialized: 128x128 FBO, curl noise + velocity physics");
+		console.log(`GPGPU initialized: ${texSize}x${texSize} FBO, curl noise + velocity physics`);
 		gpuRef.current = gpu;
 		posVarRef.current = posVar;
 		velVarRef.current = velVar;
@@ -383,18 +391,26 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		window.addEventListener('wheel', onWheel, { passive: true });
 
 		return () => {
+			if (posVar.material) posVar.material.dispose();
+			if (velVar.material) velVar.material.dispose();
 			gpu.dispose();
 			defaultPosDataTex.dispose();
 			window.removeEventListener('wheel', onWheel);
 		};
-	}, [gl]);
+	}, [gl, texSize, actualParticleCount]);
 
 	// Render uniforms
-	const uniforms = useMemo(() => ({
-		u_currPosTex: { value: null as THREE.Texture | null },
-		uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
-		uResolution: { value: new THREE.Vector2(size.width, size.height) },
-	}), [theme, size]);
+	const uniforms = useMemo(() => {
+		const isLow = tier === "low";
+		return {
+			u_currPosTex: { value: null as THREE.Texture | null },
+			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
+			uResolution: { value: new THREE.Vector2(size.width, size.height) },
+			u_opacity: { value: isLow ? 0.95 : 0.32 },
+			u_pSizeMul: { value: isLow ? 1.6 : 0.4 },
+			u_pSoftMul: { value: 0.92 },
+		};
+	}, [theme, size, tier]);
 
 	// GPGPU compute + render update
 	useFrame((state, delta) => {
@@ -424,6 +440,10 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
 			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
 			materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
+			
+			const isLow = tier === "low";
+			materialRef.current.uniforms.u_opacity.value = isLow ? 0.95 : 0.32;
+			materialRef.current.uniforms.u_pSizeMul.value = isLow ? 1.6 : 0.4;
 		}
 	});
 
@@ -519,7 +539,7 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<Bloom intensity={1.2} luminanceThreshold={0.8} mipmapBlur />
+				<Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.8} mipmapBlur />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
@@ -535,7 +555,7 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
-			<Bloom intensity={1.2} luminanceThreshold={0.8} mipmapBlur />
+			<Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.8} mipmapBlur />
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}

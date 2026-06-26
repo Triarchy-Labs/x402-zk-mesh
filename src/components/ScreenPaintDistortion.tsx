@@ -143,16 +143,30 @@ const ScreenPaintDistortion = forwardRef(function ScreenPaintDistortion(
 
   // Load REAL blue noise texture on mount (Lusion: BlueNoise.preInit())
   useEffect(() => {
+    let activeTex: Texture | null = null;
+    let isMounted = true;
     const loader = new TextureLoader();
     loader.load("/LDR_RGB1_0.png", (tex) => {
+      if (!isMounted) {
+        tex.dispose();
+        return;
+      }
       // Lusion exact: NearestFilter + RepeatWrapping (строка 42627-42630)
       tex.generateMipmaps = false;
       tex.minFilter = NearestFilter;
       tex.magFilter = NearestFilter;
       tex.wrapS = RepeatWrapping;
       tex.wrapT = RepeatWrapping;
+      activeTex = tex;
       effect.uniforms.get("u_blueNoiseTexture")!.value = tex;
     });
+
+    return () => {
+      isMounted = false;
+      if (activeTex) {
+        activeTex.dispose();
+      }
+    };
   }, [effect]);
 
   // Update every frame (Lusion: BlueNoise.update())

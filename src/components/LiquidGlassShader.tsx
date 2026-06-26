@@ -35,10 +35,10 @@ import { GPUComputationRenderer } from "three/examples/jsm/misc/GPUComputationRe
 const TEX_SIZE = 128; // строка 48648
 const PARTICLE_COUNT = TEX_SIZE * TEX_SIZE; // 16384, строка 48649
 
-// Render: boosted to compensate for missing Bloom postprocessing (physics remain 1:1)
-const U_OPACITY = "0.95";
-const U_P_SIZE_MUL = "1.6";
-const U_P_SOFT_MUL = "2.5";
+// Render: Lusion canon defaults
+const U_OPACITY = "0.32";
+const U_P_SIZE_MUL = "0.4";
+const U_P_SOFT_MUL = "0.92";
 const U_FOCUS_DIST = "0.32";
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
@@ -181,6 +181,10 @@ void main() {
   // Velocity integration
   positionLife.xyz += velInfo.xyz * u_deltaTime;
 
+  // Curl noise displacement applied directly to position (Lusion stop-motion style)
+  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_deltaTime;
+  positionLife.xyz += curlForce;
+
   gl_FragColor = positionLife;
 }
 `;
@@ -192,9 +196,6 @@ uniform float u_time;
 uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
-uniform float u_mouseStrength;        // DEFAULT: 0.2 (line 155)
-uniform float u_mouseMoveIntensity;   // Lerped mouse delta (line 158)
-uniform vec3 u_screenBounds;          // Screen projection bounds (line 161)
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
@@ -202,39 +203,25 @@ vec3 hash33(vec3 p3) {
   return fract((p3.xxy + p3.yxx) * p3.zyx);
 }
 
-// Project 3D position to UV — Lusion exact (line 33)
-vec2 posToUv(vec3 pos) {
-  vec2 uv = pos.xy / u_screenBounds.xy;
-  uv = (uv + vec2(1.0)) / 2.0;
-  uv.y = 1.0 - uv.y;
-  return uv;
-}
-
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay check for respawn
+  // Life decay check for respawn / reset velocity
   positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
   if (positionLife.w < 0.0) {
     vec3 h = hash33(vec3(uv, u_time));
+    velInfo.xyz = vec3(0.0);
     velInfo.w = 0.0;
   }
 
-  // Damping 0.985 — Lusion exact (velocityDissipation)
-  velInfo.xyz *= 0.985;
+  // Damping 0.975 scaled to FPS (Lusion exact: velocityDissipation = 0.975)
+  velInfo.xyz *= pow(0.975, u_deltaTime * 60.0);
 
   // Wind force
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
-
-  // Curl noise displacement — Lusion canon: apply to Velocity, not Position!
-  // u_curlNoiseScale = 0.1, u_curlStrength = 5.0 (Lusion constants from SKILL.md)
-  vec3 curlStr = vec3(5.0); 
-  vec3 curlScale = vec3(0.1);
-  vec3 curlForce = curl(positionLife.xyz * curlScale, u_time * 0.5, 0.02) * curlStr * u_deltaTime;
-  velInfo.xyz += curlForce;
 
   gl_FragColor = velInfo;
 }
@@ -289,10 +276,8 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
 	const posVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
 	const velVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
-	// Scroll + mouse tracking refs — Lusion exact (lines 190-215)
+	// Scroll tracking ref — Lusion exact (lines 190-215)
 	const lerpedWheelDelta = useRef(0);
-	const mouseMoveIntensity = useRef(0);
-	const prevMousePos = useRef({ x: 0, y: 0 });
 	const { gl, size } = useThree();
 
 	// Create sim UVs + colors (immutable, initialized once)
@@ -371,9 +356,6 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
-		velVar.material.uniforms.u_mouseStrength = { value: 0.2 };  // Lusion exact (line 155)
-		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };  // Lusion exact (line 158)
-		velVar.material.uniforms.u_screenBounds = { value: new THREE.Vector3(4.0, 3.8, 1.0) };
 		// paintTexture uniform removed
 
 		// Wrapping for seamless noise
@@ -398,16 +380,12 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		const onWheel = (e: WheelEvent) => {
 			lerpedWheelDelta.current += (e.deltaY * 0.01 - lerpedWheelDelta.current) * 0.15;
 		};
-		const onMouseMove = (e: MouseEvent) => {
-			prevMousePos.current = { x: e.clientX, y: e.clientY };
-		};
 		window.addEventListener('wheel', onWheel, { passive: true });
-		window.addEventListener('mousemove', onMouseMove);
 
 		return () => {
 			gpu.dispose();
+			defaultPosDataTex.dispose();
 			window.removeEventListener('wheel', onWheel);
-			window.removeEventListener('mousemove', onMouseMove);
 		};
 	}, [gl]);
 
@@ -434,8 +412,8 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 		const wd = lerpedWheelDelta.current * 0.0144;
 		velVarRef.current.material.uniforms.u_windForce.value.y = wd;
 		posVarRef.current.material.uniforms.u_curlStrength.value.y = 0.12 + Math.abs(wd) * 0.5;
-		// Decay wheel delta
-		lerpedWheelDelta.current *= 0.95;
+		// Decay wheel delta (FPS independent)
+		lerpedWheelDelta.current *= Math.pow(0.95, clampedDelta * 60.0);
 
 		// Run GPGPU compute
 		gpuRef.current.compute();
@@ -481,6 +459,7 @@ function LiquidNebula({ theme, particleCount: _particleCount }: { theme: "dark" 
 				fragmentShader={themedFragmentShader}
 				uniforms={uniforms}
 				transparent
+				premultipliedAlpha={true}
 				depthWrite={false}
 				depthTest={false}
 				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
@@ -540,7 +519,7 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<Bloom intensity={1.2} luminanceThreshold={0.9} mipmapBlur />
+				<Bloom intensity={1.2} luminanceThreshold={0.8} mipmapBlur />
 				<ChromaticAberration
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
@@ -556,7 +535,7 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
-			<Bloom intensity={1.2} luminanceThreshold={0.9} mipmapBlur />
+			<Bloom intensity={1.2} luminanceThreshold={0.8} mipmapBlur />
 			<ChromaticAberration
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}

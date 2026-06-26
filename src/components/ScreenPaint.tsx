@@ -1,7 +1,7 @@
 "use client";
 import { useFBO } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, type MutableRefObject } from "react";
+import { useRef, useMemo, useEffect, type MutableRefObject } from "react";
 import * as THREE from "three";
 import type { PointerState } from "../hooks/useUnifiedPointer";
 
@@ -117,9 +117,12 @@ export default function ScreenPaint({ pointerRef, onTextureReady }: ScreenPaintP
 		});
 	}, []);
 
+	const geomRef = useRef<THREE.PlaneGeometry | null>(null);
 	const scene = useMemo(() => {
 		const s = new THREE.Scene();
-		const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), paintMaterial);
+		const geom = new THREE.PlaneGeometry(2, 2);
+		geomRef.current = geom;
+		const quad = new THREE.Mesh(geom, paintMaterial);
 		s.add(quad);
 		return s;
 	}, [paintMaterial]);
@@ -128,6 +131,16 @@ export default function ScreenPaint({ pointerRef, onTextureReady }: ScreenPaintP
 		const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 		return cam;
 	}, []);
+
+	// Cleanup memory on unmount
+	useEffect(() => {
+		return () => {
+			if (geomRef.current) {
+				geomRef.current.dispose();
+			}
+			paintMaterial.dispose();
+		};
+	}, [paintMaterial]);
 
 	// Previous pointer for segment drawing
 	const prevPointer = useRef({ px: 0, py: 0 });

@@ -45,18 +45,18 @@ const fragment = /* glsl */ `
     float fL = dot(f, vec3(0.2126, 0.7152, 0.0722));
     float hL = dot(h, vec3(0.2126, 0.7152, 0.0722));
 
-    // Min/max of cross neighborhood
-    float nz = 0.25 * (bL + dL + fL + hL);
-    float mn = min(min(bL, dL), min(eL, min(fL, hL)));
-    float mx = max(max(bL, dL), max(eL, max(fL, hL)));
+    // Min/max of cross neighborhood per channel (Lusion exact)
+    vec3 mn4 = min(min(b, d), min(f, h));
+    vec3 mx4 = max(max(b, d), max(f, h));
 
-    // Adaptive lobe strength (Lusion exact)
-    float range = mx - mn;
-    float lobe = max(0.0, min(
-      (mn + mn + mn + nz) / (4.0 * mx) - 1.0,
-      0.0
-    )) * FsrRcasCon(u_sharpness);
-    lobe = max(-0.1875, lobe);  // Clamp to prevent over-sharpening
+    // Avoid division by zero and preserve sign
+    vec3 hitMin = mn4 / (4.0 * mx4 + 1e-5);
+    vec3 hitMax = (1.0 - mx4) / (4.0 * mn4 - 4.0 - 1e-5);
+    vec3 lobeRGB = max(-hitMin, hitMax);
+    
+    float FSR_RCAS_LIMIT = 0.1875;
+    float con = FsrRcasCon(u_sharpness);
+    float lobe = max(-FSR_RCAS_LIMIT, min(max(lobeRGB.r, max(lobeRGB.g, lobeRGB.b)), 0.0)) * con;
 
     // Weighted average (Lusion exact)
     vec3 col = (lobe * (b + d + h + f) + e) / (4.0 * lobe + 1.0);

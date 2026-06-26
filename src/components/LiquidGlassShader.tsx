@@ -528,9 +528,9 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 		return (
 			<EffectComposer multisampling={0}>
 				<SMAA preset={cfg.smaa} />
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				<FsrEasuPass sharpness={0.2} />
 				{ <FsrRcasPass sharpness={1.0} /> as any }
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			</EffectComposer>
 		);
 	}
@@ -544,9 +544,9 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 					blendFunction={BlendFunction.NORMAL}
 					offset={new THREE.Vector2(0.001, 0.001)}
 				/>
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 				<FsrEasuPass sharpness={0.2} />
 				{ <FsrRcasPass sharpness={1.0} /> as any }
+				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			</EffectComposer>
 		);
 	}
@@ -560,9 +560,9 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 				blendFunction={BlendFunction.NORMAL}
 				offset={new THREE.Vector2(0.001, 0.001)}
 			/>
-			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 			<FsrEasuPass sharpness={0.2} />
 			{ <FsrRcasPass sharpness={1.0} /> as any }
+			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
 		</EffectComposer>
 	);
 }

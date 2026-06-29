@@ -247,10 +247,8 @@ void main() {
   
   // Read position + life from GPGPU FBO texture
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
-  
-  // Fallback to attribute position if FBO texture is uninitialized (prevents center spawn jump on load)
-  vec3 pos = (positionLife.w == 0.0) ? position : positionLife.xyz;
-  float lifeSize = sizeFromLife(positionLife.w == 0.0 ? a_simUv.y : positionLife.w);
+  vec3 pos = positionLife.xyz;
+  float lifeSize = sizeFromLife(positionLife.w);
   
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   
@@ -305,14 +303,21 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		return [uvs, col];
 	}, [texSize, actualParticleCount]);
 
-	// Generate initial spawn positions once per particleCount change
+	// Generate initial spawn positions — labs.lusion.co EXACT _getCubePosDistribution()
 	const initialPositions = useMemo(() => {
 		const arr = new Float32Array(actualParticleCount * 3);
+		const bx = parseFloat(SPAWN_X), by = parseFloat(SPAWN_Y), bz = parseFloat(SPAWN_Z);
+		const ox = parseFloat(SPAWN_OX), oy = parseFloat(SPAWN_OY), oz = parseFloat(SPAWN_OZ);
 		for (let i = 0; i < actualParticleCount; i++) {
-			// Start positions: cluster on the left (-3.0 to -2.5) to flow in gradually from behind the screen
-			arr[i * 3]     = parseFloat(SPAWN_OX) + Math.pow(Math.random(), 4) * 0.5;
-			arr[i * 3 + 1] = parseFloat(SPAWN_OY) + (Math.random() - 0.5) * parseFloat(SPAWN_Y);
-			arr[i * 3 + 2] = parseFloat(SPAWN_OZ) + (Math.random() - 0.5) * parseFloat(SPAWN_Z);
+			// Second half: nt=2 (expanded bounds) — labs.lusion.co exact
+			const nt = i >= actualParticleCount / 2 ? 2 : 0;
+			const ebx = bx + nt * (Math.random() - 0.5);
+			const eby = by + nt * (Math.random() - 0.5);
+			const ebz = bz + nt * (Math.random() - 0.5);
+			// X: pow(random,4) center-clustered distribution → range (-7 to 1)
+			arr[i * 3]     = (Math.pow(Math.random(), 4) * 2 - 1) * ebx + ox;
+			arr[i * 3 + 1] = (Math.random() * 2 - 1) * eby + oy;
+			arr[i * 3 + 2] = (Math.random() * 2 - 1) * ebz + oz;
 		}
 		return arr;
 	}, [actualParticleCount]);
@@ -336,14 +341,19 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			posData[i * 4 + 3] = i / actualParticleCount;
 		}
 
-		// Default position texture for respawn (Lusion exact: texture2D(u_defaultPosTex, uv))
+		// Default position texture for respawn — labs.lusion.co EXACT
 		const defaultPosTex = gpu.createTexture();
 		const defaultPosData = defaultPosTex.image.data as Float32Array;
+		const bx = parseFloat(SPAWN_X), by = parseFloat(SPAWN_Y), bz = parseFloat(SPAWN_Z);
+		const ox = parseFloat(SPAWN_OX), oy = parseFloat(SPAWN_OY), oz = parseFloat(SPAWN_OZ);
 		for (let i = 0; i < actualParticleCount; i++) {
-			// Respawn positions use the full canon layout (X от -3.0 до 1.0)
-			defaultPosData[i * 4]     = parseFloat(SPAWN_OX) + Math.pow(Math.random(), 4) * parseFloat(SPAWN_X);
-			defaultPosData[i * 4 + 1] = parseFloat(SPAWN_OY) + (Math.random() - 0.5) * parseFloat(SPAWN_Y);
-			defaultPosData[i * 4 + 2] = parseFloat(SPAWN_OZ) + (Math.random() - 0.5) * parseFloat(SPAWN_Z);
+			const nt = i >= actualParticleCount / 2 ? 2 : 0;
+			const ebx = bx + nt * (Math.random() - 0.5);
+			const eby = by + nt * (Math.random() - 0.5);
+			const ebz = bz + nt * (Math.random() - 0.5);
+			defaultPosData[i * 4]     = (Math.pow(Math.random(), 4) * 2 - 1) * ebx + ox;
+			defaultPosData[i * 4 + 1] = (Math.random() * 2 - 1) * eby + oy;
+			defaultPosData[i * 4 + 2] = (Math.random() * 2 - 1) * ebz + oz;
 			defaultPosData[i * 4 + 3] = 1.0;
 		}
 		const defaultPosDataTex = new THREE.DataTexture(
@@ -498,7 +508,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 				fragmentShader={themedFragmentShader}
 				uniforms={uniforms}
 				transparent
-				premultipliedAlpha={true}
+				/* premultipliedAlpha removed — not in labs.lusion.co original */
 				depthWrite={false}
 				depthTest={false}
 				blending={THREE.NormalBlending}  // labs.lusion.co EXACT: always NormalBlending

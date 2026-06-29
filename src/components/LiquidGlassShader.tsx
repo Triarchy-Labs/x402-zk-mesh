@@ -226,15 +226,16 @@ void main() {
   windVel /= 1.0 + velInfo.w * u_mode;
   velInfo.xyz += windVel;
 
-  // Mouse interaction (simplified from screenPaint)
-  // Original uses 2D fluid sim texture; we use direct radial push
+  // Mouse interaction (simplified from screenPaint fluid sim)
+  // Original: 2D fluid sim texture with dissipation 0.975 — very viscous, "oil-like"
+  // Our approximation: gentle radial push with tight radius and low force
   vec3 toMouse = u_mouse3d - positionLife.xyz;
   float dist2 = dot(toMouse, toMouse);
-  float radius = 0.8;  // influence radius
-  float influence = exp(-dist2 / (radius * radius)) * u_mouseMoveIntensity * 0.2;
-  // Push particles AWAY from mouse (perpendicular + radial)
+  float radius = 0.3;  // tight influence radius (original screenPaint ~100px at screen scale)
+  float falloff = smoothstep(radius * radius, 0.0, dist2);  // hard cutoff vs gaussian
+  float influence = falloff * u_mouseMoveIntensity * 0.04;  // very gentle force
   vec3 pushDir = normalize(toMouse + vec3(0.001));
-  velInfo.xyz -= pushDir * influence * u_deltaTime * 60.0;
+  velInfo.xyz -= pushDir * influence;
 
   gl_FragColor = velInfo;
 }

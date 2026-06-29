@@ -177,11 +177,11 @@ void main() {
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
-  // Velocity integration — canon: pos += vel * u_simSpeed (no deltaTime)
-  positionLife.xyz += velInfo.xyz * u_simSpeed;
+  // Velocity integration scaled by simSpeed
+  positionLife.xyz += velInfo.xyz * u_simSpeed * u_deltaTime;
 
-  // Curl noise displacement — canon applies per-frame, no deltaTime
-  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul;
+  // Curl noise displacement with strength multiplier and simSpeed scaling
+  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul * u_deltaTime;
   positionLife.xyz += curlForce;
 
   gl_FragColor = positionLife;
@@ -192,7 +192,6 @@ void main() {
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
-uniform float u_simSpeed;
 uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
@@ -215,11 +214,11 @@ void main() {
     velInfo.w = 0.0;
   }
 
-  // Damping — canon: vel *= 0.975 per frame (no deltaTime scaling)
-  velInfo.xyz *= 0.975;
+  // Damping 0.975 scaled to FPS (Lusion exact: velocityDissipation = 0.975)
+  velInfo.xyz *= pow(0.975, u_deltaTime * 60.0);
 
-  // Wind force — canon: vel += windForce * windStrMul * simSpeed
-  vec3 windVel = u_windForce * u_windStrMul * u_simSpeed;
+  // Wind force
+  vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
 
   gl_FragColor = velInfo;
@@ -380,7 +379,6 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
-		velVar.material.uniforms.u_simSpeed = { value: 0.12 };  // Lusion exact (line 239)
 		// paintTexture uniform removed
 
 		// Wrapping for seamless noise

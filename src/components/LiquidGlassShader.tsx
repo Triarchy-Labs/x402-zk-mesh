@@ -140,7 +140,7 @@ vec3 hash33(vec3 p3) {
 }
 `;
 
-// ── Position Compute Shader — EXACT from labs.lusion.co bundle (lines 3230-3232) ──
+// ── Position Compute Shader — labs.lusion.co bundle EXACT ──
 const positionShader = /* glsl */ `
 ${NOISE_GLSL}
 
@@ -153,14 +153,15 @@ uniform vec3 u_curlStrength;
 uniform float u_curlStrMul;
 uniform float u_simSpeed;
 uniform vec3 u_bounds;
+uniform float u_mode;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay — labs.lusion.co EXACT: * 0.01 is CANON (particles live ~5 min)
-  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
+  // Life decay — labs.lusion.co EXACT: * (1.0 + velInfo.w) makes logo-mode particles die faster
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01 * (1.0 + velInfo.w);
 
   // Respawn when life < 0
   if (positionLife.w < 0.0) {
@@ -173,26 +174,28 @@ void main() {
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
-  // Position integration — labs.lusion.co EXACT: vel * dt, NO simSpeed!
+  // Position integration — labs.lusion.co EXACT: vel * dt
   positionLife.xyz += velInfo.xyz * u_deltaTime;
 
-  // Curl noise — labs.lusion.co EXACT: applied to position, persistence=0.02
+  // Curl noise — labs.lusion.co EXACT
   vec3 curlStr = u_curlStrength * u_curlStrMul;
   vec3 curlScale = u_curlNoiseScale * 1.0;
   vec3 curlVel = curl(positionLife.xyz * curlScale, u_time * u_simSpeed, 0.02) * curlStr * u_deltaTime;
+  curlVel /= 1.0 + velInfo.w * u_mode;  // dampen curl in logo mode
   positionLife.xyz += curlVel;
 
   gl_FragColor = positionLife;
 }
 `;
 
-// ── Velocity Compute Shader — EXACT from labs.lusion.co bundle (line 3233) ──
+// ── Velocity Compute Shader — labs.lusion.co bundle EXACT ──
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
 uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
+uniform float u_mode;
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
@@ -205,62 +208,67 @@ void main() {
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay (simplified copy for mode switching) — labs.lusion.co EXACT
+  // Life decay for mode switching — labs.lusion.co EXACT
   positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
   if (positionLife.w < 0.0) {
+    // Respawn: reset velocity, set mode weight
+    vec3 h = hash33(vec3(uv, u_time));
     velInfo.xyz = vec3(0.0);
-    velInfo.w = 0.0;
+    velInfo.w = h.y * u_mode;  // mode weight for logo attraction
   }
 
-  // Damping — labs.lusion.co EXACT: flat 0.975 per frame, NOT pow()
+  // Damping — labs.lusion.co EXACT: flat 0.975 per frame
   velInfo.xyz *= 0.975;
 
-  // Wind force — labs.lusion.co EXACT
+  // Wind force — labs.lusion.co EXACT: dampened by mode weight
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
+  windVel /= 1.0 + velInfo.w * u_mode;
   velInfo.xyz += windVel;
 
   gl_FragColor = velInfo;
 }
 `;
 
-// ── Render Vertex Shader (строка 48602) — reads from FBO ──
+// ── Render Vertex Shader — labs.lusion.co bundle EXACT ──
+// NOTE: v_color is declared but NEVER written = vec3(0,0,0) = BLACK particles
+// In labs.lusion.co, postInvert=1 inverts the whole scene → black becomes white on dark bg
+// We handle this with our LusionFinalPass postInvert
 const gpgpuVertexShader = /* glsl */ `
 uniform sampler2D u_currPosTex;
 uniform vec2 uResolution;
 uniform float u_opacity;
 uniform float u_pSizeMul;
 uniform float u_pSoftMul;
+uniform float u_focusDist;
 attribute vec2 a_simUv;
-attribute vec3 customColor;
-varying vec3 vColor;
 varying float vSoftness;
 varying float vOpacity;
+varying vec3 vColor;
 
-// Lusion EXACT sizeFromLife (строка 48602)
+// labs.lusion.co EXACT sizeFromLife
 float sizeFromLife(float life) {
   float cut = 0.008;
   return (1.0 - smoothstep(1.0 - cut, 1.0, life)) * smoothstep(0.0, cut, life);
 }
 
 void main() {
-  vColor = customColor;
+  // v_color intentionally unset = vec3(0) = black (labs.lusion.co exact)
   
-  // Read position + life from GPGPU FBO texture
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
-  vec3 pos = positionLife.xyz;
   float lifeSize = sizeFromLife(positionLife.w);
-  
+  vec3 pos = positionLife.xyz;
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   
-  // Lusion EXACT pSize (строка 48602)
-  float dist = ${U_FOCUS_DIST} * 10.0;
+  // labs.lusion.co EXACT DoF size calculation
+  float dist = u_focusDist * 10.0;
   float coef = abs(-mvPosition.z - dist) * 0.3 + pow(max(0.0, -mvPosition.z - dist), 2.5) * 0.5;
   
   vSoftness = coef * u_pSoftMul * 10.0;
-  vOpacity = u_opacity * lifeSize; // Opacity strictly follows lifeSize curve!
+  vOpacity = 1.0;
+  vOpacity = u_opacity * lifeSize;
   
   gl_Position = projectionMatrix * mvPosition;
-  float pSize = (coef * 200.0 * u_pSizeMul) / max(0.001, -mvPosition.z) * uResolution.y / 1280.0;
+  float pSize = (coef * 200.0 * u_pSizeMul) / -mvPosition.z * uResolution.y / 1280.0;
   gl_PointSize = pSize * lifeSize;
 }
 `;
@@ -281,26 +289,16 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const texSize = Math.round(Math.sqrt(particleCount));
 	const actualParticleCount = texSize * texSize;
 
-	// Create sim UVs + colors (immutable, initialized once per particleCount change)
-	const [simUvs, colors] = useMemo(() => {
+	// Create sim UVs (immutable, initialized once per particleCount change)
+	const simUvs = useMemo(() => {
 		const uvs = new Float32Array(actualParticleCount * 2);
-		const col = new Float32Array(actualParticleCount * 3);
-		// Stark, clean, premium white-hot look to avoid 'muddy' or 'gypsy' gold
-		const baseColor = new THREE.Color("#ffffff");
-		const secondaryColor = new THREE.Color("#fcf8e8");
-
 		for (let i = 0; i < actualParticleCount; i++) {
 			const x = (i % texSize) / texSize;
 			const y = Math.floor(i / texSize) / texSize;
 			uvs[i * 2] = x + 0.5 / texSize;
 			uvs[i * 2 + 1] = y + 0.5 / texSize;
-
-			const c = Math.random() > 0.5 ? baseColor : secondaryColor;
-			col[i * 3] = c.r;
-			col[i * 3 + 1] = c.g;
-			col[i * 3 + 2] = c.b;
 		}
-		return [uvs, col];
+		return uvs;
 	}, [texSize, actualParticleCount]);
 
 	// Generate initial spawn positions — labs.lusion.co EXACT _getCubePosDistribution()
@@ -370,7 +368,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		gpu.setVariableDependencies(posVar, [posVar, velVar]);
 		gpu.setVariableDependencies(velVar, [posVar, velVar]);
 
-		// Position uniforms — Lusion exact from Particles.js _initTextures()
+		// Position uniforms — labs.lusion.co exact
 		posVar.material.uniforms.u_defaultPosTex = { value: defaultPosDataTex };
 		posVar.material.uniforms.u_time = { value: 0 };
 		posVar.material.uniforms.u_deltaTime = { value: 0.016 };
@@ -378,16 +376,17 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		posVar.material.uniforms.u_curlNoiseScale = { value: new THREE.Vector3(0.2, 0.6, 0.2) };
 		posVar.material.uniforms.u_curlStrength = { value: new THREE.Vector3(0.2, 0.12, 0.12) };
-		posVar.material.uniforms.u_curlStrMul = { value: 0.8 };  // Lusion exact (Particles.js line 125)
+		posVar.material.uniforms.u_curlStrMul = { value: 0.8 };
 		posVar.material.uniforms.u_bounds = { value: new THREE.Vector3(7.0, 5.0, 2.0) };
+		posVar.material.uniforms.u_mode = { value: 0.0 };  // 0 = particle mode, 1 = logo mode
 
-		// Velocity uniforms — Lusion exact from Particles.js _initTextures()
+		// Velocity uniforms — labs.lusion.co exact
 		velVar.material.uniforms.u_deltaTime = { value: 0.016 };
 		velVar.material.uniforms.u_time = { value: 0 };
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
-		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
-		// paintTexture uniform removed
+		velVar.material.uniforms.u_windStrMul = { value: 1 };
+		velVar.material.uniforms.u_mode = { value: 0.0 };
 
 		// Wrapping for seamless noise
 		posVar.wrapS = THREE.RepeatWrapping;
@@ -428,18 +427,18 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		};
 	}, [gl, texSize, actualParticleCount]);
 
-	// Render uniforms (created once, updated dynamic properties in useFrame to prevent resets)
+	// Render uniforms — labs.lusion.co exact
 	const uniforms = useMemo(() => {
 		return {
 			u_currPosTex: { value: null as THREE.Texture | null },
-			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
-			// labs.lusion.co EXACT: u_resolution = CSS * DPR (GL viewport pixels)
+			// labs.lusion.co: u_resolution = CSS * DPR (GL viewport pixels)
 			uResolution: { value: new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr) },
-			u_opacity: { value: 0.32 },     // labs.lusion.co exact
-			u_pSizeMul: { value: 0.4 },     // labs.lusion.co exact
+			u_opacity: { value: 0.32 },
+			u_pSizeMul: { value: 0.4 },
 			u_pSoftMul: { value: 0.92 },
+			u_focusDist: { value: 0.32 },  // labs.lusion.co exact
 		};
-	}, [tier]); // only recreate when tier changes
+	}, [tier]);
 
 	// GPGPU compute + render update
 	useFrame((state, delta) => {
@@ -467,7 +466,6 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const posTex = gpuRef.current.getCurrentRenderTarget(posVarRef.current).texture;
 		if (materialRef.current) {
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
-			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
 			// labs.lusion.co: resolution = CSS * DPR
 			materialRef.current.uniforms.uResolution.value.set(
 				size.width * viewport.dpr,
@@ -476,11 +474,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		}
 	});
 
+	// labs.lusion.co EXACT fragment shader
+	// v_color = vec3(0) from vertex shader = black particles
+	// postInvert in LusionFinalPass inverts scene for dark theme
 	const themedFragmentShader = `
       varying vec3 vColor;
       varying float vSoftness;
       varying float vOpacity;
-      uniform float uTheme;
 
       float linearStep(float edge0, float edge1, float x) {
         return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
@@ -489,8 +489,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
       void main() {
         float d = length(gl_PointCoord.xy * 2.0 - 1.0);
         float b = linearStep(0.0, vSoftness + fwidth(d), 1.0 - d);
-        vec3 finalColor = mix(vColor, vec3(0.05, 0.05, 0.05), uTheme);
-        vec3 color = finalColor * b * vOpacity;
+        vec3 color = vColor * b * vOpacity;
         gl_FragColor = vec4(color, b * vOpacity);
       }
     `;
@@ -500,7 +499,6 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			<bufferGeometry>
 				<bufferAttribute attach="attributes-position" args={[fboSeedPositions, 3]} />
 				<bufferAttribute attach="attributes-a_simUv" args={[simUvs, 2]} />
-				<bufferAttribute attach="attributes-customColor" args={[colors, 3]} />
 			</bufferGeometry>
 			<shaderMaterial
 				ref={materialRef}
@@ -597,7 +595,8 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 			}}
 		>
 			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 60, near: 0.1, far: 10 }}>
-				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
+				{/* labs.lusion.co: bgColorHex="#000000" for dark, particles are black, postInvert flips all */}
+				<color attach="background" args={[theme === "dark" ? "#000000" : "#fafafa"]} />
 				
 				{/* Core Lighting & Voltage Surges */}
 				<VoltageLights theme={theme} />

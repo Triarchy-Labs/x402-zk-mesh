@@ -153,7 +153,8 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
 
   const effect = useMemo(() => {
     return new LusionFinalEffect({
-      bgColor: theme === "dark" ? [0.004, 0.008, 0.004] : [0.98, 0.98, 0.98],
+      // labs.lusion.co: bgColorHex="#000000"
+      bgColor: theme === "dark" ? [0, 0, 0] : [0.98, 0.98, 0.98],
       vignetteFrom,
       vignetteTo,
       vignetteColor: theme === "dark" ? [0, 0, 0] : [0.95, 0.95, 0.95],
@@ -161,6 +162,8 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
       contrast,
       brightness,
       tintOpacity,
+      // labs.lusion.co EXACT: postInvert=1 for dark theme (inverts black particles to white)
+      invert: theme === "dark" ? 1 : 0,
     });
   }, [theme, vignetteFrom, vignetteTo, saturation, contrast, brightness, tintOpacity]);
 
@@ -176,11 +179,13 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
 
     // Update theme-dependent uniforms
     effect.uniforms.get("u_bgColor")!.value = theme === "dark"
-      ? [0.004, 0.008, 0.004]
+      ? [0, 0, 0]
       : [0.98, 0.98, 0.98];
     effect.uniforms.get("u_vignetteColor")!.value = theme === "dark"
       ? [0, 0, 0]
       : [0.95, 0.95, 0.95];
+    // labs.lusion.co: postInvert=1 for dark theme
+    effect.uniforms.get("u_invert")!.value = theme === "dark" ? 1 : 0;
   });
 
   return <primitive ref={ref} object={effect} dispose={null} />;

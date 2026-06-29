@@ -163,8 +163,8 @@ void main() {
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay (GOES DOWN: 1.0 → 0.0) — Lusion exact
-  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
+  // Life decay (GOES DOWN: 1.0 → 0.0) — canon: life -= 0.005/frame
+  positionLife.w -= u_deltaTime * u_simDieSpeed;
 
   // Respawn when life < 0
   if (positionLife.w < 0.0) {
@@ -177,11 +177,11 @@ void main() {
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
-  // Velocity integration scaled by simSpeed
-  positionLife.xyz += velInfo.xyz * u_simSpeed * u_deltaTime;
+  // Velocity integration — canon: pos += vel * u_simSpeed (no deltaTime)
+  positionLife.xyz += velInfo.xyz * u_simSpeed;
 
-  // Curl noise displacement with strength multiplier and simSpeed scaling
-  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul * u_deltaTime;
+  // Curl noise displacement — canon applies per-frame, no deltaTime
+  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul;
   positionLife.xyz += curlForce;
 
   gl_FragColor = positionLife;
@@ -192,6 +192,7 @@ void main() {
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
+uniform float u_simSpeed;
 uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
@@ -208,17 +209,17 @@ void main() {
   vec4 velInfo = texture2D(textureVelocity, uv);
 
   // Life decay check for respawn / reset velocity
-  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
+  positionLife.w -= u_deltaTime * u_simDieSpeed;
   if (positionLife.w < 0.0) {
     velInfo.xyz = vec3(0.0);
     velInfo.w = 0.0;
   }
 
-  // Damping 0.975 scaled to FPS (Lusion exact: velocityDissipation = 0.975)
-  velInfo.xyz *= pow(0.975, u_deltaTime * 60.0);
+  // Damping — canon: vel *= 0.975 per frame (no deltaTime scaling)
+  velInfo.xyz *= 0.975;
 
-  // Wind force
-  vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
+  // Wind force — canon: vel += windForce * windStrMul * simSpeed
+  vec3 windVel = u_windForce * u_windStrMul * u_simSpeed;
   velInfo.xyz += windVel;
 
   gl_FragColor = velInfo;
@@ -379,6 +380,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1 };  // Lusion exact (line 152)
+		velVar.material.uniforms.u_simSpeed = { value: 0.12 };  // Lusion exact (line 239)
 		// paintTexture uniform removed
 
 		// Wrapping for seamless noise

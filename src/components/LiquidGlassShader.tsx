@@ -17,9 +17,9 @@ import FsrEasuPass from "./FsrEasuPass";
 
 // Adaptive constants per device tier (labs.lusion.co: TEX_SIZE=128 → 16384 particles, DPR capped at 1.5)
 const TIER_CONFIG = {
-	high: { particles: 16384, smaa: SMAAPreset.HIGH, dpr: [0.75, 1.0] as [number, number] },
-	mid:  { particles: 9216,  smaa: SMAAPreset.MEDIUM, dpr: [0.5, 0.75] as [number, number] },
-	low:  { particles: 4096,  smaa: SMAAPreset.LOW, dpr: [0.5, 0.5] as [number, number] },
+	high: { particles: 16384, smaa: SMAAPreset.HIGH, dpr: [1, 1.5] as [number, number] },
+	mid:  { particles: 9216,  smaa: SMAAPreset.MEDIUM, dpr: [0.75, 1.0] as [number, number] },
+	low:  { particles: 4096,  smaa: SMAAPreset.LOW, dpr: [0.5, 0.75] as [number, number] },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -39,8 +39,8 @@ const U_FOCUS_DIST = "0.32";
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
 // NOTE: Use strings with decimals for GLSL (JS integers break shader compilation)
-const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
-const SPAWN_OX = "-3.0"; const SPAWN_OY = "-0.5"; const SPAWN_OZ = "0.0";  // Lusion EXACT offset (11_key_constants line 16)
+const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "1.8";
+const SPAWN_OX = "-3.0"; const SPAWN_OY = "-0.5"; const SPAWN_OZ = "0.0";
 // Kill boundaries (reserved for particle respawn shader — currently using wrap-around instead)
 // const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";
 

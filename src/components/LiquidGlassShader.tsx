@@ -299,6 +299,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const mouseNDC = useRef(new THREE.Vector2());
 	const prevMouseNDC = useRef(new THREE.Vector2());
 	const mouseMoveIntensity = useRef(0);
+	const diagLogged = useRef(false);
 	const { gl, size, viewport, camera } = useThree();
 	const tier = useDeviceTier();
 
@@ -473,7 +474,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		return {
 			u_currPosTex: { value: null as THREE.Texture | null },
 			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
-			uResolution: { value: new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr) },
+			// Use actual canvas pixel dimensions — ground truth for gl_PointSize
+			uResolution: { value: new THREE.Vector2(gl.domElement.width, gl.domElement.height) },
 			u_opacity: { value: 0.32 },
 			u_pSizeMul: { value: 0.4 },
 			u_pSoftMul: { value: 0.92 },
@@ -524,10 +526,18 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		if (materialRef.current) {
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
 			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
+			// domElement.width/height = actual canvas pixel count (CSS × DPR)
 			materialRef.current.uniforms.uResolution.value.set(
-				size.width * viewport.dpr,
-				size.height * viewport.dpr
+				gl.domElement.width,
+				gl.domElement.height
 			);
+			// One-time diagnostic
+			if (!diagLogged.current) {
+				diagLogged.current = true;
+				const drawBuf = gl.getContext().drawingBufferWidth;
+				const drawBufH = gl.getContext().drawingBufferHeight;
+				console.log(`[PARTICLE DIAG] size=${size.width}x${size.height} dpr=${viewport.dpr} domElement=${gl.domElement.width}x${gl.domElement.height} drawBuf=${drawBuf}x${drawBufH} uResolution=${gl.domElement.width}x${gl.domElement.height}`);
+			}
 		}
 	});
 

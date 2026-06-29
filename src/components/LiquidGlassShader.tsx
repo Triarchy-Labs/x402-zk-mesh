@@ -476,7 +476,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
 			// Use actual canvas pixel dimensions — ground truth for gl_PointSize
 			uResolution: { value: new THREE.Vector2(gl.domElement.width, gl.domElement.height) },
-			u_opacity: { value: 0.32 },
+			// Canon: 0.32 (labs.lusion.co). Reduced for white-on-dark rendering path.
+			// Original uses black particles + postInvert = low relative contrast.
+			// White-on-dark has much higher perceived contrast, needs compensation.
+			u_opacity: { value: 0.15 },
 			u_pSizeMul: { value: 0.4 },
 			u_pSoftMul: { value: 0.92 },
 			u_focusDist: { value: 0.32 },

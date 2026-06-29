@@ -281,8 +281,7 @@ void main() {
   
   gl_Position = projectionMatrix * mvPosition;
   float pSize = (coef * 200.0 * u_pSizeMul) / -mvPosition.z * uResolution.y / 1280.0;
-  // DEBUG: hardcode size to prove pipeline — REMOVE after testing
-  gl_PointSize = max(pSize * lifeSize, 40.0);
+  gl_PointSize = pSize * lifeSize;
 }
 `;
 
@@ -527,18 +526,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		if (materialRef.current) {
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
 			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
-			// domElement.width/height = actual canvas pixel count (CSS × DPR)
 			materialRef.current.uniforms.uResolution.value.set(
 				gl.domElement.width,
 				gl.domElement.height
 			);
-			// One-time diagnostic
-			if (!diagLogged.current) {
-				diagLogged.current = true;
-				const drawBuf = gl.getContext().drawingBufferWidth;
-				const drawBufH = gl.getContext().drawingBufferHeight;
-				console.log(`[PARTICLE DIAG] size=${size.width}x${size.height} dpr=${viewport.dpr} domElement=${gl.domElement.width}x${gl.domElement.height} drawBuf=${drawBuf}x${drawBufH} uResolution=${gl.domElement.width}x${gl.domElement.height}`);
-			}
 		}
 	});
 
@@ -557,8 +548,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
       void main() {
         float d = length(gl_PointCoord.xy * 2.0 - 1.0);
         float b = linearStep(0.0, vSoftness + fwidth(d), 1.0 - d);
-        vec3 color = vColor * b * vOpacity;
-        gl_FragColor = vec4(color, b * vOpacity);
+        // NON-PREMULTIPLIED: NormalBlending does src.rgb * src.a internally
+        // Original uses v_color=vec3(0) where premultiplied doesn't matter
+        // For white particles: must output non-premultiplied to avoid double-alpha
+        gl_FragColor = vec4(vColor, b * vOpacity);
       }
     `;
 

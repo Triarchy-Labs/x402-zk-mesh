@@ -3,27 +3,23 @@
 // All particles now unified in LiquidNebula with CPU-side animation
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
-	Bloom,
-	ChromaticAberration,
 	EffectComposer,
 	SMAA,
 } from "@react-three/postprocessing";
 import { SMAAPreset } from "postprocessing";
-import { BlendFunction } from "postprocessing";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
-import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
 import LusionFinalPass from "./LusionFinalPass";
 import FsrRcasPass from "./FsrRcasPass";
 import FsrEasuPass from "./FsrEasuPass";
 
-// Lusion-grade adaptive constants per device tier
+// Adaptive constants per device tier (labs.lusion.co: TEX_SIZE=128 → 16384 particles, DPR capped at 1.5)
 const TIER_CONFIG = {
-	high: { particles: 16384, smaa: SMAAPreset.HIGH, bloomIntensity: 1.5, dpr: [0.75, 1.0] as [number, number], enableChroma: true },
-	mid:  { particles: 9216,  smaa: SMAAPreset.MEDIUM, bloomIntensity: 1.0, dpr: [0.5, 0.75] as [number, number], enableChroma: true },
-	low:  { particles: 4096,  smaa: SMAAPreset.LOW, bloomIntensity: 0.6, dpr: [0.5, 0.5] as [number, number], enableChroma: false },
+	high: { particles: 16384, smaa: SMAAPreset.HIGH, dpr: [0.75, 1.0] as [number, number] },
+	mid:  { particles: 9216,  smaa: SMAAPreset.MEDIUM, dpr: [0.5, 0.75] as [number, number] },
+	low:  { particles: 4096,  smaa: SMAAPreset.LOW, dpr: [0.5, 0.5] as [number, number] },
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -144,18 +140,18 @@ vec3 hash33(vec3 p3) {
 }
 `;
 
-// ── Position Compute Shader — EXACT from 01_particle_position_shader.glsl ──
+// ── Position Compute Shader — EXACT from labs.lusion.co bundle (lines 3230-3232) ──
 const positionShader = /* glsl */ `
 ${NOISE_GLSL}
 
 uniform sampler2D u_defaultPosTex;
 uniform float u_time;
 uniform float u_deltaTime;
-uniform float u_simSpeed;
 uniform float u_simDieSpeed;
 uniform vec3 u_curlNoiseScale;
 uniform vec3 u_curlStrength;
 uniform float u_curlStrMul;
+uniform float u_simSpeed;
 uniform vec3 u_bounds;
 
 void main() {
@@ -163,8 +159,8 @@ void main() {
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay (GOES DOWN: 1.0 → 0.0) — canon: life -= 0.005/frame
-  positionLife.w -= u_deltaTime * u_simDieSpeed;
+  // Life decay — labs.lusion.co EXACT: * 0.01 is CANON (particles live ~5 min)
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
 
   // Respawn when life < 0
   if (positionLife.w < 0.0) {
@@ -177,18 +173,20 @@ void main() {
   boundCheck *= step(-u_bounds, positionLife.xyz);
   positionLife.w *= boundCheck.x * boundCheck.y * boundCheck.z;
 
-  // Velocity integration scaled by simSpeed
-  positionLife.xyz += velInfo.xyz * u_simSpeed * u_deltaTime;
+  // Position integration — labs.lusion.co EXACT: vel * dt, NO simSpeed!
+  positionLife.xyz += velInfo.xyz * u_deltaTime;
 
-  // Curl noise displacement with strength multiplier and simSpeed scaling
-  vec3 curlForce = curl(positionLife.xyz * u_curlNoiseScale, u_time * 0.12, 0.35) * u_curlStrength * u_curlStrMul * u_deltaTime;
-  positionLife.xyz += curlForce;
+  // Curl noise — labs.lusion.co EXACT: applied to position, persistence=0.02
+  vec3 curlStr = u_curlStrength * u_curlStrMul;
+  vec3 curlScale = u_curlNoiseScale * 1.0;
+  vec3 curlVel = curl(positionLife.xyz * curlScale, u_time * u_simSpeed, 0.02) * curlStr * u_deltaTime;
+  positionLife.xyz += curlVel;
 
   gl_FragColor = positionLife;
 }
 `;
 
-// ── Velocity Compute Shader — EXACT from 02_particle_velocity_shader.glsl ──
+// ── Velocity Compute Shader — EXACT from labs.lusion.co bundle (line 3233) ──
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
@@ -207,17 +205,17 @@ void main() {
   vec4 positionLife = texture2D(texturePosition, uv);
   vec4 velInfo = texture2D(textureVelocity, uv);
 
-  // Life decay check for respawn / reset velocity
-  positionLife.w -= u_deltaTime * u_simDieSpeed;
+  // Life decay (simplified copy for mode switching) — labs.lusion.co EXACT
+  positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
   if (positionLife.w < 0.0) {
     velInfo.xyz = vec3(0.0);
     velInfo.w = 0.0;
   }
 
-  // Damping 0.975 scaled to FPS (Lusion exact: velocityDissipation = 0.975)
-  velInfo.xyz *= pow(0.975, u_deltaTime * 60.0);
+  // Damping — labs.lusion.co EXACT: flat 0.975 per frame, NOT pow()
+  velInfo.xyz *= 0.975;
 
-  // Wind force
+  // Wind force — labs.lusion.co EXACT
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;
   velInfo.xyz += windVel;
 
@@ -503,7 +501,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 				premultipliedAlpha={true}
 				depthWrite={false}
 				depthTest={false}
-				blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
+				blending={THREE.NormalBlending}  // labs.lusion.co EXACT: always NormalBlending
 				extensions-derivatives={true}
 			/>
 		</points>
@@ -533,13 +531,12 @@ function VoltageLights({ theme }: { theme: "dark" | "light" }) {
 }
 
 /**
- * Adaptive post-processing pipeline — Lusion-grade (Blueprint §FSR + §SMAA)
- * Pipeline order matches Lusion exactly (строка 49553-49555):
- *   Scene → SMAA → FSR RCAS → Bloom → LusionFinalPass(vignette+dither+color) → ScreenPaintDistortion
+ * Adaptive post-processing pipeline — labs.lusion.co verified
+ * Pipeline order matches labs.lusion.co EXACTLY:
+ *   Scene → SMAA(+FSR) → Final(vignette+colorGrade+dither+postInvert)
  *
- * High: Full pipeline (SMAA HIGH + FSR RCAS + Bloom + ChromaticAberration + Noise + LusionFinal + ScreenPaintDistortion)
- * Mid:  Reduced pipeline (SMAA MEDIUM + FSR RCAS + Bloom reduced + LusionFinal + ScreenPaintDistortion)
- * Low:  Minimal pipeline (SMAA LOW + FSR RCAS + LusionFinal only)
+ * NOTE: Bloom is DISABLED in labs.lusion.co (bloomAmount=0, not even in queue).
+ * Glow comes from particle stacking with NormalBlending, not post-processing.
  */
 // Adaptive Post Processing
 function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier: DeviceTier }) {
@@ -556,31 +553,10 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 		);
 	}
 
-	if (tier === "mid") {
-		return (
-			<EffectComposer multisampling={0}>
-				<SMAA preset={cfg.smaa} />
-				<Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.8} mipmapBlur />
-				<ChromaticAberration
-					blendFunction={BlendFunction.NORMAL}
-					offset={new THREE.Vector2(0.001, 0.001)}
-				/>
-				<FsrEasuPass sharpness={0.2} />
-				{ <FsrRcasPass sharpness={1.0} /> as any }
-				<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
-			</EffectComposer>
-		);
-	}
-
-	// tier === "high" — full Lusion pipeline
+	// mid + high — same pipeline, just different SMAA preset
 	return (
 		<EffectComposer multisampling={0}>
 			<SMAA preset={cfg.smaa} />
-			<Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.8} mipmapBlur />
-			<ChromaticAberration
-				blendFunction={BlendFunction.NORMAL}
-				offset={new THREE.Vector2(0.001, 0.001)}
-			/>
 			<FsrEasuPass sharpness={0.2} />
 			{ <FsrRcasPass sharpness={1.0} /> as any }
 			<LusionFinalPass theme={theme} tintOpacity={0} vignetteFrom={0.6} vignetteTo={1.6} />
@@ -610,7 +586,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 				touchAction: "none",
 			}}
 		>
-			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 45 }}>
+			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 60, near: 0.1, far: 10 }}>
 				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 				
 				{/* Core Lighting & Voltage Surges */}

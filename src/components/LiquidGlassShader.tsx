@@ -250,9 +250,9 @@ void main() {
   // Read position + life from GPGPU FBO texture
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
   
-  // Apply true Lusion life decay to size (fade in / out curve)
-  float lifeSize = sizeFromLife(positionLife.w);
-  vec3 pos = positionLife.xyz;
+  // Fallback to attribute position if FBO texture is uninitialized (prevents center spawn jump on load)
+  vec3 pos = (positionLife.w == 0.0) ? position : positionLife.xyz;
+  float lifeSize = sizeFromLife(positionLife.w == 0.0 ? a_simUv.y : positionLife.w);
   
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   
@@ -307,8 +307,20 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		return [uvs, col];
 	}, [texSize, actualParticleCount]);
 
+	// Generate initial spawn positions once per particleCount change
+	const initialPositions = useMemo(() => {
+		const arr = new Float32Array(actualParticleCount * 3);
+		for (let i = 0; i < actualParticleCount; i++) {
+			// Start positions: cluster on the left (-3.0 to -2.5) to flow in gradually from behind the screen
+			arr[i * 3]     = parseFloat(SPAWN_OX) + Math.pow(Math.random(), 4) * 0.5;
+			arr[i * 3 + 1] = parseFloat(SPAWN_OY) + (Math.random() - 0.5) * parseFloat(SPAWN_Y);
+			arr[i * 3 + 2] = parseFloat(SPAWN_OZ) + (Math.random() - 0.5) * parseFloat(SPAWN_Z);
+		}
+		return arr;
+	}, [actualParticleCount]);
+
 	// FBO seed positions (vertex shader reads from FBO, not from position attribute)
-	const fboSeedPositions = useMemo(() => new Float32Array(actualParticleCount * 3), [actualParticleCount]);
+	const fboSeedPositions = initialPositions;
 
 	// Initialize GPUComputationRenderer
 	useEffect(() => {
@@ -318,10 +330,10 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const posTex = gpu.createTexture();
 		const posData = posTex.image.data as Float32Array;
 		for (let i = 0; i < actualParticleCount; i++) {
-			// Lusion EXACT spawn (line 219): pow(rand,4) for X clusters to center
-			posData[i * 4]     = (Math.pow(Math.random(), 4) * 2 - 1) * parseFloat(SPAWN_X) + parseFloat(SPAWN_OX);
-			posData[i * 4 + 1] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Y) + parseFloat(SPAWN_OY);
-			posData[i * 4 + 2] = (Math.random() * 2 - 1) * parseFloat(SPAWN_Z) + parseFloat(SPAWN_OZ);
+			// Use shared initialPositions to ensure 100% mathematical parity with bufferGeometry position attribute
+			posData[i * 4]     = initialPositions[i * 3];
+			posData[i * 4 + 1] = initialPositions[i * 3 + 1];
+			posData[i * 4 + 2] = initialPositions[i * 3 + 2];
 			// Lusion EXACT life init (line 111): linear i/N, not random
 			posData[i * 4 + 3] = i / actualParticleCount;
 		}
@@ -329,7 +341,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		// Default position texture for respawn (Lusion exact: texture2D(u_defaultPosTex, uv))
 		const defaultPosTex = gpu.createTexture();
 		const defaultPosData = defaultPosTex.image.data as Float32Array;
-		defaultPosData.set(posData); // copy initial positions
+		for (let i = 0; i < actualParticleCount; i++) {
+			// Respawn positions use the full canon layout (X от -3.0 до 1.0)
+			defaultPosData[i * 4]     = parseFloat(SPAWN_OX) + Math.pow(Math.random(), 4) * parseFloat(SPAWN_X);
+			defaultPosData[i * 4 + 1] = parseFloat(SPAWN_OY) + (Math.random() - 0.5) * parseFloat(SPAWN_Y);
+			defaultPosData[i * 4 + 2] = parseFloat(SPAWN_OZ) + (Math.random() - 0.5) * parseFloat(SPAWN_Z);
+			defaultPosData[i * 4 + 3] = 1.0;
+		}
 		const defaultPosDataTex = new THREE.DataTexture(
 			defaultPosData, texSize, texSize, THREE.RGBAFormat, THREE.FloatType
 		);
@@ -384,6 +402,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVarRef.current = posVar;
 		velVarRef.current = velVar;
 
+		// Set initial GPGPU texture to avoid null texture render state on first frame
+		uniforms.u_currPosTex.value = gpu.getCurrentRenderTarget(posVar).texture;
+
 		// Scroll wheel listener — Lusion exact (line 190-194)
 		const onWheel = (e: WheelEvent) => {
 			lerpedWheelDelta.current += (e.deltaY * 0.01 - lerpedWheelDelta.current) * 0.15;
@@ -399,7 +420,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		};
 	}, [gl, texSize, actualParticleCount]);
 
-	// Render uniforms
+	// Render uniforms (created once, updated dynamic properties in useFrame to prevent resets)
 	const uniforms = useMemo(() => {
 		const isLow = tier === "low";
 		return {
@@ -410,7 +431,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			u_pSizeMul: { value: isLow ? 1.6 : 0.4 },
 			u_pSoftMul: { value: 0.92 },
 		};
-	}, [theme, size, tier]);
+	}, [tier]); // only recreate when tier changes
 
 	// GPGPU compute + render update
 	useFrame((state, delta) => {

@@ -188,7 +188,7 @@ void main() {
 }
 `;
 
-// ── Velocity Compute Shader — labs.lusion.co bundle EXACT ──
+// ── Velocity Compute Shader — labs.lusion.co bundle + simplified mouse ──
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
@@ -196,6 +196,8 @@ uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
 uniform float u_mode;
+uniform vec3 u_mouse3d;
+uniform float u_mouseMoveIntensity;
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
@@ -211,10 +213,9 @@ void main() {
   // Life decay for mode switching — labs.lusion.co EXACT
   positionLife.w -= u_deltaTime * u_simDieSpeed * 0.01;
   if (positionLife.w < 0.0) {
-    // Respawn: reset velocity, set mode weight
     vec3 h = hash33(vec3(uv, u_time));
     velInfo.xyz = vec3(0.0);
-    velInfo.w = h.y * u_mode;  // mode weight for logo attraction
+    velInfo.w = h.y * u_mode;
   }
 
   // Damping — labs.lusion.co EXACT: flat 0.975 per frame
@@ -225,14 +226,23 @@ void main() {
   windVel /= 1.0 + velInfo.w * u_mode;
   velInfo.xyz += windVel;
 
+  // Mouse interaction (simplified from screenPaint)
+  // Original uses 2D fluid sim texture; we use direct radial push
+  vec3 toMouse = u_mouse3d - positionLife.xyz;
+  float dist2 = dot(toMouse, toMouse);
+  float radius = 0.8;  // influence radius
+  float influence = exp(-dist2 / (radius * radius)) * u_mouseMoveIntensity * 0.2;
+  // Push particles AWAY from mouse (perpendicular + radial)
+  vec3 pushDir = normalize(toMouse + vec3(0.001));
+  velInfo.xyz -= pushDir * influence * u_deltaTime * 60.0;
+
   gl_FragColor = velInfo;
 }
 `;
 
-// ── Render Vertex Shader — labs.lusion.co bundle EXACT ──
-// NOTE: v_color is declared but NEVER written = vec3(0,0,0) = BLACK particles
-// In labs.lusion.co, postInvert=1 inverts the whole scene → black becomes white on dark bg
-// We handle this with our LusionFinalPass postInvert
+// ── Render Vertex Shader — labs.lusion.co pipeline ──
+// Particle color: white on dark bg (labs.lusion.co achieves this via
+// their postprocessing chain; we set vColor directly for same visual result)
 const gpgpuVertexShader = /* glsl */ `
 uniform sampler2D u_currPosTex;
 uniform vec2 uResolution;
@@ -240,6 +250,7 @@ uniform float u_opacity;
 uniform float u_pSizeMul;
 uniform float u_pSoftMul;
 uniform float u_focusDist;
+uniform float uTheme;  // 0=dark, 1=light
 attribute vec2 a_simUv;
 varying float vSoftness;
 varying float vOpacity;
@@ -252,7 +263,8 @@ float sizeFromLife(float life) {
 }
 
 void main() {
-  // v_color intentionally unset = vec3(0) = black (labs.lusion.co exact)
+  // Dark: white particles on dark bg. Light: dark particles on light bg.
+  vColor = mix(vec3(1.0), vec3(0.04), uTheme);
   
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
   float lifeSize = sizeFromLife(positionLife.w);
@@ -280,9 +292,14 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
 	const posVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
 	const velVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
-	// Scroll tracking ref — Lusion exact (lines 190-215)
+	// Scroll tracking ref — Lusion exact
 	const lerpedWheelDelta = useRef(0);
-	const { gl, size, viewport } = useThree();
+	// Mouse tracking refs
+	const mouse3d = useRef(new THREE.Vector3());
+	const mouseNDC = useRef(new THREE.Vector2());
+	const prevMouseNDC = useRef(new THREE.Vector2());
+	const mouseMoveIntensity = useRef(0);
+	const { gl, size, viewport, camera } = useThree();
 	const tier = useDeviceTier();
 
 	// Calculate texture dimensions from particle count
@@ -387,6 +404,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
 		velVar.material.uniforms.u_windStrMul = { value: 1 };
 		velVar.material.uniforms.u_mode = { value: 0.0 };
+		velVar.material.uniforms.u_mouse3d = { value: new THREE.Vector3() };
+		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };
 
 		// Wrapping for seamless noise
 		posVar.wrapS = THREE.RepeatWrapping;
@@ -418,25 +437,35 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		};
 		window.addEventListener('wheel', onWheel, { passive: true });
 
+		// Mouse move listener
+		const onMouseMove = (e: MouseEvent) => {
+			mouseNDC.current.set(
+				(e.clientX / window.innerWidth) * 2 - 1,
+				-(e.clientY / window.innerHeight) * 2 + 1
+			);
+		};
+		window.addEventListener('mousemove', onMouseMove, { passive: true });
+
 		return () => {
 			if (posVar.material) posVar.material.dispose();
 			if (velVar.material) velVar.material.dispose();
 			gpu.dispose();
 			defaultPosDataTex.dispose();
 			window.removeEventListener('wheel', onWheel);
+			window.removeEventListener('mousemove', onMouseMove);
 		};
 	}, [gl, texSize, actualParticleCount]);
 
-	// Render uniforms — labs.lusion.co exact
+	// Render uniforms
 	const uniforms = useMemo(() => {
 		return {
 			u_currPosTex: { value: null as THREE.Texture | null },
-			// labs.lusion.co: u_resolution = CSS * DPR (GL viewport pixels)
+			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
 			uResolution: { value: new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr) },
 			u_opacity: { value: 0.32 },
 			u_pSizeMul: { value: 0.4 },
 			u_pSoftMul: { value: 0.92 },
-			u_focusDist: { value: 0.32 },  // labs.lusion.co exact
+			u_focusDist: { value: 0.32 },
 		};
 	}, [tier]);
 
@@ -459,6 +488,22 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		// Decay wheel delta (FPS independent)
 		lerpedWheelDelta.current *= Math.pow(0.95, clampedDelta * 60.0);
 
+		// Mouse: unproject NDC to world z=0 plane — labs.lusion.co _getMouse3d()
+		const _v3 = new THREE.Vector3(mouseNDC.current.x, mouseNDC.current.y, 0.5);
+		_v3.unproject(camera);
+		_v3.sub(camera.position).normalize();
+		const t = -camera.position.z / _v3.z;
+		mouse3d.current.copy(camera.position).add(_v3.multiplyScalar(t));
+		velVarRef.current.material.uniforms.u_mouse3d.value.copy(mouse3d.current);
+
+		// Mouse move intensity — labs.lusion.co exact: speed*32, clamped to 2, lerp 0.072
+		const dx = mouseNDC.current.x - prevMouseNDC.current.x;
+		const dy = mouseNDC.current.y - prevMouseNDC.current.y;
+		const speed = Math.min(Math.sqrt(dx * dx + dy * dy) * 32, 2);
+		mouseMoveIntensity.current += (speed - mouseMoveIntensity.current) * 0.072;
+		velVarRef.current.material.uniforms.u_mouseMoveIntensity.value = mouseMoveIntensity.current;
+		prevMouseNDC.current.copy(mouseNDC.current);
+
 		// Run GPGPU compute
 		gpuRef.current.compute();
 
@@ -466,7 +511,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		const posTex = gpuRef.current.getCurrentRenderTarget(posVarRef.current).texture;
 		if (materialRef.current) {
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
-			// labs.lusion.co: resolution = CSS * DPR
+			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
 			materialRef.current.uniforms.uResolution.value.set(
 				size.width * viewport.dpr,
 				size.height * viewport.dpr
@@ -495,7 +540,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
     `;
 
 	return (
-		<points ref={pointsRef}>
+		<points ref={pointsRef} frustumCulled={false}>
 			<bufferGeometry>
 				<bufferAttribute attach="attributes-position" args={[fboSeedPositions, 3]} />
 				<bufferAttribute attach="attributes-a_simUv" args={[simUvs, 2]} />
@@ -595,8 +640,7 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 			}}
 		>
 			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 60, near: 0.1, far: 10 }}>
-				{/* labs.lusion.co: bgColorHex="#000000" for dark, particles are black, postInvert flips all */}
-				<color attach="background" args={[theme === "dark" ? "#000000" : "#fafafa"]} />
+				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
 				
 				{/* Core Lighting & Voltage Surges */}
 				<VoltageLights theme={theme} />

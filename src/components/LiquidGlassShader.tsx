@@ -281,7 +281,8 @@ void main() {
   
   gl_Position = projectionMatrix * mvPosition;
   float pSize = (coef * 200.0 * u_pSizeMul) / -mvPosition.z * uResolution.y / 1280.0;
-  gl_PointSize = pSize * lifeSize;
+  // DEBUG: hardcode size to prove pipeline — REMOVE after testing
+  gl_PointSize = max(pSize * lifeSize, 40.0);
 }
 `;
 

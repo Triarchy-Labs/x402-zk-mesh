@@ -39,7 +39,7 @@ const U_FOCUS_DIST = "0.32";
 
 // Lusion EXACT spawn/kill (строки 48653-48664)
 // NOTE: Use strings with decimals for GLSL (JS integers break shader compilation)
-const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "1.8";
+const SPAWN_X = "4.0"; const SPAWN_Y = "2.4"; const SPAWN_Z = "0.64";
 const SPAWN_OX = "-3.0"; const SPAWN_OY = "-0.5"; const SPAWN_OZ = "0.0";
 // Kill boundaries (reserved for particle respawn shader — currently using wrap-around instead)
 // const KILL_X = "7.0"; const KILL_Y = "5.0"; const KILL_Z = "2.0";

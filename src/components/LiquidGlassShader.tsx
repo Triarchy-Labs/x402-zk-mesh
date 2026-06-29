@@ -274,7 +274,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const velVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
 	// Scroll tracking ref — Lusion exact (lines 190-215)
 	const lerpedWheelDelta = useRef(0);
-	const { gl, size } = useThree();
+	const { gl, size, viewport } = useThree();
 	const tier = useDeviceTier();
 
 	// Calculate texture dimensions from particle count
@@ -430,13 +430,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 	// Render uniforms (created once, updated dynamic properties in useFrame to prevent resets)
 	const uniforms = useMemo(() => {
-		const isLow = tier === "low";
 		return {
 			u_currPosTex: { value: null as THREE.Texture | null },
 			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
-			uResolution: { value: new THREE.Vector2(size.width, size.height) },
-			u_opacity: { value: isLow ? 0.95 : 0.32 },
-			u_pSizeMul: { value: isLow ? 1.6 : 0.4 },
+			// labs.lusion.co EXACT: u_resolution = CSS * DPR (GL viewport pixels)
+			uResolution: { value: new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr) },
+			u_opacity: { value: 0.32 },     // labs.lusion.co exact
+			u_pSizeMul: { value: 0.4 },     // labs.lusion.co exact
 			u_pSoftMul: { value: 0.92 },
 		};
 	}, [tier]); // only recreate when tier changes
@@ -468,11 +468,11 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		if (materialRef.current) {
 			materialRef.current.uniforms.u_currPosTex.value = posTex;
 			materialRef.current.uniforms.uTheme.value = theme === "dark" ? 0.0 : 1.0;
-			materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
-			
-			const isLow = tier === "low";
-			materialRef.current.uniforms.u_opacity.value = isLow ? 0.95 : 0.32;
-			materialRef.current.uniforms.u_pSizeMul.value = isLow ? 1.6 : 0.4;
+			// labs.lusion.co: resolution = CSS * DPR
+			materialRef.current.uniforms.uResolution.value.set(
+				size.width * viewport.dpr,
+				size.height * viewport.dpr
+			);
 		}
 	});
 

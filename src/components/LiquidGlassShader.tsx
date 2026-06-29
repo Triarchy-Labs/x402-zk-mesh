@@ -424,6 +424,18 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		}
 
 		console.log(`GPGPU initialized: ${texSize}x${texSize} FBO, curl noise + velocity physics`);
+
+		// Prewarm: run 120 simulation frames (~2 sec) to spread particles from offscreen spawn cluster
+		// Labs.lusion.co has a loading screen that runs sim while loading assets — we simulate that
+		const prewarmDt = 1 / 60;
+		for (let i = 0; i < 120; i++) {
+			posVar.material.uniforms.u_time.value = i * prewarmDt;
+			posVar.material.uniforms.u_deltaTime.value = prewarmDt;
+			velVar.material.uniforms.u_time.value = i * prewarmDt;
+			velVar.material.uniforms.u_deltaTime.value = prewarmDt;
+			gpu.compute();
+		}
+
 		gpuRef.current = gpu;
 		posVarRef.current = posVar;
 		velVarRef.current = velVar;

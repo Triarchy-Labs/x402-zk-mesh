@@ -30,12 +30,41 @@ interface AgentProfile {
 }
 
 const RANK_COLORS: Record<string, string> = {
-	GRANDMASTER: "#ff5500",
-	MASTER: "#cc7700",
-	ADEPT: "#ffaa00",
-	JOURNEYMAN: "#ffaa00",
-	APPRENTICE: "#995500",
-	INITIATE: "#ffaa00",
+	GRANDMASTER: "#ffffff",
+	MASTER: "rgba(255,255,255,0.85)",
+	ADEPT: "rgba(255,255,255,0.7)",
+	JOURNEYMAN: "rgba(255,255,255,0.7)",
+	APPRENTICE: "rgba(255,255,255,0.5)",
+	INITIATE: "rgba(255,255,255,0.35)",
+};
+
+const RealTimeClock = () => {
+	const [time, setTime] = useState("");
+
+	useEffect(() => {
+		const update = () => {
+			const now = new Date();
+			setTime(now.toLocaleTimeString("ru-RU", { hour12: false }));
+		};
+		update();
+		const interval = setInterval(update, 1000);
+		return () => clearInterval(interval);
+	}, []);
+
+	return (
+		<div style={{
+			marginTop: "8rem",
+			textAlign: "center",
+			fontFamily: "monospace",
+			fontSize: "4.5rem",
+			fontWeight: "bold",
+			color: "#fff",
+			letterSpacing: "0.2em",
+			textShadow: "0 0 35px rgba(255, 170, 0, 0.95)",
+		}}>
+			{time}
+		</div>
+	);
 };
 
 const ProfilePage = () => {
@@ -137,7 +166,7 @@ const ProfilePage = () => {
 				<Nav />
 				<div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
 					<motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-						style={{ display: "inline-block", width: "32px", height: "32px", border: "2px solid #ffaa00", borderTopColor: "transparent", borderRadius: "50%" }} />
+						style={{ display: "inline-block", width: "32px", height: "32px", border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%" }} />
 				</div>
 			</div>
 		);
@@ -147,19 +176,19 @@ const ProfilePage = () => {
 		<div style={{ backgroundColor: "transparent", minHeight: "100vh", color: "#fff", fontFamily: "'Inter', sans-serif" }}>
 			<Nav />
 
-			<div style={{ maxWidth: "1000px", margin: "0 auto", padding: "12rem 5vw 4rem" }}>
+			<div style={{ maxWidth: "150rem", margin: "0 auto", padding: "12rem 5vw 4rem" }}>
 				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-					<h1 style={{ fontSize: "4.5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
+					<h1 style={{ fontSize: "5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
 						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>_</span>
-						Operative <span style={{ color: "#ffaa00", fontWeight: "600", textShadow: "0 0 15px rgba(255, 170, 0,0.4)" }}>Profile</span>
+						Operative <span style={{ color: "#e0a922", fontWeight: "600" }}>Profile</span>
 					</h1>
-					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.4rem", marginBottom: "3rem" }}>
+					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.6rem", marginBottom: "3rem" }}>
 						Your cryptographic identity and reputation on the X402 ZK Mesh.
 					</p>
 				</motion.div>
 
 				{error && !showRegister && (
-					<div style={{ padding: "1.5rem", background: "rgba(255, 85, 0,0.1)", border: "1px solid rgba(255, 85, 0,0.3)", borderRadius: "8px", color: "#ff5500", fontFamily: "'Space Mono', monospace" }}>
+					<div style={{ padding: "1.5rem", background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "8px", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace", fontSize: "1.45rem", marginBottom: "2rem" }}>
 						{error}
 					</div>
 				)}
@@ -169,91 +198,91 @@ const ProfilePage = () => {
 						<motion.div
 							key="register"
 							initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-							style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", maxWidth: "600px", margin: "0 auto" }}
+							style={{ padding: "4rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", maxWidth: "90rem", margin: "0 auto" }}
 						>
-							<h3 style={{ margin: "0 0 1.5rem", color: "#fff", fontFamily: "'Space Mono', monospace" }}>{"// INITIALIZE PROFILE"}</h3>
-							<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+							<h3 style={{ margin: "0 0 2.5rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontSize: "2rem", letterSpacing: "0.08em" }}>{"// INITIALIZE PROFILE"}</h3>
+							<div style={{ display: "flex", flexDirection: "column", gap: "1.8rem" }}>
 								<div>
-									<label style={{ display: "block", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>OPERATIVE NAME</label>
+									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>OPERATIVE NAME</label>
 									<input type="text" value={regName} onChange={e => setRegName(e.target.value)}
-										style={{ width: "100%", padding: "12px", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "4px", color: "#fff", fontFamily: "'Space Mono', monospace" }} />
+										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
 								</div>
 								<div>
-									<label style={{ display: "block", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>ENTITY TYPE</label>
-									<div style={{ display: "flex", gap: "1rem" }}>
+									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>ENTITY TYPE</label>
+									<div style={{ display: "flex", gap: "1.2rem" }}>
 										<button onClick={() => setRegType("human")}
-											style={{ flex: 1, padding: "10px", border: `1px solid ${regType === "human" ? "#ffaa00" : "rgba(255,255,255,0.2)"}`, background: regType === "human" ? "rgba(255, 170, 0,0.1)" : "transparent", color: regType === "human" ? "#ffaa00" : "#fff", borderRadius: "4px", fontFamily: "'Space Mono', monospace", cursor: "pointer" }}
+											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "human" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "human" ? "white" : "transparent", color: regType === "human" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "6px", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "human" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
 										>HUMAN</button>
 										<button onClick={() => setRegType("bot")}
-											style={{ flex: 1, padding: "10px", border: `1px solid ${regType === "bot" ? "#995500" : "rgba(255,255,255,0.2)"}`, background: regType === "bot" ? "rgba(153, 85, 0,0.1)" : "transparent", color: regType === "bot" ? "#995500" : "#fff", borderRadius: "4px", fontFamily: "'Space Mono', monospace", cursor: "pointer" }}
+											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "bot" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "bot" ? "white" : "transparent", color: regType === "bot" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "6px", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "bot" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
 										>AUTONOMOUS BOT</button>
 									</div>
 								</div>
 								<div>
-									<label style={{ display: "block", fontSize: "1.2rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>CAPABILITIES (comma separated)</label>
-									<input type="text" placeholder="e.g. Rust, Smart Contracts, ZK" value={regSkills} onChange={e => setRegSkills(e.target.value)}
-										style={{ width: "100%", padding: "12px", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "4px", color: "#fff", fontFamily: "'Space Mono', monospace" }} />
+									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>CAPABILITIES (comma separated)</label>
+									<input type="text" placeholder="e.g. Rust, ZK, Soroban" value={regSkills} onChange={e => setRegSkills(e.target.value)}
+										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
 								</div>
 								<button
 									onClick={handleRegister} disabled={registering || !regName.trim()}
-									style={{ marginTop: "1rem", width: "100%", padding: "14px", background: registering ? "rgba(255, 170, 0,0.3)" : "#ffaa00", color: "#000", border: "none", borderRadius: "4px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", cursor: registering ? "wait" : "pointer" }}
+									style={{ marginTop: "2rem", width: "100%", padding: "1.8rem", background: registering ? "rgba(224, 169, 34, 0.2)" : "#e0a922", color: registering ? "rgba(255,255,255,0.4)" : "#000", border: "none", borderRadius: "6px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", fontSize: "1.7rem", cursor: registering ? "wait" : "pointer", transition: "all 0.2s" }}
 								>{registering ? "INITIALIZING..." : "JOIN TRIARCHY MESH"}</button>
-								{error && <div style={{ color: "#ff5500", fontSize: "1.2rem", textAlign: "center", marginTop: "0.5rem" }}>{error}</div>}
+								{error && <div style={{ color: "#ff5500", fontSize: "1.45rem", textAlign: "center", marginTop: "1rem" }}>{error}</div>}
 							</div>
 						</motion.div>
 					) : profile ? (
 						<motion.div
 							key="profile"
 							initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-							style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "2rem" }}
+							style={{ display: "grid", gridTemplateColumns: "1fr 35rem", gap: "2rem" }}
 						>
 							<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
 								{/* Identity Card */}
-								<div style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", position: "relative", overflow: "hidden" }}>
-									<div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: `linear-gradient(90deg, ${RANK_COLORS[profile.rank] || "#ffaa00"}, transparent)` }} />
+								<div style={{ padding: "2.4rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", position: "relative", overflow: "hidden" }}>
+									<div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: `linear-gradient(90deg, ${RANK_COLORS[profile.rank] || "#fff"}, transparent)` }} />
 									
 									<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
 										<div>
-											<h2 style={{ margin: "0 0 0.5rem", fontSize: "3rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+											<h2 style={{ margin: "0 0 0.5rem", fontSize: "4rem", display: "flex", alignItems: "center", gap: "1rem" }}>
 												{profile.name}
-												<span style={{ fontSize: "1.3rem", padding: "4px 8px", background: profile.type === "bot" ? "rgba(153, 85, 0,0.2)" : "rgba(255, 170, 0,0.2)", color: profile.type === "bot" ? "#995500" : "#ffaa00", borderRadius: "4px", border: `1px solid ${profile.type === "bot" ? "rgba(153, 85, 0,0.4)" : "rgba(255, 170, 0,0.4)"}`, fontFamily: "'Space Mono', monospace" }}>
+												<span style={{ fontSize: "1.45rem", padding: "4px 8px", background: "rgba(255, 255, 255, 0.08)", color: "rgba(255, 255, 255, 0.8)", borderRadius: "4px", border: "1px solid rgba(255, 255, 255, 0.2)", fontFamily: "'Space Mono', monospace" }}>
 													{profile.type.toUpperCase()}
 												</span>
 											</h2>
-											<div style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.4rem" }}>
+											<div style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem" }}>
 												ID: {profile.id.substring(0, 8)}...{profile.id.substring(profile.id.length - 8)}
 											</div>
 										</div>
 										<div style={{ textAlign: "right" }}>
-											<div style={{ color: RANK_COLORS[profile.rank] || "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", fontWeight: "bold", textShadow: `0 0 10px ${RANK_COLORS[profile.rank]}88` }}>
+											<div style={{ color: RANK_COLORS[profile.rank] || "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.8rem", fontWeight: "bold" }}>
 												[{profile.rank}]
 											</div>
-											<div style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.2rem", marginTop: "0.25rem" }}>Current Standing</div>
+											<div style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.35rem", marginTop: "0.25rem" }}>Current Standing</div>
 										</div>
 									</div>
 
 									<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
-										<div style={{ padding: "1rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-											<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>TOTAL XP</div>
-											<div style={{ fontSize: "2.4rem", color: "#cc7700", fontFamily: "'Space Mono', monospace" }}>{profile.xp.toLocaleString()}</div>
+										<div style={{ padding: "1.2rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>TOTAL XP</div>
+											<div style={{ fontSize: "2.8rem", color: "#fff", fontFamily: "'Space Mono', monospace", fontWeight: "semibold" }}>{profile.xp.toLocaleString()}</div>
 										</div>
-										<div style={{ padding: "1rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-											<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>SIGNAL SCORE</div>
-											<div style={{ fontSize: "2.4rem", color: "#995500", fontFamily: "'Space Mono', monospace" }}>{profile.signal.toFixed(2)}</div>
+										<div style={{ padding: "1.2rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>SIGNAL SCORE</div>
+											<div style={{ fontSize: "2.8rem", color: "#fff", fontFamily: "'Space Mono', monospace", fontWeight: "semibold" }}>{profile.signal.toFixed(2)}</div>
 										</div>
-										<div style={{ padding: "1rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-											<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>IMPACT RATING</div>
-											<div style={{ fontSize: "2.4rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>{profile.impact.toFixed(2)}</div>
+										<div style={{ padding: "1.2rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>IMPACT RATING</div>
+											<div style={{ fontSize: "2.8rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontWeight: "semibold" }}>{profile.impact.toFixed(2)}</div>
 										</div>
 									</div>
 
 									{profile.zk_identity_commitment && (
-										<div style={{ padding: "1rem", background: "rgba(204, 119, 0,0.1)", borderRadius: "8px", border: "1px dashed rgba(204, 119, 0,0.3)" }}>
-											<div style={{ fontSize: "1.2rem", color: "#cc7700", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-												<span style={{ display: "inline-block", width: "8px", height: "8px", background: "#cc7700", borderRadius: "50%", boxShadow: "0 0 8px #cc7700" }} />
+										<div style={{ padding: "1.2rem", background: "rgba(255, 255, 255, 0.03)", borderRadius: "8px", border: "1px dashed rgba(255, 255, 255, 0.2)" }}>
+											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+												<span style={{ display: "inline-block", width: "8px", height: "8px", background: "#fff", borderRadius: "50%" }} />
 												ZK IDENTITY COMMITMENT (POSEIDON)
 											</div>
-											<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.7)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all" }}>
+											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.7)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all" }}>
 												{profile.zk_identity_commitment}
 											</div>
 										</div>
@@ -261,54 +290,54 @@ const ProfilePage = () => {
 								</div>
 
 								{/* Capabilities */}
-								<div style={{ padding: "2rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}>
-									<h3 style={{ margin: "0 0 1rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{"// REGISTERED CAPABILITIES"}</h3>
-									<div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+								<div style={{ padding: "2.4rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}>
+									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{"// REGISTERED CAPABILITIES"}</h3>
+									<div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap" }}>
 										{profile.capabilities.map(cap => (
-											<span key={cap} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", fontSize: "1.3rem", color: "rgba(255,255,255,0.8)" }}>
+											<span key={cap} style={{ padding: "8px 16px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", fontSize: "1.45rem", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace" }}>
 												{cap}
 											</span>
 										))}
-										{profile.capabilities.length === 0 && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.4rem" }}>No specific capabilities registered.</span>}
+										{profile.capabilities.length === 0 && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.5rem" }}>No specific capabilities registered.</span>}
 									</div>
 								</div>
 							</div>
 
 							{/* Right Column: Stats */}
-							<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-								<div style={{ padding: "1.5rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}>
-									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>FINANCIALS</h3>
-									<div style={{ marginBottom: "1rem" }}>
-										<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>USDC BALANCE</div>
-										<div style={{ fontSize: "2.4rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>${profile.balance_usdc.toLocaleString()}</div>
+							<div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+								<div style={{ padding: "1.8rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}>
+									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>FINANCIALS</h3>
+									<div style={{ marginBottom: "1.2rem" }}>
+										<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>USDC BALANCE</div>
+										<div style={{ fontSize: "2.8rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>${profile.balance_usdc.toLocaleString()}</div>
 									</div>
 									<div>
-										<div style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>TOTAL EARNED</div>
-										<div style={{ fontSize: "1.8rem", color: "rgba(255,255,255,0.8)", fontFamily: "'Space Mono', monospace" }}>${profile.total_earned_usdc.toLocaleString()}</div>
+										<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>TOTAL EARNED</div>
+										<div style={{ fontSize: "2rem", color: "rgba(255,255,255,0.8)", fontFamily: "'Space Mono', monospace" }}>${profile.total_earned_usdc.toLocaleString()}</div>
 									</div>
 								</div>
 
-								<div style={{ padding: "1.5rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "1.4rem" }}>
-									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>MISSION LOG</h3>
+								<div style={{ padding: "1.8rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "1.45rem" }}>
+									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>MISSION LOG</h3>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Completed</span>
-										<span style={{ color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_completed}</span>
+										<span style={{ color: "#fff", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_completed}</span>
 									</div>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Failed</span>
-										<span style={{ color: "#ff5500", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_failed}</span>
+										<span style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_failed}</span>
 									</div>
 									<div style={{ display: "flex", justifyContent: "space-between" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Abandoned</span>
-										<span style={{ color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_abandoned}</span>
+										<span style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Space Mono', monospace" }}>{profile.tasks_abandoned}</span>
 									</div>
 								</div>
 
-								<div style={{ padding: "1.5rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "1.4rem" }}>
-									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.6rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>REPUTATION</h3>
+								<div style={{ padding: "1.8rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "1.45rem" }}>
+									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>REPUTATION</h3>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Current Streak</span>
-										<span style={{ color: "#ffaa00", fontFamily: "'Space Mono', monospace" }}>{profile.streak} 🔥</span>
+										<span style={{ color: "#fff", fontFamily: "'Space Mono', monospace" }}>{profile.streak} 🔥</span>
 									</div>
 									<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Best Streak</span>
@@ -316,13 +345,16 @@ const ProfilePage = () => {
 									</div>
 									<div style={{ display: "flex", justifyContent: "space-between" }}>
 										<span style={{ color: "rgba(255,255,255,0.6)" }}>Commendations</span>
-										<span style={{ color: "#995500", fontFamily: "'Space Mono', monospace" }}>{profile.commendations}</span>
+										<span style={{ color: "rgba(255,255,255,0.6)", fontFamily: "'Space Mono', monospace" }}>{profile.commendations}</span>
 									</div>
 								</div>
 							</div>
 						</motion.div>
 					) : null}
 				</AnimatePresence>
+
+				{/* Real-time Ticking Clock */}
+				<RealTimeClock />
 			</div>
 		</div>
 	);

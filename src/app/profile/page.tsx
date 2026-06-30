@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Nav } from "@/components/Nav";
+import { GsapHeader } from "@/components/GsapHeader";
 import { isConnected, requestAccess } from "@stellar/freighter-api";
 
 interface AgentProfile {
@@ -177,15 +178,11 @@ const ProfilePage = () => {
 			<Nav />
 
 			<div style={{ maxWidth: "150rem", margin: "0 auto", padding: "12rem 5vw 4rem" }}>
-				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-					<h1 style={{ fontSize: "5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>_</span>
-						Operative <span style={{ color: "#e0a922", fontWeight: "600" }}>Profile</span>
-					</h1>
-					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.6rem", marginBottom: "3rem" }}>
-						Your cryptographic identity and reputation on the X402 ZK Mesh.
-					</p>
-				</motion.div>
+				<GsapHeader
+					title="Operative"
+					accentTitle="Profile"
+					subtitle="Your cryptographic identity and reputation on the X402 ZK Mesh."
+				/>
 
 				{error && !showRegister && (
 					<div style={{ padding: "1.5rem", background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "8px", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace", fontSize: "1.45rem", marginBottom: "2rem" }}>

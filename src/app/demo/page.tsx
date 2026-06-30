@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Nav } from "@/components/Nav";
+import { GsapHeader } from "@/components/GsapHeader";
 
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 
@@ -1966,15 +1967,14 @@ export default function DemoPage() {
           <div className="mb-[2.4rem] border-b border-white/10 pb-[2rem]">
             <div className="flex flex-wrap items-end justify-between gap-[1.6rem]">
               <div>
-                <p className="text-[1.6rem] uppercase tracking-[0.24em] text-[#e0a922]/70 font-medium" style={{ fontFamily: FONT_HEADING }}>
+                <p className="text-[1.6rem] uppercase tracking-[0.24em] text-[#e0a922]/70 font-medium mb-[0.5rem]" style={{ fontFamily: FONT_HEADING }}>
                   Stellar Testnet / Judge Mode
                 </p>
-                <h1 className="mt-[0.8rem] text-[5rem] font-semibold tracking-[0.02em] text-white" style={{ fontFamily: FONT_HEADING }}>
-                  x402 ZK Mesh Execution Trace
-                </h1>
-                <p className="mt-[1rem] max-w-[86rem] text-[2rem] leading-relaxed text-white/55">
-                  Paid agent mesh with private ZK admission control: workers execute only when the proof is valid and the guild root is approved.
-                </p>
+                <GsapHeader
+                  title="x402 ZK Mesh"
+                  accentTitle="Execution Trace"
+                  subtitle="Paid agent mesh with private ZK admission control: workers execute only when the proof is valid and the guild root is approved."
+                />
               </div>
               <div className="flex flex-wrap gap-[0.8rem]">
                 <button

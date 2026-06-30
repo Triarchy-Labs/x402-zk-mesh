@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Nav } from "@/components/Nav";
+import { GsapHeader } from "@/components/GsapHeader";
 import { requestAccess, isConnected as checkFreighterConnected } from "@stellar/freighter-api";
 import { AgentOrb, AgentState } from "@/components/AgentOrb";
 import ReactMarkdown from "react-markdown";
@@ -282,22 +283,20 @@ export default function Dashboard() {
 			<div className="w-full flex-1 flex flex-col mx-auto px-[5vw] mt-[2rem] gap-[4rem]">
 				
 				{/* HEADER */}
-				<motion.div initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }} className="relative flex justify-between items-end">
-					<div>
-                        <motion.h1 variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } } }} className="text-[4rem] md:text-[5rem] font-light mb-[2rem] tracking-tight text-gray-300">
-                            <span className="text-gray-500 mr-[2rem]"><motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span></span>
-                            Sovereign <span className="text-[#ffaa00] font-bold tracking-tight shadow-[#ffaa00]/20 drop-shadow-[0_0_15px_rgba(255, 170, 0,0.4)]">Dashboard</span>
-                        </motion.h1>
-                        <p className="text-gray-400 max-w-2xl text-[1.4rem] leading-relaxed tracking-wide mt-[1rem]">
-                            The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Nemotron 550B Semantic Firewall.
-                        </p>
-                    </div>
-                    {/* SIMULATE ATTACK BUTTON */}
-                    <button onClick={simulateAttack} disabled={isAnalyzing} className="px-[2rem] py-[1rem] border border-[#ff5500] text-[#ff5500] rounded hover:bg-[#ff5500]/20 transition-all font-bold tracking-widest text-[1.2rem] flex items-center gap-[1rem] shadow-[0_0_15px_rgba(255, 85, 0,0.2)]">
-                        <svg className="w-[1.6rem] h-[1.6rem] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                        {isAnalyzing ? "INJECTING PAYLOAD..." : "SIMULATE HACK"}
-                    </button>
-				</motion.div>
+				<div className="relative flex justify-between items-end flex-wrap gap-[2rem]">
+					<div className="flex-1 min-w-[30rem]">
+						<GsapHeader
+							title="Sovereign"
+							accentTitle="Dashboard"
+							subtitle="The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Nemotron 550B Semantic Firewall."
+						/>
+					</div>
+					{/* SIMULATE ATTACK BUTTON */}
+					<button onClick={simulateAttack} disabled={isAnalyzing} className="mb-[3rem] px-[2rem] py-[1rem] border border-[#ff5500] text-[#ff5500] rounded hover:bg-[#ff5500]/20 transition-all font-bold tracking-widest text-[1.2rem] flex items-center gap-[1rem] shadow-[0_0_15px_rgba(255, 85, 0,0.2)]">
+						<svg className="w-[1.6rem] h-[1.6rem] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+						{isAnalyzing ? "INJECTING PAYLOAD..." : "SIMULATE HACK"}
+					</button>
+				</div>
 
 				{/* 1. TOP: The Sentient Stage */}
 				<section ref={stageRef} className={`relative w-full h-[45vh] min-h-[350px] flex items-center justify-center z-10 overflow-hidden rounded-3xl border transition-colors duration-500 shadow-2xl ${agentState === "danger" ? "border-[#ff5500]/50 bg-black" : "border-white/5 bg-black/50"}`}>

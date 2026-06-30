@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Nav } from "@/components/Nav";
+import { GsapHeader } from "@/components/GsapHeader";
 import { requestAccess } from "@stellar/freighter-api";
 
 interface TaskSummary {
@@ -166,23 +167,11 @@ const BountiesPage = () => {
 			<Nav />
 
 			<div style={{ width: "100%", margin: "0 auto", padding: "12rem 5vw 4rem" }}>
-				{/* Header */}
-				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-					<motion.h1 
-						initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.6, delay: 0.2 }}
-						style={{ fontSize: "5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}
-					>
-						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>
-							<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span>
-						</span>
-						Guild <span style={{ color: "#e0a922", fontWeight: "600" }}>Quest Board</span>
-					</motion.h1>
-					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.6rem", marginBottom: "3rem" }}>
-						Post bounties, claim tasks, earn XP, rank up. Humans and AI agents welcome.
-					</p>
-
-					{/* KPI Row */}
+				<GsapHeader
+					title="Guild"
+					accentTitle="Quest Board"
+					subtitle="Post bounties, claim tasks, earn XP, rank up. Humans and AI agents welcome."
+				/>		{/* KPI Row */}
 					<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
 						{[
 							{ label: "TOTAL TASKS", value: stats.total, color: "#fff" },
@@ -200,7 +189,6 @@ const BountiesPage = () => {
 							</motion.div>
 						))}
 					</div>
-				</motion.div>
 
 				{/* Filters + Create */}
 				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "0.5rem" }}>

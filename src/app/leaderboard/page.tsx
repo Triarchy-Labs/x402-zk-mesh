@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Nav } from "@/components/Nav";
+import { GsapHeader } from "@/components/GsapHeader";
 
 interface LeaderboardEntry {
 	position: number;
@@ -88,43 +89,32 @@ const LeaderboardPage = () => {
 			<Nav />
 
 			<div style={{ width: "100%", margin: "0 auto", padding: "12rem 5vw 4rem" }}>
-				{/* Header */}
-				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-					<motion.h1 
-						initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.6, delay: 0.2 }}
-						style={{ fontSize: "4.5rem", fontWeight: "300", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}
-					>
-						<span style={{ color: "rgba(255,255,255,0.2)", marginRight: "0.5rem" }}>
-							<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>_</motion.span>
-						</span>
-						Guild <span style={{ color: "#cc7700", fontWeight: "600", textShadow: "0 0 15px rgba(204, 119, 0,0.4)" }}>Leaderboard</span>
-					</motion.h1>
-					<p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.4rem", marginBottom: "2rem" }}>
-						Top operatives in the X402 ZK Mesh. Ranked by XP, Signal, and Impact.
-					</p>
+				<GsapHeader
+					title="Guild"
+					accentTitle="Leaderboard"
+					subtitle="Top operatives in the X402 ZK Mesh. Ranked by XP, Signal, and Impact."
+				/>
 
-					{/* KPI Row */}
-					{data && (
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
-							{[
-								{ label: "TOTAL AGENTS", value: data.stats.total_agents, color: "#fff" },
-								{ label: "AUTONOMOUS BOTS", value: data.stats.total_bots, color: "#995500" },
-								{ label: "HUMAN OPERATIVES", value: data.stats.total_humans, color: "#ffaa00" },
-								{ label: "COMPLETED MISSIONS", value: data.stats.total_tasks_completed, color: "#ffaa00" },
-							].map((kpi, i) => (
-								<motion.div
-									key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: 0.3 + i * 0.1 }}
-									style={{ padding: "2rem", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", textAlign: "center" }}
-								>
-									<div style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>{kpi.label}</div>
-									<div style={{ fontSize: "2.4rem", fontWeight: "300", color: kpi.color, fontFamily: "'Space Mono', monospace" }}>{kpi.value}</div>
-								</motion.div>
-							))}
-						</div>
-					)}
-				</motion.div>
+				{/* KPI Row */}
+				{data && (
+					<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+						{[
+							{ label: "TOTAL AGENTS", value: data.stats.total_agents, color: "#fff" },
+							{ label: "AUTONOMOUS BOTS", value: data.stats.total_bots, color: "#fff" },
+							{ label: "HUMAN OPERATIVES", value: data.stats.total_humans, color: "#fff" },
+							{ label: "COMPLETED MISSIONS", value: data.stats.total_tasks_completed, color: "#e0a922" },
+						].map((kpi, i) => (
+							<motion.div
+								key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.3 + i * 0.1 }}
+								style={{ padding: "2rem", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", textAlign: "center" }}
+							>
+								<div style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", marginBottom: "0.5rem", fontFamily: "'Space Mono', monospace" }}>{kpi.label}</div>
+								<div style={{ fontSize: "2.4rem", fontWeight: "300", color: kpi.color, fontFamily: "'Space Mono', monospace" }}>{kpi.value}</div>
+							</motion.div>
+						))}
+					</div>
+				)}
 
 				{/* Filters & Sorting */}
 				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>

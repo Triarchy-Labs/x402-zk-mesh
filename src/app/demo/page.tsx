@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Nav } from "@/components/Nav";
 
+const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
+
+
 type StepStatus =
   | "confirmed"
   | "verified"
@@ -713,11 +716,11 @@ function HardPathChecklist({
   items: Array<{ id: string; label: string; evidence: string; step?: DemoTraceStep; state: HardPathState }>;
 }) {
   return (
-    <section className="border border-white/10 bg-black/55 p-[1.8rem]">
-      <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Current Trace Checklist</h2>
+    <section className="border border-white/10 bg-black/40 backdrop-blur-md p-[1.8rem] rounded-lg">
+      <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Current Trace Checklist</h2>
       <div className="mt-[1.2rem] grid gap-[0.8rem]">
         {items.map((item, index) => (
-          <div key={item.id} className="grid grid-cols-[2.4rem_minmax(0,1fr)_5.8rem] items-center gap-[0.9rem] border border-white/10 bg-white/[0.03] p-[1rem]">
+          <div key={item.id} className="grid grid-cols-[2.4rem_minmax(0,1fr)_5.8rem] items-center gap-[0.9rem] border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
             <div className="text-[1rem] text-white/35">{String(index + 1).padStart(2, "0")}</div>
             <div className="min-w-0">
               <div className="truncate text-[1.1rem] text-white/75">{item.label}</div>
@@ -738,9 +741,9 @@ function LoadBearingZkPanel({ step }: { step?: DemoTraceStep }) {
   const metadata = step?.metadata || {};
 
   return (
-    <section className="border border-white/10 bg-black/55 p-[1.8rem]">
+    <section className="border border-white/10 bg-black/40 backdrop-blur-md p-[1.8rem] rounded-lg">
       <div className="flex items-center justify-between gap-[1rem]">
-        <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Load-Bearing ZK Gate</h2>
+        <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Load-Bearing ZK Gate</h2>
         <span className={`border px-[0.8rem] py-[0.4rem] text-[0.95rem] tracking-[0.12em] ${hardPathClass(state)}`}>
           {hardPathCopy(state)}
         </span>
@@ -767,7 +770,7 @@ function LoadBearingZkPanel({ step }: { step?: DemoTraceStep }) {
         </div>
         {step?.txHash && (
           step.explorer ? (
-            <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
+            <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
               zk tx: {shortValue(step.txHash)}
             </a>
           ) : (
@@ -783,11 +786,11 @@ function LoadBearingZkPanel({ step }: { step?: DemoTraceStep }) {
 
 function DecisionMatrix() {
   return (
-    <section className="border border-white/10 bg-black/55 p-[1.8rem]">
-      <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">ZK Decision Matrix</h2>
+    <section className="border border-white/10 bg-black/40 backdrop-blur-md p-[1.8rem] rounded-lg">
+      <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>ZK Decision Matrix</h2>
       <div className="mt-[1.2rem] grid gap-[0.8rem]">
         {DECISION_MATRIX.map((item) => (
-          <div key={item.scenario} className="border border-white/10 bg-white/[0.03] p-[1rem]">
+          <div key={item.scenario} className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
             <div className="flex flex-wrap items-center justify-between gap-[0.8rem]">
               <div className="text-[1.1rem] uppercase tracking-[0.14em] text-white/75">{item.scenario}</div>
               <div className={`border px-[0.7rem] py-[0.4rem] text-[0.95rem] uppercase tracking-[0.12em] ${
@@ -821,9 +824,9 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
   const recordedCount = EVIDENCE_CASES.filter((item) => evidence[item.key]).length;
 
   return (
-    <section className="border border-white/10 bg-black/55 p-[1.8rem]">
+    <section className="border border-white/10 bg-black/40 backdrop-blur-md p-[1.8rem] rounded-lg">
       <div className="flex items-center justify-between gap-[1rem]">
-        <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Scenario Evidence</h2>
+        <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Scenario Evidence</h2>
         <span className="border border-white/10 bg-black px-[0.8rem] py-[0.4rem] text-[0.95rem] text-white/55">
           {recordedCount}/{EVIDENCE_CASES.length}
         </span>
@@ -840,7 +843,7 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
           const paymentAssetCode = metadataString(payment, "assetCode");
 
           return (
-            <div key={item.key} className="border border-white/10 bg-white/[0.03] p-[1rem]">
+            <div key={item.key} className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
               <div className="flex flex-wrap items-center justify-between gap-[0.8rem]">
                 <div className="text-[1.05rem] uppercase tracking-[0.14em] text-white/75">{item.title}</div>
                 <div className={`border px-[0.7rem] py-[0.4rem] text-[0.95rem] uppercase tracking-[0.12em] ${evidenceClass(item.tone, !!trace)}`}>
@@ -868,7 +871,7 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
                   <span className="text-white/70">{settlement ? statusCopy[settlement.status] : "none"}</span>
                 </div>
                 {payment?.txHash && (
-                  <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
+                  <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
                     payment tx: {shortValue(payment.txHash)}
                   </a>
                 )}
@@ -886,6 +889,7 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
   );
 }
 
+
 function JudgeSuitePanel({
   runs,
   result,
@@ -901,10 +905,10 @@ function JudgeSuitePanel({
   const verdict = running ? "running" : result?.status || (evidenceReady ? "passed" : "ready");
 
   return (
-    <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+    <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
       <div className="flex flex-wrap items-center justify-between gap-[1rem]">
         <div>
-          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">One-Click Judge Suite</h2>
+          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>One-Click Judge Suite</h2>
           <div className="mt-[0.6rem] text-[1.1rem] text-white/35">
             {running
               ? `${completedCount}/${runs.length} scenarios complete`
@@ -921,7 +925,7 @@ function JudgeSuitePanel({
       </div>
       <div className="mt-[1.2rem] grid gap-[0.8rem]">
         {runs.map((run) => (
-          <div key={run.scenario} className="grid gap-[0.9rem] border border-white/10 bg-white/[0.03] p-[1rem] lg:grid-cols-[minmax(0,1.1fr)_8rem_minmax(0,1fr)]">
+          <div key={run.scenario} className="grid gap-[0.9rem] border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md lg:grid-cols-[minmax(0,1.1fr)_8rem_minmax(0,1fr)]">
             <div className="min-w-0">
               <div className="text-[1.1rem] uppercase tracking-[0.14em] text-white/75">{run.title}</div>
               <div className="mt-[0.5rem] text-[1.05rem] leading-relaxed text-white/35">{run.expected}</div>
@@ -947,7 +951,7 @@ function JudgeSuitePanel({
                     <span className="text-white/70">{run.settlement || "none"}</span>
                   </div>
                   {run.txHash && (
-                    <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
+                    <a className="break-all text-[#e0a922] underline decoration-[#e0a922]/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
                       tx: {shortValue(run.txHash)}
                     </a>
                   )}
@@ -970,7 +974,7 @@ function JudgeSuitePanel({
 function JudgePreflightPanel({
   report,
   isMockMode,
-  setIsMockMode
+  setIsMockMode,
 }: {
   report: PreflightReport | null;
   isMockMode: boolean;
@@ -978,8 +982,8 @@ function JudgePreflightPanel({
 }) {
   if (!report) {
     return (
-      <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
-        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Judge Preflight</div>
+      <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
+        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Judge Preflight</div>
         <div className="mt-[0.8rem] text-[1.1rem] text-white/35">Loading gateway readiness checks.</div>
       </section>
     );
@@ -988,24 +992,26 @@ function JudgePreflightPanel({
   const aliveWorkers = report.workers.filter((worker) => worker.alive).length;
 
   return (
-    <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+    <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
       <div className="flex flex-wrap items-start justify-between gap-[1.6rem]">
         <div>
-          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Judge Preflight</h2>
+          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Judge Preflight</h2>
           <div className="mt-[0.6rem] text-[1.1rem] text-white/35">
             402 challenge, Stellar env, mesh workers and claim boundaries checked before live suite execution.
           </div>
         </div>
-        <div className="flex items-center gap-[0.5rem] border border-white/10 p-[0.3rem] bg-black/40">
+        <div className="flex items-center gap-[0.5rem] border border-white/10 p-[0.3rem] bg-black/30 rounded backdrop-blur-sm">
           <button
             onClick={() => setIsMockMode(false)}
-            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${!isMockMode ? "bg-cyan-500/20 text-cyan-200 border border-cyan-500/40" : "text-white/35 hover:text-white/70"}`}
+            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${!isMockMode ? "bg-[#e0a922]/20 text-[#e0a922] border border-[#e0a922]/40" : "text-white/35 hover:text-white/70"}`}
+            style={{ fontFamily: FONT_HEADING }}
           >
             Stellar Testnet
           </button>
           <button
             onClick={() => setIsMockMode(true)}
-            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${isMockMode ? "bg-emerald-500/20 text-emerald-200 border border-emerald-500/40" : "text-white/35 hover:text-white/70"}`}
+            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${isMockMode ? "bg-white/10 text-white border border-white/20" : "text-white/35 hover:text-white/70"}`}
+            style={{ fontFamily: FONT_HEADING }}
           >
             Sandbox Simulator
           </button>
@@ -1016,26 +1022,26 @@ function JudgePreflightPanel({
       </div>
 
       {isMockMode && (
-        <div className="mt-[1.2rem] border border-amber-300/30 bg-amber-300/5 px-[1.2rem] py-[0.8rem] text-[1.1rem] tracking-[0.08em] text-amber-200/90 flex items-center justify-between gap-[1rem]">
+        <div className="mt-[1.2rem] border border-amber-300/30 bg-amber-300/5 px-[1.2rem] py-[0.8rem] text-[1.1rem] tracking-[0.08em] text-amber-200/90 flex items-center justify-between gap-[1rem] rounded">
           <span>⚠️ AUTO-FALLBACK: Sandbox Simulator Enabled (Horizon Testnet Offline or Unconfigured)</span>
           <span className="text-[0.9rem] text-amber-200/50 uppercase">[ mock execution sandbox ]</span>
         </div>
       )}
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-4">
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">402 challenge</div>
           <div className="mt-[0.45rem] text-[1.45rem] text-white">{report.challenge.ok ? "PASS" : "FAIL"}</div>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Workers alive</div>
           <div className="mt-[0.45rem] text-[1.45rem] text-white">{aliveWorkers}/{report.workers.length}</div>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Payer</div>
           <div className="mt-[0.45rem] text-[1.45rem] text-white">{report.runtime.payerConfigured ? "READY" : "MISSING"}</div>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Amount</div>
           <div className="mt-[0.45rem] text-[1.45rem] text-white">{report.runtime.demoAmount}</div>
         </div>
@@ -1043,7 +1049,7 @@ function JudgePreflightPanel({
 
       <div className="mt-[1.2rem] grid gap-[0.8rem]">
         {report.checks.map((check) => (
-          <div key={check.id} className="grid gap-[0.8rem] border border-white/10 bg-white/[0.03] p-[1rem] md:grid-cols-[18rem_minmax(0,1fr)_7rem]">
+          <div key={check.id} className="grid gap-[0.8rem] border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md md:grid-cols-[18rem_minmax(0,1fr)_7rem]">
             <div className="text-[1.05rem] uppercase tracking-[0.14em] text-white/75">{check.label}</div>
             <div className="min-w-0 text-[1.05rem] leading-relaxed text-white/40">
               {check.detail}
@@ -1058,7 +1064,7 @@ function JudgePreflightPanel({
 
       <div className="mt-[1.2rem] grid gap-[0.8rem] md:grid-cols-2">
         {report.workers.map((worker) => (
-          <div key={worker.url} className="border border-white/10 bg-white/[0.03] p-[1rem]">
+          <div key={worker.url} className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
             <div className="flex flex-wrap items-center justify-between gap-[0.8rem]">
               <div className="min-w-0 break-all text-[1.05rem] text-white/75">{worker.name || shortValue(worker.url)}</div>
               <span className={`border px-[0.7rem] py-[0.35rem] text-[0.9rem] uppercase tracking-[0.12em] ${preflightCheckClass(worker.alive ? "pass" : "fail")}`}>
@@ -1075,10 +1081,10 @@ function JudgePreflightPanel({
         ))}
       </div>
 
-      <h3 className="mt-[1.2rem] text-[1.05rem] uppercase tracking-[0.16em] text-white/35">Claim Boundaries</h3>
+      <h3 className="mt-[1.2rem] text-[1.05rem] uppercase tracking-[0.16em] text-white/35 font-medium" style={{ fontFamily: FONT_HEADING }}>Claim Boundaries</h3>
       <div className="mt-[0.8rem] grid gap-[0.8rem]">
         {report.claimBoundaries.map((claim) => (
-          <div key={claim.claim} className="grid gap-[0.8rem] border border-white/10 bg-white/[0.03] p-[1rem] md:grid-cols-[18rem_8rem_minmax(0,1fr)]">
+          <div key={claim.claim} className="grid gap-[0.8rem] border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md md:grid-cols-[18rem_8rem_minmax(0,1fr)]">
             <div className="text-[1.05rem] uppercase tracking-[0.14em] text-white/75">{claim.claim}</div>
             <div className={`self-start border px-[0.7rem] py-[0.35rem] text-center text-[0.9rem] uppercase tracking-[0.12em] ${claimClass(claim.status)}`}>
               {claim.status}
@@ -1106,18 +1112,18 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
 
   if (!pack) {
     return (
-      <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
-        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Judge Artifact Pack</div>
+      <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
+        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Judge Artifact Pack</div>
         <div className="mt-[0.8rem] text-[1.1rem] text-white/35">Loading evidence pack.</div>
       </section>
     );
   }
 
   return (
-    <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+    <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
       <div className="flex flex-wrap items-start justify-between gap-[1rem]">
         <div>
-          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Judge Artifact Pack</h2>
+          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Judge Artifact Pack</h2>
           <div className="mt-[0.6rem] text-[1.1rem] text-white/35">{pack.verdict}</div>
         </div>
         <div className="flex flex-wrap gap-[0.8rem]">
@@ -1126,23 +1132,24 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
           </span>
           <button
             onClick={copyArtifactPack}
-            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-[#e0a922] hover:text-[#e0a922]"
+            style={{ fontFamily: FONT_HEADING }}
           >
-            {copied ? "COPIED" : "COPY PACK"}
+            {copied ? "[ COPIED ]" : "[ COPY PACK ]"}
           </button>
         </div>
       </div>
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-3">
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Suite coverage</div>
           <div className="mt-[0.45rem] text-[1.5rem] text-white">{pack.coverage.recorded}/{pack.coverage.total}</div>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Current trace path</div>
           <div className="mt-[0.45rem] text-[1.5rem] text-white">{pack.currentTrace.hardPathPassed}/{pack.currentTrace.hardPathTotal}</div>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Current trace</div>
           <div className="mt-[0.45rem] break-all text-[1.2rem] text-white">{pack.currentTrace.status}</div>
         </div>
@@ -1152,7 +1159,7 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
 
       <div className="mt-[1.2rem] grid gap-[0.8rem]">
         {pack.scenarios.map((scenario) => (
-          <div key={scenario.key} className="grid gap-[0.9rem] border border-white/10 bg-white/[0.03] p-[1rem] lg:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)]">
+          <div key={scenario.key} className="grid gap-[0.9rem] border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md lg:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)]">
             <div className="min-w-0">
               <div className="text-[1.1rem] uppercase tracking-[0.14em] text-white/75">{scenario.title}</div>
               <div className="mt-[0.5rem] text-[1.05rem] leading-relaxed text-white/35">{scenario.expected}</div>
@@ -1180,12 +1187,12 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
                 </div>
               )}
               {scenario.paymentExplorer && scenario.paymentTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
                   payment tx: {shortValue(scenario.paymentTx)}
                 </a>
               )}
               {scenario.proofExplorer && scenario.proofTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
                   proof tx: {shortValue(scenario.proofTx)}
                 </a>
               )}
@@ -1195,7 +1202,7 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
                 </div>
               )}
               {scenario.settlementExplorer && scenario.settlementTx && (
-                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
                   settlement tx: {shortValue(scenario.settlementTx)}
                 </a>
               )}
@@ -1208,17 +1215,17 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
       </div>
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-2">
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md text-amber-200 hover:border-amber-300/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">membership verifier</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.membershipVerifier.id}</div>
         </a>
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md text-amber-200 hover:border-amber-300/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">guild registry</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.guildRegistry.id}</div>
         </a>
       </div>
 
-      <pre className="mt-[1.2rem] max-h-[22rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/50 p-[1rem] text-[1rem] leading-relaxed text-white/45">
+      <pre className="mt-[1.2rem] max-h-[22rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/30 p-[1rem] rounded-md text-[1rem] leading-relaxed text-white/45">
         {pack.copyText}
       </pre>
     </section>
@@ -1240,18 +1247,18 @@ function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) 
 
   if (!pack) {
     return (
-      <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
-        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Submission Pack</div>
+      <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
+        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Submission Pack</div>
         <div className="mt-[0.8rem] text-[1.1rem] text-white/35">Loading submission evidence.</div>
       </section>
     );
   }
 
   return (
-    <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+    <section className="mb-[1.2rem] border border-white/10 bg-black/40 backdrop-blur-md p-[1.6rem] rounded-lg">
       <div className="flex flex-wrap items-start justify-between gap-[1rem]">
         <div className="max-w-[78rem]">
-          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Submission Pack</h2>
+          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-[#e0a922] font-medium" style={{ fontFamily: FONT_HEADING }}>Submission Pack</h2>
           <div className="mt-[0.6rem] text-[1.2rem] leading-relaxed text-white/55">{pack.headline}</div>
         </div>
         <div className="flex flex-wrap gap-[0.8rem]">
@@ -1260,34 +1267,35 @@ function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) 
           </span>
           <button
             onClick={copySubmissionPack}
-            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-[#e0a922] hover:text-[#e0a922]"
+            style={{ fontFamily: FONT_HEADING }}
           >
-            {copied ? "COPIED" : "COPY SUBMISSION"}
+            {copied ? "[ COPIED ]" : "[ COPY SUBMISSION ]"}
           </button>
         </div>
       </div>
 
       <div className="mt-[1.2rem] grid gap-[0.8rem] lg:grid-cols-3">
         {pack.pitch.map((line, index) => (
-          <div key={line} className="border border-white/10 bg-white/[0.03] p-[1rem] text-[1.05rem] leading-relaxed text-white/45">
-            <div className="mb-[0.5rem] text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Pitch {index + 1}</div>
+          <div key={line} className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md text-[1.05rem] leading-relaxed text-white/45">
+            <div className="mb-[0.5rem] text-[0.95rem] uppercase tracking-[0.16em] text-[#e0a922]/70">Pitch {index + 1}</div>
             {line}
           </div>
         ))}
       </div>
 
       <div className="mt-[1.2rem] grid gap-[1rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
-          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-white/35">Proof Of Work</h3>
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
+          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-[#e0a922]/70 font-medium" style={{ fontFamily: FONT_HEADING }}>Proof Of Work</h3>
           <div className="mt-[0.8rem] grid gap-[0.7rem]">
             {pack.proofOfWork.map((item) => (
-              <div key={item.label} className="grid gap-[0.7rem] border border-white/10 bg-black/35 p-[0.9rem] md:grid-cols-[12rem_6rem_minmax(0,1fr)]">
+              <div key={item.label} className="grid gap-[0.7rem] border border-white/10 bg-black/20 backdrop-blur-sm p-[0.9rem] rounded md:grid-cols-[12rem_6rem_minmax(0,1fr)]">
                 <div className="text-[1rem] uppercase tracking-[0.12em] text-white/65">{item.label}</div>
                 <div className={`self-start border px-[0.6rem] py-[0.3rem] text-center text-[0.9rem] uppercase tracking-[0.12em] ${preflightCheckClass(item.status)}`}>
                   {item.status}
                 </div>
                 {item.href ? (
-                  <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={item.href} target="_blank" rel="noreferrer">
+                  <a className="break-all text-amber-200 underline decoration-amber-200/30 underline-offset-4" href={item.href} target="_blank" rel="noreferrer">
                     {item.evidence}
                   </a>
                 ) : (
@@ -1298,13 +1306,13 @@ function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) 
           </div>
         </div>
 
-        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
-          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-white/35">Judge Steps</h3>
+        <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
+          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-[#e0a922]/70 font-medium" style={{ fontFamily: FONT_HEADING }}>Judge Steps</h3>
           <div className="mt-[0.8rem] grid gap-[0.7rem]">
             {pack.judgeSteps.map((step, index) => (
-              <div key={step.label} className="border border-white/10 bg-black/35 p-[0.9rem]">
+              <div key={step.label} className="border border-white/10 bg-black/20 backdrop-blur-sm p-[0.9rem] rounded">
                 <div className="text-[1rem] uppercase tracking-[0.12em] text-white/65">{String(index + 1).padStart(2, "0")} {step.label}</div>
-                <div className="mt-[0.45rem] break-all text-[1.02rem] text-cyan-200">{step.action}</div>
+                <div className="mt-[0.45rem] break-all text-[1.02rem] text-amber-200">{step.action}</div>
                 <div className="mt-[0.45rem] text-[1.02rem] leading-relaxed text-white/40">{step.expected}</div>
               </div>
             ))}
@@ -1314,7 +1322,7 @@ function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) 
 
       <div className="mt-[1.2rem] grid gap-[0.8rem] md:grid-cols-2">
         {pack.demoVideoOutline.map((shot) => (
-          <div key={shot.timebox} className="border border-white/10 bg-white/[0.03] p-[1rem]">
+          <div key={shot.timebox} className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-[1rem] rounded-md">
             <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">{shot.timebox}</div>
             <div className="mt-[0.5rem] text-[1.05rem] text-white/70">{shot.shot}</div>
             <div className="mt-[0.45rem] text-[1.02rem] leading-relaxed text-white/40">{shot.narration}</div>
@@ -1322,7 +1330,7 @@ function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) 
         ))}
       </div>
 
-      <pre className="mt-[1.2rem] max-h-[24rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/50 p-[1rem] text-[1rem] leading-relaxed text-white/45">
+      <pre className="mt-[1.2rem] max-h-[24rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/30 p-[1rem] rounded-md text-[1rem] leading-relaxed text-white/45">
         {pack.copyMarkdown}
       </pre>
     </section>
@@ -1954,20 +1962,20 @@ export default function DemoPage() {
   }, [error, loading, trace]);
 
   return (
-    <main className="min-h-screen bg-[#050608] pt-[12rem] pb-[6rem] font-mono text-white">
+    <main className="min-h-screen pt-[12rem] pb-[6rem] text-white">
       <Nav />
       <section className="mx-auto grid w-full max-w-[150rem] gap-[2.4rem] px-[4vw] lg:grid-cols-[minmax(0,1fr)_42rem]">
         <div className="min-w-0">
           <div className="mb-[2.4rem] border-b border-white/10 pb-[2rem]">
             <div className="flex flex-wrap items-end justify-between gap-[1.6rem]">
               <div>
-                <p className="text-[1.1rem] uppercase tracking-[0.24em] text-white/35">
+                <p className="text-[1.1rem] uppercase tracking-[0.24em] text-[#e0a922]/70 font-medium" style={{ fontFamily: FONT_HEADING }}>
                   Stellar Testnet / Judge Mode
                 </p>
-                <h1 className="mt-[0.8rem] text-[3.6rem] font-semibold tracking-[0.02em] text-white">
+                <h1 className="mt-[0.8rem] text-[3.6rem] font-semibold tracking-[0.02em] text-white" style={{ fontFamily: FONT_HEADING }}>
                   x402 ZK Mesh Execution Trace
                 </h1>
-                <p className="mt-[1rem] max-w-[86rem] text-[1.25rem] leading-relaxed text-white/45">
+                <p className="mt-[1rem] max-w-[86rem] text-[1.25rem] leading-relaxed text-white/55">
                   Paid agent mesh with private ZK admission control: workers execute only when the proof is valid and the guild root is approved.
                 </p>
               </div>
@@ -1975,69 +1983,74 @@ export default function DemoPage() {
                 <button
                   onClick={runJudgeSuite}
                   disabled={busy}
-                  className="border border-cyan-300/50 bg-cyan-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-cyan-100 transition hover:border-cyan-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-[#e0a922]/50 bg-[#e0a922]/5 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-[#e0a922] transition hover:border-[#e0a922] hover:bg-[#e0a922]/15 disabled:cursor-wait disabled:opacity-50"
+                  style={{ fontFamily: FONT_HEADING }}
                 >
-                  {suiteRunning ? "SUITE RUNNING" : "RUN JUDGE SUITE"}
+                  {suiteRunning ? "[ SUITE RUNNING ]" : "[ RUN JUDGE SUITE ]"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("happy-path")}
                   disabled={busy}
-                  className="border border-emerald-300/45 bg-emerald-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-emerald-100 transition hover:border-emerald-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-[#e0a922] bg-[#e0a922] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-black font-semibold transition hover:bg-[#ffaa00] disabled:cursor-wait disabled:opacity-50"
+                  style={{ fontFamily: FONT_HEADING }}
                 >
-                  {running ? "RUNNING" : "RUN FRESH TRACE"}
+                  {running ? "[ RUNNING ]" : "[ RUN FRESH TRACE ]"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("tampered-worker-proof")}
                   disabled={busy}
-                  className="border border-red-300/45 bg-red-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-red-100 transition hover:border-red-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-[#e0a922]/50 bg-[#e0a922]/5 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-[#e0a922] transition hover:border-[#e0a922] hover:bg-[#e0a922]/15 disabled:cursor-wait disabled:opacity-50"
+                  style={{ fontFamily: FONT_HEADING }}
                 >
-                  RUN BLOCKED TRACE
+                  [ RUN BLOCKED TRACE ]
                 </button>
                 <button
                   onClick={() => runTraceScenario("unapproved-worker-root")}
                   disabled={busy}
-                  className="border border-amber-300/45 bg-amber-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-[#e0a922]/50 bg-[#e0a922]/5 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-[#e0a922] transition hover:border-[#e0a922] hover:bg-[#e0a922]/15 disabled:cursor-wait disabled:opacity-50"
+                  style={{ fontFamily: FONT_HEADING }}
                 >
-                  RUN UNAPPROVED ROOT
+                  [ RUN UNAPPROVED ROOT ]
                 </button>
                 <button
                   onClick={refresh}
-                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-[#e0a922] hover:text-[#e0a922]"
+                  style={{ fontFamily: FONT_HEADING }}
                 >
-                  REFRESH
+                  [ REFRESH ]
                 </button>
               </div>
             </div>
             <div className="mt-[1.6rem] flex flex-wrap gap-[1rem] text-[1.1rem] uppercase tracking-[0.14em]">
-              <span className="border border-white/10 bg-black px-[1rem] py-[0.6rem] text-white/55">
+              <span className="border border-white/10 bg-black/40 backdrop-blur-md px-[1rem] py-[0.6rem] text-white/55">
                 STATUS: {statusLabel}
               </span>
-              <span className="border border-white/10 bg-black px-[1rem] py-[0.6rem] text-white/55">
+              <span className="border border-white/10 bg-black/40 backdrop-blur-md px-[1rem] py-[0.6rem] text-white/55">
                 NETWORK: STELLAR TESTNET
               </span>
               {trace?.taskId && (
-                <span className="border border-white/10 bg-black px-[1rem] py-[0.6rem] text-white/55">
+                <span className="border border-white/10 bg-black/40 backdrop-blur-md px-[1rem] py-[0.6rem] text-white/55">
                   TASK: {shortValue(trace.taskId)}
                 </span>
               )}
             </div>
             <div className="mt-[1.4rem] grid gap-[1rem] sm:grid-cols-4">
-              <div className="border border-white/10 bg-black/50 p-[1.2rem]">
-                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Current trace path</div>
+              <div className="border border-white/10 bg-black/30 backdrop-blur-md p-[1.2rem] rounded-lg">
+                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-[#e0a922]/70">Current trace path</div>
                 <div className="mt-[0.4rem] text-[1.5rem] text-white">{hardPathPassCount}/{HARD_PATH.length}</div>
               </div>
-              <div className="border border-white/10 bg-black/50 p-[1.2rem]">
-                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Mesh route</div>
+              <div className="border border-white/10 bg-black/30 backdrop-blur-md p-[1.2rem] rounded-lg">
+                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-[#e0a922]/70">Mesh route</div>
                 <div className="mt-[0.4rem] text-[1.5rem] text-white">
                   {meshStep ? `${statusCopy[meshStep.status]} / ${meshCandidateCount ?? "?"}` : "WAIT"}
                 </div>
               </div>
-              <div className="border border-white/10 bg-black/50 p-[1.2rem]">
-                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">ZK worker gate</div>
+              <div className="border border-white/10 bg-black/30 backdrop-blur-md p-[1.2rem] rounded-lg">
+                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-[#e0a922]/70">ZK worker gate</div>
                 <div className="mt-[0.4rem] text-[1.5rem] text-white">{hardPathCopy(hardPathState(workerZkStep))}</div>
               </div>
-              <div className="border border-white/10 bg-black/50 p-[1.2rem]">
-                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Settlement</div>
+              <div className="border border-white/10 bg-black/30 backdrop-blur-md p-[1.2rem] rounded-lg">
+                <div className="text-[0.95rem] uppercase tracking-[0.16em] text-[#e0a922]/70">Settlement</div>
                 <div className="mt-[0.4rem] text-[1.5rem] text-white">{settlementStep ? statusCopy[settlementStep.status] : "WAIT"}</div>
               </div>
             </div>
@@ -2066,7 +2079,7 @@ export default function DemoPage() {
           )}
 
           {running && (
-            <div className="mb-[1.2rem] border border-cyan-300/30 bg-cyan-300/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-cyan-100">
+            <div className="mb-[1.2rem] border border-[#e0a922]/30 bg-[#e0a922]/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-[#e0a922]">
               Live run in progress: payment, ZK gate, delegation and settlement are executing.
             </div>
           )}

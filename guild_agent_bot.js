@@ -15,15 +15,28 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('node:path');
+const snarkjs = require('snarkjs');
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 3001;
-const GATEWAY = 'http://localhost:3000';
+const PORT = Number.parseInt(process.env.PORT || process.env.AGENT_PORT || '3001', 10);
+const GATEWAY = (process.env.GATEWAY_URL || 'http://localhost:3000').replace(/\/$/, '');
+const AGENT_NAME = process.env.AGENT_NAME || 'mercenary-bot-0x4b3';
+const AGENT_CAPABILITIES = (process.env.AGENT_CAPABILITIES || 'code-audit,soroban-review,llm-execution,security-scan')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+const AGENT_PUBLIC_KEY = process.env.AGENT_PUBLIC_KEY || 'GDEMO000000000000000000000000000000000000000000000000BOT';
+const BN254_FIELD = BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617');
+const MEMBERSHIP_WASM = path.join(__dirname, 'public', 'circuits', 'membership_proof.wasm');
+const MEMBERSHIP_ZKEY = path.join(__dirname, 'public', 'circuits', 'membership_proof_final.zkey');
 
 let membershipLeaf = null;
+let membershipProofInputs = null;
 let agentId = null;
+const proofCache = new Map();
 
 async function joinGuild() {
     console.log('\n--- GUILD ONBOARDING ---');
@@ -47,14 +60,15 @@ async function joinGuild() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                name: 'mercenary-bot-0x4b3',
-                capabilities: ['code-audit', 'soroban-review', 'llm-execution', 'security-scan'],
-                publicKey: 'GDEMO000000000000000000000000000000000000000000000000BOT'
+                name: AGENT_NAME,
+                capabilities: AGENT_CAPABILITIES,
+                publicKey: AGENT_PUBLIC_KEY
             })
         });
         const data = await res.json();
         agentId = data.agent?.id;
         membershipLeaf = data.guild?.membershipLeaf;
+        membershipProofInputs = data.guild?.proofInputs;
         console.log(`      Agent ID: ${agentId}`);
         console.log(`      Membership Leaf: ${membershipLeaf?.substring(0, 16)}...`);
         console.log(`      Guild Members: ${data.guild?.totalMembers}`);
@@ -71,7 +85,7 @@ async function joinGuild() {
 
 // Task execution endpoint
 app.post('/api/hire', (req, res) => {
-    const { task } = req.body;
+    const task = req.body.task || req.body.description || '';
 
     console.log('\n[GUILD AGENT] Received Task:');
     console.log(`  Task: "${task}"`);
@@ -91,7 +105,7 @@ app.post('/api/hire', (req, res) => {
         }
 
         res.json({
-            agent_id: agentId || 'mercenary_bot_0x4b3',
+            agent_id: agentId || AGENT_NAME,
             status: 'success',
             result,
             membership: membershipLeaf ? 'guild_verified' : 'public',
@@ -102,13 +116,62 @@ app.post('/api/hire', (req, res) => {
     }, 1500);
 });
 
+// ZK membership proof endpoint used by the gateway before delegation.
+app.post('/api/membership-proof', async (req, res) => {
+    if (!membershipProofInputs || !membershipLeaf) {
+        return res.status(409).json({
+            error: 'Agent is not registered as a guild member yet.',
+            agent_id: agentId,
+        });
+    }
+
+    const profile = req.body?.proof_profile === 'unapproved-root' ? 'unapproved-root' : 'approved-root';
+    try {
+        const cacheKey = profile;
+        if (!proofCache.has(cacheKey)) {
+            const baseProofInput = {
+                leaf: membershipProofInputs.leaf,
+                pathElements: membershipProofInputs.pathElements,
+                pathIndices: membershipProofInputs.pathIndices,
+            };
+            const proofInput = profile === 'unapproved-root'
+                ? {
+                    ...baseProofInput,
+                    leaf: ((BigInt(baseProofInput.leaf) + 1n) % BN254_FIELD).toString(),
+                }
+                : baseProofInput;
+            const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+                proofInput,
+                MEMBERSHIP_WASM,
+                MEMBERSHIP_ZKEY,
+            );
+            proofCache.set(cacheKey, { proof, publicSignals });
+        }
+
+        const cached = proofCache.get(cacheKey);
+        res.json({
+            agent_id: agentId || AGENT_NAME,
+            circuit: 'membership_proof',
+            profile,
+            proof: cached.proof,
+            publicSignals: cached.publicSignals,
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: error instanceof Error ? error.message : String(error),
+            agent_id: agentId,
+        });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({
         status: 'alive',
         agent_id: agentId,
+        name: AGENT_NAME,
         guild_member: !!membershipLeaf,
-        capabilities: ['code-audit', 'soroban-review', 'llm-execution', 'security-scan'],
+        capabilities: AGENT_CAPABILITIES,
     });
 });
 

@@ -53,18 +53,25 @@ const RealTimeClock = () => {
 	}, []);
 
 	return (
-		<div style={{
-			marginTop: "8rem",
-			textAlign: "center",
-			fontFamily: "monospace",
-			fontSize: "4.5rem",
-			fontWeight: "bold",
-			color: "#fff",
-			letterSpacing: "0.2em",
-			textShadow: "0 0 35px rgba(255, 170, 0, 0.95)",
-		}}>
+		<motion.div
+			initial={{ opacity: 0.15, scale: 0.98 }}
+			whileHover={{ opacity: 0.85, scale: 1.02, textShadow: "0 0 50px rgba(255, 170, 0, 1)" }}
+			transition={{ duration: 0.5, ease: "easeOut" }}
+			style={{
+				marginTop: "18rem",
+				textAlign: "center",
+				fontFamily: "monospace",
+				fontSize: "12rem",
+				fontWeight: "bold",
+				color: "#fff",
+				letterSpacing: "0.15em",
+				textShadow: "0 0 30px rgba(255, 170, 0, 0.5)",
+				cursor: "default",
+				userSelect: "none",
+			}}
+		>
 			{time}
-		</div>
+		</motion.div>
 	);
 };
 

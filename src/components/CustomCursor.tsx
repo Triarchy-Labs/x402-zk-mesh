@@ -93,18 +93,15 @@ export default function CustomCursor() {
 				width: 20,
 				height: 20,
 				borderRadius: "50%",
-				// Apple Glass: Clear interior, frosted border, high refraction
-				backgroundColor: isHovering ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.2)",
-				border: isHovering ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.4)",
+				backgroundColor: isHovering ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.25)",
+				border: isHovering ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.5)",
 				pointerEvents: "none",
 				zIndex: 99999,
-				backdropFilter: isHovering ? "blur(1.5px) saturate(150%) brightness(1.05) contrast(110%)" : "blur(1px) saturate(110%)",
-				WebkitBackdropFilter: isHovering ? "blur(1.5px) saturate(150%) brightness(1.05) contrast(110%)" : "blur(1px) saturate(110%)",
-				// Multilayered inset to simulate glass bezel distortion
+				// Removed backdropFilter to prevent GPU rendering artifacts (black spots) on Canvas
 				boxShadow: isHovering 
-					? "inset 0 0.5px 0.5px rgba(255,255,255,0.5), inset 0 0 10px rgba(255,255,255,0.2), 0 4px 15px rgba(0,0,0,0.2)" 
+					? "0 0 10px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.2)" 
 					: "0 2px 5px rgba(0,0,0,0.15)",
-				transition: "background-color 0.6s ease, border 0.6s ease, backdrop-filter 0.6s ease, box-shadow 0.6s ease",
+				transition: "background-color 0.4s ease, border 0.4s ease, box-shadow 0.4s ease",
 				willChange: "transform",
 			}}
 		/>

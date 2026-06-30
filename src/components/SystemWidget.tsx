@@ -42,10 +42,10 @@ export function SystemWidget() {
 			style={{
 				position: "fixed",
 				bottom: "25vh",
-				left: "24px",
+				left: "18px",
 				display: "flex",
 				alignItems: "center",
-				fontSize: "1.2rem",
+				fontSize: "0.9rem",
 				fontFamily: '"Space Mono", monospace',
 				color: "rgba(255,255,255,0.6)",
 				textTransform: "uppercase",
@@ -58,18 +58,18 @@ export function SystemWidget() {
 			}}
 		>
 			<span style={{ color: "#fff", display: "inline-block" }}>[ {timeStr}</span>
-			<span style={{ margin: "20px 0", color: "rgba(255,255,255,0.2)", display: "inline-block" }}>{"//"}</span>
+			<span style={{ margin: "15px 0", color: "rgba(255,255,255,0.2)", display: "inline-block" }}>{"//"}</span>
 			<span style={{ color: "rgba(255,255,255,0.6)", display: "inline-block" }}>FPS</span>
 			<span style={{ 
-				marginTop: "20px",
+				marginTop: "15px",
 				color: fps >= 55 ? "#ffaa00" : fps >= 30 ? "#ffb000" : "#ff5500",
 				fontWeight: "bold",
-				textShadow: fps >= 55 ? "0 0 15px rgba(255, 170, 0,0.4)" : "none",
+				textShadow: fps >= 55 ? "0 0 10px rgba(255, 170, 0,0.35)" : "none",
 				display: "inline-block"
 			}}>
 				{fps.toString().padStart(2, "0")}
 			</span>
-			<span style={{ marginTop: "12px", color: "#fff", display: "inline-block" }}>]</span>
+			<span style={{ marginTop: "9px", color: "#fff", display: "inline-block" }}>]</span>
 		</motion.div>
 	);
 }

@@ -82,7 +82,13 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
                     color: "rgba(255, 255, 255, 0.6)" 
                 }}
             >
-				INITIALIZING L402 MESH PROTOCOL...
+				{progress > 75
+					? "SETTLING STELLAR MESH TRANSACTION..."
+					: progress > 50
+					? "CONFIGURING X402 GATEWAY..."
+					: progress > 25
+					? "ESTABLISHING AI SWARM MESH..."
+					: "INITIALIZING ZK TRUST SYSTEMS..."}
 			</motion.div>
 		</motion.div>
 	);

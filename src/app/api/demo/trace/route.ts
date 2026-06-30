@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const limitParam = Number.parseInt(url.searchParams.get("limit") || "5", 10);
   const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 25) : 5;
   const traces = await readDemoTraces(limit);
-  const latest = traces[0] || null;
+  const latest = traces.find((trace) => trace.status === "complete") || traces[0] || null;
   const contracts = getContractAddresses();
 
   return NextResponse.json({

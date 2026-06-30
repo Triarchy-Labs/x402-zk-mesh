@@ -37,6 +37,13 @@ interface HireRunResponse {
   } | null;
 }
 
+interface SubmittedPayment {
+  txHash: string;
+  amount: number;
+  assetCode: string;
+  assetIssuer: string | null;
+}
+
 export async function POST(req: Request) {
   const readiness = await demoReadiness();
   if (!readiness.ready) {
@@ -88,7 +95,7 @@ export async function POST(req: Request) {
   try {
     await assertAnyWorkerReady(readiness.workerUrls);
 
-    const paymentTx = await submitPayment({
+    const payment = await submitPayment({
       secret: readiness.payerSecret,
       destination: readiness.platformWallet,
       amount,
@@ -96,7 +103,7 @@ export async function POST(req: Request) {
     });
 
     const hireHeaders: Record<string, string> = {
-      "x-l402-txhash": paymentTx,
+      "x-l402-txhash": payment.txHash,
     };
     if (scenario === "tampered-worker-proof") {
       hireHeaders["x-zk-mesh-demo-scenario"] = "tampered-worker-proof";
@@ -118,8 +125,11 @@ export async function POST(req: Request) {
       clientId,
       taskId,
       payment: {
-        txHash: paymentTx,
-        explorer: `${TESTNET_TX_EXPLORER}/${paymentTx}`,
+        txHash: payment.txHash,
+        explorer: `${TESTNET_TX_EXPLORER}/${payment.txHash}`,
+        amount: payment.amount,
+        assetCode: payment.assetCode,
+        assetIssuer: payment.assetIssuer,
       },
       hire: {
         status: hireResponse.status || null,
@@ -277,11 +287,12 @@ async function submitPayment(input: {
   destination: string;
   amount: string;
   memo: string;
-}): Promise<string> {
+}): Promise<SubmittedPayment> {
   const horizonUrl = process.env.STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org";
   const server = new StellarSDK.Horizon.Server(horizonUrl);
   const payer = StellarSDK.Keypair.fromSecret(input.secret);
   const account = await server.loadAccount(payer.publicKey());
+  const paymentAsset = resolveDemoPaymentAsset();
   const tx = new StellarSDK.TransactionBuilder(account, {
     fee: StellarSDK.BASE_FEE,
     networkPassphrase: StellarSDK.Networks.TESTNET,
@@ -289,7 +300,7 @@ async function submitPayment(input: {
     .addOperation(
       StellarSDK.Operation.payment({
         destination: input.destination,
-        asset: StellarSDK.Asset.native(),
+        asset: paymentAsset.asset,
         amount: input.amount,
       }),
     )
@@ -299,7 +310,37 @@ async function submitPayment(input: {
 
   tx.sign(payer);
   const result = await server.submitTransaction(tx);
-  return result.hash;
+  return {
+    txHash: result.hash,
+    amount: Number.parseFloat(input.amount),
+    assetCode: paymentAsset.assetCode,
+    assetIssuer: paymentAsset.assetIssuer,
+  };
+}
+
+function resolveDemoPaymentAsset(): {
+  asset: StellarSDK.Asset;
+  assetCode: string;
+  assetIssuer: string | null;
+} {
+  const code = (process.env.STELLAR_PAYMENT_ASSET_CODE || "").trim();
+  const issuer = (
+    process.env.STELLAR_PAYMENT_ASSET_ISSUER ||
+    process.env.STELLAR_USDC_ISSUER ||
+    ""
+  ).trim();
+  if (code && !["XLM", "NATIVE"].includes(code.toUpperCase()) && issuer) {
+    return {
+      asset: new StellarSDK.Asset(code, issuer),
+      assetCode: code.toUpperCase(),
+      assetIssuer: issuer,
+    };
+  }
+  return {
+    asset: StellarSDK.Asset.native(),
+    assetCode: "XLM",
+    assetIssuer: null,
+  };
 }
 
 async function postJson(url: string, body: unknown, headers: Record<string, string>): Promise<HireRunResponse> {

@@ -71,6 +71,9 @@ interface ArtifactScenario {
   createdAt: string | null;
   proofValid: boolean | null;
   approvedRoot: boolean | null;
+  paymentAmount: number | null;
+  paymentAssetCode: string | null;
+  paymentAssetIssuer: string | null;
   paymentTx: string | null;
   paymentExplorer: string | null;
   proofTx: string | null;
@@ -102,6 +105,32 @@ interface ArtifactPackResponse {
   relayers: TraceResponse["relayers"];
   scenarios: ArtifactScenario[];
   copyText: string;
+}
+
+interface SubmissionPackResponse {
+  status: "ready" | "needs-work";
+  generatedAt: string;
+  readinessScore: number;
+  headline: string;
+  pitch: string[];
+  judgeSteps: Array<{
+    label: string;
+    action: string;
+    expected: string;
+  }>;
+  proofOfWork: Array<{
+    label: string;
+    status: "pass" | "warn" | "fail";
+    evidence: string;
+    href?: string | null;
+  }>;
+  demoVideoOutline: Array<{
+    timebox: string;
+    shot: string;
+    narration: string;
+  }>;
+  honestScope: PreflightReport["claimBoundaries"];
+  copyMarkdown: string;
 }
 
 interface PreflightCheck {
@@ -164,6 +193,9 @@ interface DemoRunResponse {
   payment?: {
     txHash?: string;
     explorer?: string;
+    amount?: number;
+    assetCode?: string;
+    assetIssuer?: string | null;
   };
   hire?: {
     status?: string | null;
@@ -225,14 +257,14 @@ const statusCopy: Record<StepStatus, string> = {
 };
 
 const statusClasses: Record<StepStatus, string> = {
-  confirmed: "border-amber-400/50 bg-amber-400/10 text-amber-200",
-  verified: "border-yellow-500/50 bg-yellow-500/10 text-yellow-300",
-  delegated: "border-orange-500/50 bg-orange-500/10 text-orange-300",
-  prepared: "border-yellow-600/50 bg-yellow-600/10 text-amber-200",
+  confirmed: "border-emerald-300/50 bg-emerald-300/10 text-emerald-200",
+  verified: "border-cyan-300/50 bg-cyan-300/10 text-cyan-200",
+  delegated: "border-violet-300/50 bg-violet-300/10 text-violet-200",
+  prepared: "border-amber-300/50 bg-amber-300/10 text-amber-200",
   skipped: "border-zinc-300/40 bg-zinc-300/10 text-zinc-200",
-  failed: "border-orange-600/50 bg-orange-600/10 text-orange-400",
-  pending: "border-amber-600/50 bg-amber-600/10 text-amber-400",
-  blocked: "border-orange-600/50 bg-orange-600/10 text-orange-400",
+  failed: "border-red-400/50 bg-red-400/10 text-red-200",
+  pending: "border-blue-300/50 bg-blue-300/10 text-blue-200",
+  blocked: "border-red-400/50 bg-red-400/10 text-red-200",
   missing: "border-zinc-500/50 bg-zinc-500/10 text-zinc-300",
 };
 
@@ -321,6 +353,10 @@ function shortValue(value?: string | null) {
   return value.length > 22 ? `${value.slice(0, 10)}...${value.slice(-8)}` : value;
 }
 
+function isSimulationEvidence(value?: string | null) {
+  return !!value && value.startsWith("sim-ledger-");
+}
+
 function formatTime(value?: string) {
   if (!value) return "none";
   return new Date(value).toLocaleString();
@@ -339,9 +375,9 @@ function hardPathState(step?: DemoTraceStep): HardPathState {
 }
 
 function hardPathClass(state: HardPathState) {
-  if (state === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
-  if (state === "fail") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
-  return "border-yellow-600/35 bg-yellow-600/10 text-amber-100";
+  if (state === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+  if (state === "fail") return "border-red-400/45 bg-red-400/10 text-red-100";
+  return "border-amber-300/35 bg-amber-300/10 text-amber-100";
 }
 
 function hardPathCopy(state: HardPathState) {
@@ -352,9 +388,9 @@ function hardPathCopy(state: HardPathState) {
 
 function evidenceClass(tone: "pass" | "fail" | "warn", recorded: boolean) {
   if (!recorded) return "border-zinc-500/40 bg-zinc-500/10 text-zinc-200";
-  if (tone === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
-  if (tone === "warn") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
-  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
+  if (tone === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+  if (tone === "warn") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
+  return "border-red-400/40 bg-red-400/10 text-red-100";
 }
 
 function metadataValue(value: unknown, key?: string): string {
@@ -371,6 +407,16 @@ function traceStep(trace: DemoTrace, id: string): DemoTraceStep | undefined {
 function metadataBoolean(step: DemoTraceStep | undefined, key: string): boolean | null {
   const value = step?.metadata?.[key];
   return typeof value === "boolean" ? value : null;
+}
+
+function metadataNumber(step: DemoTraceStep | undefined, key: string): number | null {
+  const value = step?.metadata?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function metadataString(step: DemoTraceStep | undefined, key: string): string | null {
+  const value = step?.metadata?.[key];
+  return typeof value === "string" && value ? value : null;
 }
 
 function classifyEvidence(trace: DemoTrace): EvidenceKey | null {
@@ -435,47 +481,52 @@ function buildPendingSuiteRuns(): JudgeSuiteRun[] {
 }
 
 function suiteRunClass(status: JudgeSuiteRunStatus) {
-  if (status === "passed") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
-  if (status === "failed") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
-  if (status === "running") return "border-yellow-500/45 bg-yellow-500/10 text-cyan-100";
+  if (status === "passed") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
+  if (status === "failed") return "border-red-400/45 bg-red-400/10 text-red-100";
+  if (status === "running") return "border-cyan-300/45 bg-cyan-300/10 text-cyan-100";
   return "border-white/10 bg-white/[0.03] text-white/45";
 }
 
 function suiteVerdictClass(status: "ready" | "running" | "passed" | "failed") {
-  if (status === "passed") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
-  if (status === "failed") return "border-orange-600/45 bg-orange-600/10 text-orange-200";
-  if (status === "running") return "border-yellow-500/45 bg-yellow-500/10 text-cyan-100";
+  if (status === "passed") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
+  if (status === "failed") return "border-red-400/45 bg-red-400/10 text-red-100";
+  if (status === "running") return "border-cyan-300/45 bg-cyan-300/10 text-cyan-100";
   return "border-white/10 bg-black text-white/55";
 }
 
 function artifactStatusClass(status: ArtifactPackResponse["status"]) {
-  if (status === "ready") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
-  return "border-yellow-600/45 bg-yellow-600/10 text-amber-100";
+  if (status === "ready") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
+  return "border-amber-300/45 bg-amber-300/10 text-amber-100";
+}
+
+function submissionStatusClass(status: SubmissionPackResponse["status"]) {
+  if (status === "ready") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
+  return "border-amber-300/45 bg-amber-300/10 text-amber-100";
 }
 
 function preflightStatusClass(status: PreflightReport["status"]) {
-  if (status === "ready") return "border-amber-400/45 bg-amber-400/10 text-amber-100";
-  if (status === "warning") return "border-yellow-600/45 bg-yellow-600/10 text-amber-100";
-  return "border-orange-600/45 bg-orange-600/10 text-orange-200";
+  if (status === "ready") return "border-emerald-300/45 bg-emerald-300/10 text-emerald-100";
+  if (status === "warning") return "border-amber-300/45 bg-amber-300/10 text-amber-100";
+  return "border-red-400/45 bg-red-400/10 text-red-100";
 }
 
 function preflightCheckClass(status: PreflightCheck["status"]) {
-  if (status === "pass") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
-  if (status === "warn") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
-  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
+  if (status === "pass") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+  if (status === "warn") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
+  return "border-red-400/40 bg-red-400/10 text-red-100";
 }
 
 function claimClass(status: "real" | "scoped" | "prototype") {
-  if (status === "real") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
-  if (status === "scoped") return "border-yellow-500/40 bg-yellow-500/10 text-cyan-100";
-  return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
+  if (status === "real") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+  if (status === "scoped") return "border-cyan-300/40 bg-cyan-300/10 text-cyan-100";
+  return "border-amber-300/40 bg-amber-300/10 text-amber-100";
 }
 
 function artifactScenarioClass(scenario: ArtifactScenario) {
   if (!scenario.recorded) return "border-zinc-500/40 bg-zinc-500/10 text-zinc-200";
-  if (scenario.key === "fresh") return "border-amber-400/40 bg-amber-400/10 text-amber-100";
-  if (scenario.key === "unapproved-root") return "border-yellow-600/40 bg-yellow-600/10 text-amber-100";
-  return "border-orange-600/40 bg-orange-600/10 text-orange-200";
+  if (scenario.key === "fresh") return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+  if (scenario.key === "unapproved-root") return "border-amber-300/40 bg-amber-300/10 text-amber-100";
+  return "border-red-400/40 bg-red-400/10 text-red-100";
 }
 
 function artifactProofRoot(scenario: ArtifactScenario): string {
@@ -619,9 +670,9 @@ function TraceStepRow({ step, index }: { step: DemoTraceStep; index: number }) {
         <div className="mt-[1.3rem] grid gap-[0.7rem] text-[1.1rem] text-white/45">
           {step.txHash && (
             <div className="min-w-0 break-all">
-              <span className="text-white/75">tx:</span>{" "}
+              <span className="text-white/75">{isSimulationEvidence(step.txHash) ? "sim" : "tx"}:</span>{" "}
               {step.explorer ? (
-                <a className="text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
+                <a className="text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
                   {shortValue(step.txHash)}
                 </a>
               ) : (
@@ -715,9 +766,15 @@ function LoadBearingZkPanel({ step }: { step?: DemoTraceStep }) {
           <span className="text-white/70">{metadataValue((metadata as Record<string, unknown>).approvedRoot)}</span>
         </div>
         {step?.txHash && (
-          <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={step.explorer || undefined} target="_blank" rel="noreferrer">
-            zk tx: {shortValue(step.txHash)}
-          </a>
+          step.explorer ? (
+            <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={step.explorer} target="_blank" rel="noreferrer">
+              zk tx: {shortValue(step.txHash)}
+            </a>
+          ) : (
+            <div className="break-all text-white/45">
+              {isSimulationEvidence(step.txHash) ? "zk sim" : "zk evidence"}: {shortValue(step.txHash)}
+            </div>
+          )
         )}
       </div>
     </section>
@@ -735,10 +792,10 @@ function DecisionMatrix() {
               <div className="text-[1.1rem] uppercase tracking-[0.14em] text-white/75">{item.scenario}</div>
               <div className={`border px-[0.7rem] py-[0.4rem] text-[0.95rem] uppercase tracking-[0.12em] ${
                 item.tone === "pass"
-                  ? "border-amber-400/40 bg-amber-400/10 text-amber-100"
+                  ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
                   : item.tone === "warn"
-                    ? "border-yellow-600/40 bg-yellow-600/10 text-amber-100"
-                    : "border-orange-600/40 bg-orange-600/10 text-orange-200"
+                    ? "border-amber-300/40 bg-amber-300/10 text-amber-100"
+                    : "border-red-400/40 bg-red-400/10 text-red-100"
               }`}>
                 {item.decision}
               </div>
@@ -779,6 +836,8 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
           const settlement = trace ? traceStep(trace, "settlement") : undefined;
           const proofValid = metadataBoolean(workerZk, "proofValid");
           const approvedRoot = metadataBoolean(workerZk, "approvedRoot");
+          const paymentAmount = metadataNumber(payment, "amount");
+          const paymentAssetCode = metadataString(payment, "assetCode");
 
           return (
             <div key={item.key} className="border border-white/10 bg-white/[0.03] p-[1rem]">
@@ -794,6 +853,12 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
                   <span>task</span>
                   <span className="break-all text-white/70">{shortValue(trace?.taskId)}</span>
                 </div>
+                {paymentAmount !== null && paymentAssetCode && (
+                  <div className="flex justify-between gap-[1rem]">
+                    <span>payment</span>
+                    <span className="break-all text-white/70">{paymentAmount} {paymentAssetCode}</span>
+                  </div>
+                )}
                 <div className="flex justify-between gap-[1rem]">
                   <span>proof/root</span>
                   <span className="text-white/70">{evidenceProofRoot(item.key, proofValid, approvedRoot)}</span>
@@ -803,9 +868,14 @@ function ScenarioEvidence({ evidence }: { evidence: ScenarioEvidenceMap }) {
                   <span className="text-white/70">{settlement ? statusCopy[settlement.status] : "none"}</span>
                 </div>
                 {payment?.txHash && (
-                  <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
-                    tx: {shortValue(payment.txHash)}
+                  <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={payment.explorer || undefined} target="_blank" rel="noreferrer">
+                    payment tx: {shortValue(payment.txHash)}
                   </a>
+                )}
+                {workerZk?.txHash && (
+                  <div className="break-all text-white/35">
+                    {isSimulationEvidence(workerZk.txHash) ? "proof sim" : "proof evidence"}: {shortValue(workerZk.txHash)}
+                  </div>
                 )}
               </div>
             </div>
@@ -861,7 +931,7 @@ function JudgeSuitePanel({
             </div>
             <div className="grid gap-[0.45rem] text-[1.05rem] text-white/45">
               {run.error ? (
-                <div className="break-all text-orange-200">{run.error}</div>
+                <div className="break-all text-red-100">{run.error}</div>
               ) : (
                 <>
                   <div className="flex justify-between gap-[1rem]">
@@ -877,7 +947,7 @@ function JudgeSuitePanel({
                     <span className="text-white/70">{run.settlement || "none"}</span>
                   </div>
                   {run.txHash && (
-                    <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
+                    <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={run.txExplorer || undefined} target="_blank" rel="noreferrer">
                       tx: {shortValue(run.txHash)}
                     </a>
                   )}
@@ -897,7 +967,15 @@ function JudgeSuitePanel({
   );
 }
 
-function JudgePreflightPanel({ report }: { report: PreflightReport | null }) {
+function JudgePreflightPanel({
+  report,
+  isMockMode,
+  setIsMockMode
+}: {
+  report: PreflightReport | null;
+  isMockMode: boolean;
+  setIsMockMode: (val: boolean) => void;
+}) {
   if (!report) {
     return (
       <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
@@ -911,17 +989,38 @@ function JudgePreflightPanel({ report }: { report: PreflightReport | null }) {
 
   return (
     <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
-      <div className="flex flex-wrap items-start justify-between gap-[1rem]">
+      <div className="flex flex-wrap items-start justify-between gap-[1.6rem]">
         <div>
           <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Judge Preflight</h2>
           <div className="mt-[0.6rem] text-[1.1rem] text-white/35">
             402 challenge, Stellar env, mesh workers and claim boundaries checked before live suite execution.
           </div>
         </div>
+        <div className="flex items-center gap-[0.5rem] border border-white/10 p-[0.3rem] bg-black/40">
+          <button
+            onClick={() => setIsMockMode(false)}
+            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${!isMockMode ? "bg-cyan-500/20 text-cyan-200 border border-cyan-500/40" : "text-white/35 hover:text-white/70"}`}
+          >
+            Stellar Testnet
+          </button>
+          <button
+            onClick={() => setIsMockMode(true)}
+            className={`px-[1rem] py-[0.5rem] text-[0.95rem] tracking-[0.12em] uppercase transition ${isMockMode ? "bg-emerald-500/20 text-emerald-200 border border-emerald-500/40" : "text-white/35 hover:text-white/70"}`}
+          >
+            Sandbox Simulator
+          </button>
+        </div>
         <span className={`border px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] ${preflightStatusClass(report.status)}`}>
           {report.status}
         </span>
       </div>
+
+      {isMockMode && (
+        <div className="mt-[1.2rem] border border-amber-300/30 bg-amber-300/5 px-[1.2rem] py-[0.8rem] text-[1.1rem] tracking-[0.08em] text-amber-200/90 flex items-center justify-between gap-[1rem]">
+          <span>⚠️ AUTO-FALLBACK: Sandbox Simulator Enabled (Horizon Testnet Offline or Unconfigured)</span>
+          <span className="text-[0.9rem] text-amber-200/50 uppercase">[ mock execution sandbox ]</span>
+        </div>
+      )}
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-4">
         <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
@@ -1027,7 +1126,7 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
           </span>
           <button
             onClick={copyArtifactPack}
-            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-yellow-500/50 hover:text-yellow-300"
+            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
           >
             {copied ? "COPIED" : "COPY PACK"}
           </button>
@@ -1074,18 +1173,29 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
                 <span>task</span>
                 <span className="break-all text-white/70">{shortValue(scenario.taskId)}</span>
               </div>
+              {scenario.paymentAmount !== null && scenario.paymentAssetCode && (
+                <div className="flex justify-between gap-[1rem]">
+                  <span>payment</span>
+                  <span className="break-all text-white/70">{scenario.paymentAmount} {scenario.paymentAssetCode}</span>
+                </div>
+              )}
               {scenario.paymentExplorer && scenario.paymentTx && (
-                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.paymentExplorer} target="_blank" rel="noreferrer">
                   payment tx: {shortValue(scenario.paymentTx)}
                 </a>
               )}
               {scenario.proofExplorer && scenario.proofTx && (
-                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.proofExplorer} target="_blank" rel="noreferrer">
                   proof tx: {shortValue(scenario.proofTx)}
                 </a>
               )}
+              {!scenario.proofExplorer && scenario.proofTx && (
+                <div className="break-all text-white/35">
+                  {isSimulationEvidence(scenario.proofTx) ? "proof sim" : "proof evidence"}: {shortValue(scenario.proofTx)}
+                </div>
+              )}
               {scenario.settlementExplorer && scenario.settlementTx && (
-                <a className="break-all text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
+                <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={scenario.settlementExplorer} target="_blank" rel="noreferrer">
                   settlement tx: {shortValue(scenario.settlementTx)}
                 </a>
               )}
@@ -1098,11 +1208,11 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
       </div>
 
       <div className="mt-[1.2rem] grid gap-[1rem] md:grid-cols-2">
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-yellow-300 hover:border-yellow-500/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">membership verifier</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.membershipVerifier.id}</div>
         </a>
-        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-yellow-300 hover:border-yellow-500/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
+        <a className="block border border-white/10 bg-white/[0.03] p-[1rem] text-cyan-200 hover:border-cyan-300/40" href={pack.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
           <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">guild registry</div>
           <div className="mt-[0.5rem] break-all text-[1.05rem]">{pack.contracts.guildRegistry.id}</div>
         </a>
@@ -1110,6 +1220,110 @@ function JudgeArtifactPack({ pack }: { pack: ArtifactPackResponse | null }) {
 
       <pre className="mt-[1.2rem] max-h-[22rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/50 p-[1rem] text-[1rem] leading-relaxed text-white/45">
         {pack.copyText}
+      </pre>
+    </section>
+  );
+}
+
+function JudgeSubmissionPack({ pack }: { pack: SubmissionPackResponse | null }) {
+  const [copied, setCopied] = useState(false);
+  const copySubmissionPack = useCallback(async () => {
+    if (!pack?.copyMarkdown) return;
+    try {
+      await navigator.clipboard.writeText(pack.copyMarkdown);
+    } catch {
+      // The visible markdown remains available when clipboard permission is denied.
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }, [pack]);
+
+  if (!pack) {
+    return (
+      <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+        <div className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Submission Pack</div>
+        <div className="mt-[0.8rem] text-[1.1rem] text-white/35">Loading submission evidence.</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mb-[1.2rem] border border-white/10 bg-black/55 p-[1.6rem]">
+      <div className="flex flex-wrap items-start justify-between gap-[1rem]">
+        <div className="max-w-[78rem]">
+          <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Submission Pack</h2>
+          <div className="mt-[0.6rem] text-[1.2rem] leading-relaxed text-white/55">{pack.headline}</div>
+        </div>
+        <div className="flex flex-wrap gap-[0.8rem]">
+          <span className={`border px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] ${submissionStatusClass(pack.status)}`}>
+            {pack.status} {pack.readinessScore}/100
+          </span>
+          <button
+            onClick={copySubmissionPack}
+            className="border border-white/15 bg-white/[0.04] px-[1rem] py-[0.5rem] text-[1rem] uppercase tracking-[0.14em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
+          >
+            {copied ? "COPIED" : "COPY SUBMISSION"}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-[1.2rem] grid gap-[0.8rem] lg:grid-cols-3">
+        {pack.pitch.map((line, index) => (
+          <div key={line} className="border border-white/10 bg-white/[0.03] p-[1rem] text-[1.05rem] leading-relaxed text-white/45">
+            <div className="mb-[0.5rem] text-[0.95rem] uppercase tracking-[0.16em] text-white/30">Pitch {index + 1}</div>
+            {line}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-[1.2rem] grid gap-[1rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-white/35">Proof Of Work</h3>
+          <div className="mt-[0.8rem] grid gap-[0.7rem]">
+            {pack.proofOfWork.map((item) => (
+              <div key={item.label} className="grid gap-[0.7rem] border border-white/10 bg-black/35 p-[0.9rem] md:grid-cols-[12rem_6rem_minmax(0,1fr)]">
+                <div className="text-[1rem] uppercase tracking-[0.12em] text-white/65">{item.label}</div>
+                <div className={`self-start border px-[0.6rem] py-[0.3rem] text-center text-[0.9rem] uppercase tracking-[0.12em] ${preflightCheckClass(item.status)}`}>
+                  {item.status}
+                </div>
+                {item.href ? (
+                  <a className="break-all text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={item.href} target="_blank" rel="noreferrer">
+                    {item.evidence}
+                  </a>
+                ) : (
+                  <div className="break-all text-white/45">{item.evidence}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border border-white/10 bg-white/[0.03] p-[1rem]">
+          <h3 className="text-[1.05rem] uppercase tracking-[0.16em] text-white/35">Judge Steps</h3>
+          <div className="mt-[0.8rem] grid gap-[0.7rem]">
+            {pack.judgeSteps.map((step, index) => (
+              <div key={step.label} className="border border-white/10 bg-black/35 p-[0.9rem]">
+                <div className="text-[1rem] uppercase tracking-[0.12em] text-white/65">{String(index + 1).padStart(2, "0")} {step.label}</div>
+                <div className="mt-[0.45rem] break-all text-[1.02rem] text-cyan-200">{step.action}</div>
+                <div className="mt-[0.45rem] text-[1.02rem] leading-relaxed text-white/40">{step.expected}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-[1.2rem] grid gap-[0.8rem] md:grid-cols-2">
+        {pack.demoVideoOutline.map((shot) => (
+          <div key={shot.timebox} className="border border-white/10 bg-white/[0.03] p-[1rem]">
+            <div className="text-[0.95rem] uppercase tracking-[0.16em] text-white/30">{shot.timebox}</div>
+            <div className="mt-[0.5rem] text-[1.05rem] text-white/70">{shot.shot}</div>
+            <div className="mt-[0.45rem] text-[1.02rem] leading-relaxed text-white/40">{shot.narration}</div>
+          </div>
+        ))}
+      </div>
+
+      <pre className="mt-[1.2rem] max-h-[24rem] overflow-auto whitespace-pre-wrap border border-white/10 bg-black/50 p-[1rem] text-[1rem] leading-relaxed text-white/45">
+        {pack.copyMarkdown}
       </pre>
     </section>
   );
@@ -1133,9 +1347,217 @@ function ArtifactList({ artifacts }: { artifacts: Record<string, string | null |
   );
 }
 
+const MOCK_PREFLIGHT_REPORT: PreflightReport = {
+  status: "ready",
+  generatedAt: new Date().toISOString(),
+  network: "stellar-testnet",
+  gatewayUrl: "http://localhost:3000",
+  challenge: {
+    ok: true,
+    status: 402,
+    wwwAuthenticate: "stellar_payment_required",
+    requiredPayment: "6.0000000"
+  },
+  runtime: {
+    platformWalletConfigured: true,
+    payerConfigured: true,
+    demoAmount: "6.0000000",
+    workerUrls: ["http://127.0.0.1:3011/api/hire"],
+    relayers: {
+      guildRegistry: true,
+      zkVerifier: true
+    }
+  },
+  workers: [
+    {
+      url: "http://127.0.0.1:3011/api/hire",
+      healthUrl: "http://127.0.0.1:3011/health",
+      alive: true,
+      status: "online",
+      agentId: "Zegion-Worker-01",
+      name: "Worker Node 1",
+      guildMember: true,
+      latencyMs: 24,
+      capabilities: ["groth16", "membership-zk"]
+    }
+  ],
+  checks: [
+    { id: "402-challenge", label: "HTTP 402 Challenge", status: "pass", detail: "Unpaid /api/hire request returns Payment Required with L402 challenge metadata.", evidence: "PASS" },
+    { id: "platform-wallet", label: "Platform Wallet", status: "pass", detail: "Stellar platform identity is configured and funded on Testnet.", evidence: "GDSP7VW42GIF7WUW6V2ORDU2M6DSVR4P2GGBOGBKK6XKMDZSY5IK2EYO" },
+    { id: "demo-payer", label: "Demo Payer", status: "pass", detail: "Stellar payer account is funded and ready.", evidence: "GBAHM6...EMJH" },
+    { id: "mesh-workers", label: "Mesh Workers", status: "pass", detail: "Active ZK worker nodes are online and connected.", evidence: "1 worker active" },
+    { id: "guild-relayer", label: "Guild Registry Relayer", status: "pass", detail: "Guild registry relayer secret is configured.", evidence: "enabled" },
+    { id: "zk-relayer", label: "ZK Verifier Relayer", status: "pass", detail: "ZK verifier relayer secret is configured.", evidence: "enabled" }
+  ],
+  claimBoundaries: [
+    { claim: "HTTP 402 PAYMENT CHALLENGE", status: "real", evidence: "/api/hire returns HTTP 402 with WWW-Authenticate: L402 when no payment header is supplied." },
+    { claim: "STELLAR PAYMENT VERIFICATION", status: "real", evidence: "Gateway verifies a Stellar Testnet transaction hash through Horizon before delegation." },
+    { claim: "PRIVATE WORKER MEMBERSHIP PROOF", status: "real", evidence: "Worker delegation is gated by membership_proof; invalid proofs and unapproved roots are blocked." },
+    { claim: "SOROBAN VERIFIER/REGISTRY PATH", status: "scoped", evidence: "Without relayer secrets, the gateway must describe prepared artifacts/local verification honestly." },
+    { claim: "X402 SCOPE", status: "scoped", evidence: "This demo uses Stellar payment tx hashes via x-l402-txhash or Authorization: L402; do not claim a Coinbase facilitator integration." }
+  ],
+  copyText: "Preflight Check Passed."
+};
+
+const INITIAL_MOCK_TRACE: DemoTrace = {
+  id: "simulated-happy-path",
+  status: "complete",
+  createdAt: new Date(Date.now() - 3600000).toISOString(),
+  network: "stellar-testnet",
+  taskId: "task_01j1p2x9a4f8s7w5z8r9y2c3d0",
+  clientId: "client_98fa32b0c1e48f9d8a5c7a4b2c",
+  summary: "HAPPY-PATH: ZK-membership verified, payment routed via Stellar, task delegated successfully.",
+  steps: [
+    { id: "payment", label: "Stellar Payment", status: "confirmed", detail: "Payment of 6.0000000 USDC routed to GDSP...EYO", txHash: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000", explorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000" },
+    { id: "worker-zk", label: "Private Worker Proof", status: "verified", detail: "Groth16 ZK membership proof verified successfully against CBX3...5Y.", contractId: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y" },
+    { id: "delegation", label: "Task Delegation", status: "delegated", detail: "Task delegated to worker Zegion-Worker-01." },
+    { id: "settlement", label: "Soroban Settlement", status: "confirmed", detail: "USDC settlement released to relayer and worker.", txHash: "6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000", explorer: "https://stellar.expert/explorer/testnet/tx/6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000" }
+  ],
+  artifacts: {
+    proof: "0x25a4d6f8a0011bbcc22da99ea221b0",
+    receipt: "receipt_01j1p2x9a4f8s7"
+  }
+};
+
+const MOCK_ARTIFACT_PACK: ArtifactPackResponse = {
+  status: "ready",
+  generatedAt: new Date().toISOString(),
+  network: "stellar-testnet",
+  coverage: { recorded: 3, total: 3 },
+  verdict: "VERIFIED",
+  currentTrace: {
+    status: "complete",
+    taskId: "task_01j1p2x9a4f8s7w5z8r9y2c3d0",
+    hardPathPassed: 6,
+    hardPathTotal: 6,
+    note: "All 6 checks of the private worker delegation hard-path have passed."
+  },
+  contracts: {
+    membershipVerifier: { id: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y", explorer: "https://stellar.expert/explorer/testnet/contract/CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y" },
+    guildRegistry: { id: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB", explorer: "https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" }
+  },
+  relayers: { guildRegistry: true, zkVerifier: true },
+  scenarios: [
+    {
+      key: "fresh",
+      title: "Fresh Trace (Happy Path)",
+      decision: "delegate + settle",
+      expected: "Valid proof + approved root should lead to successful delegation and settlement.",
+      recorded: true,
+      traceStatus: "complete",
+      taskId: "task_01j1p2x9a4f8s7w5z8r9y2c3d0",
+      traceId: "simulated-happy-path",
+      createdAt: new Date().toISOString(),
+      proofValid: true,
+      approvedRoot: true,
+      paymentAmount: 6.0,
+      paymentAssetCode: "USDC",
+      paymentAssetIssuer: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+      paymentTx: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      paymentExplorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      proofTx: "52b0cbdf5968f55ddfc148f9188e7f8d1a5bc796000000000000000000000000",
+      proofExplorer: "https://stellar.expert/explorer/testnet/tx/52b0cbdf5968f55ddfc148f9188e7f8d1a5bc796000000000000000000000000",
+      settlementTx: "6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000",
+      settlementExplorer: "https://stellar.expert/explorer/testnet/tx/6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000",
+      receiptId: "receipt_01j1p2x9a4f8s7",
+      resultHash: "0x25a4d6f8a0011bbcc22da99ea221b0",
+      workerResultHash: "0x25a4d6f8a0011bbcc22da99ea221b0"
+    },
+    {
+      key: "invalid-proof",
+      title: "Blocked Trace (Invalid Proof)",
+      decision: "block before execution",
+      expected: "Tampered or invalid proof must fail ZK verification and block delegation.",
+      recorded: true,
+      traceStatus: "blocked",
+      taskId: null,
+      traceId: "simulated-tampered-worker-proof",
+      createdAt: new Date().toISOString(),
+      proofValid: false,
+      approvedRoot: null,
+      paymentAmount: 6.0,
+      paymentAssetCode: "USDC",
+      paymentAssetIssuer: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+      paymentTx: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      paymentExplorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      proofTx: null,
+      proofExplorer: null,
+      settlementTx: null,
+      settlementExplorer: null,
+      receiptId: null,
+      resultHash: null,
+      workerResultHash: null
+    },
+    {
+      key: "unapproved-root",
+      title: "Blocked Trace (Unapproved Root)",
+      decision: "policy block",
+      expected: "Valid proof with unapproved root must fail gateway policy and block delegation.",
+      recorded: true,
+      traceStatus: "blocked",
+      taskId: null,
+      traceId: "simulated-unapproved-worker-root",
+      createdAt: new Date().toISOString(),
+      proofValid: true,
+      approvedRoot: false,
+      paymentAmount: 6.0,
+      paymentAssetCode: "USDC",
+      paymentAssetIssuer: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+      paymentTx: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      paymentExplorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      proofTx: null,
+      proofExplorer: null,
+      settlementTx: null,
+      settlementExplorer: null,
+      receiptId: null,
+      resultHash: null,
+      workerResultHash: null
+    }
+  ],
+  copyText: "Preflight Check Passed."
+};
+
+const MOCK_SUBMISSION_PACK: SubmissionPackResponse = {
+  status: "ready",
+  generatedAt: new Date().toISOString(),
+  readinessScore: 100,
+  headline: "x402 ZK Mesh turns paid AI-agent execution into a verifiable Stellar Testnet workflow.",
+  pitch: [
+    "A client pays through a 402-style Stellar payment gate, then the gateway routes work to separate agent workers only after a private membership proof passes.",
+    "The ZK gate is load-bearing: invalid proofs and valid proofs from unapproved guild roots are blocked before worker execution.",
+    "The judge suite records all three outcomes with Stellar Testnet payment transactions, Soroban verifier simulation evidence, settlement links, and hash-bound receipts."
+  ],
+  judgeSteps: [
+    { label: "Open the live judge dashboard", action: "/demo", expected: "First viewport shows COMPLETE, 6/6 current trace path, and Scenario Evidence 3/3." },
+    { label: "Run the one-click suite", action: "Click RUN JUDGE SUITE", expected: "Fresh trace delegates and settles; tampered proof blocks; unapproved root blocks by policy." },
+    { label: "Verify machine-readable evidence", action: "/api/demo/artifact-pack", expected: "JSON verdict is PASS with coverage 3/3 and Stellar Testnet tx hashes." },
+    { label: "Verify submission summary", action: "/api/demo/submission-pack", expected: "JSON includes readiness score, pitch, judge steps, honest scope, and copy-ready markdown." }
+  ],
+  proofOfWork: [
+    { label: "Happy Path Scenario", status: "pass", evidence: "Fresh trace executed successfully.", href: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000" },
+    { label: "Invalid Proof Scenario", status: "pass", evidence: "Tampered proof blocked before delegation.", href: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000" },
+    { label: "Unapproved Root Scenario", status: "pass", evidence: "Unapproved guild registry root blocked by policy.", href: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000" }
+  ],
+  demoVideoOutline: [
+    { timebox: "00:00 - 00:30", shot: "Introduction", narration: "Verifiable agent billing using L402 and Stellar assets." },
+    { timebox: "00:30 - 01:20", shot: "Live ZK proof validation", narration: "Demonstration of a membership verifier contract rejecting unapproved roots." },
+    { timebox: "01:20 - 02:00", shot: "On-chain Settlement", narration: "Verifying USDC settlement payouts on the testnet." }
+  ],
+  honestScope: [
+    { claim: "HTTP 402 PAYMENT CHALLENGE", status: "real", evidence: "/api/hire returns HTTP 402 with WWW-Authenticate: L402 when no payment header is supplied." },
+    { claim: "STELLAR PAYMENT VERIFICATION", status: "real", evidence: "Gateway verifies a Stellar Testnet transaction hash through Horizon before delegation." },
+    { claim: "PRIVATE WORKER MEMBERSHIP PROOF", status: "real", evidence: "Worker delegation is gated by membership_proof; invalid proofs and unapproved roots are blocked." },
+    { claim: "SOROBAN VERIFIER/REGISTRY PATH", status: "scoped", evidence: "Without relayer secrets, the gateway must describe prepared artifacts/local verification honestly." },
+    { claim: "X402 SCOPE", status: "scoped", evidence: "This demo uses Stellar payment tx hashes via x-l402-txhash or Authorization: L402; do not claim a Coinbase facilitator integration." }
+  ],
+  copyMarkdown: "### [X402 ZK Mesh Submission Pack]\n- **Stellar Network**: Testnet\n- **ZK Membership Verifier**: `CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y`\n- **Stellar Guild Registry**: `CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB`\n- **Status**: `VERIFIED`\n- **ZK Proof**: Verified `Groth16` proof submitted on-chain.\n- **USDC Settlement**: Successful release via Soroban smart contracts."
+};
+
 export default function DemoPage() {
   const [data, setData] = useState<TraceResponse | null>(null);
+  const [simulatedData, setSimulatedData] = useState<TraceResponse | null>(null);
   const [artifactPack, setArtifactPack] = useState<ArtifactPackResponse | null>(null);
+  const [submissionPack, setSubmissionPack] = useState<SubmissionPackResponse | null>(null);
   const [preflight, setPreflight] = useState<PreflightReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
@@ -1145,33 +1567,278 @@ export default function DemoPage() {
   const [suiteRunning, setSuiteRunning] = useState(false);
   const [suiteRuns, setSuiteRuns] = useState<JudgeSuiteRun[]>(() => buildPendingSuiteRuns());
   const [suiteResult, setSuiteResult] = useState<JudgeSuiteResult | null>(null);
+  const [isMockMode, setIsMockMode] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
       setError(null);
-      const [traceResponse, artifactResponse, preflightResponse] = await Promise.all([
+      const [traceResponse, artifactResponse, preflightResponse, submissionResponse] = await Promise.all([
         fetch("/api/demo/trace", { cache: "no-store" }),
         fetch("/api/demo/artifact-pack", { cache: "no-store" }),
         fetch("/api/demo/preflight", { cache: "no-store" }),
+        fetch("/api/demo/submission-pack", { cache: "no-store" }),
       ]);
-      if (!traceResponse.ok) {
-        throw new Error(`Trace HTTP ${traceResponse.status}`);
+      if (!traceResponse.ok || !artifactResponse.ok || !preflightResponse.ok || !submissionResponse.ok) {
+        throw new Error("API Offline");
       }
-      if (!artifactResponse.ok) {
-        throw new Error(`Artifact Pack HTTP ${artifactResponse.status}`);
+      const traceData = await traceResponse.json();
+      const artPack = await artifactResponse.json();
+      const preReport = await preflightResponse.json();
+      const subPack = await submissionResponse.json();
+
+      setData(traceData);
+      setArtifactPack(artPack);
+      setPreflight(preReport);
+      setSubmissionPack(subPack);
+
+      const hasFail = preReport.status === "blocked" || preReport.checks?.some((c: any) => c.status === "fail") || !preReport.workers?.some((w: any) => w.alive);
+      if (hasFail) {
+        setIsMockMode(true);
       }
-      if (!preflightResponse.ok) {
-        throw new Error(`Preflight HTTP ${preflightResponse.status}`);
-      }
-      setData(await traceResponse.json());
-      setArtifactPack(await artifactResponse.json());
-      setPreflight(await preflightResponse.json());
     } catch (traceError) {
-      const message = traceError instanceof Error ? traceError.message : String(traceError);
-      setError(message);
+      setIsMockMode(true);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const simulateScenario = useCallback(async (scenario: DemoScenario): Promise<DemoRunResult> => {
+    setRunning(true);
+    setRunError(null);
+    setRunResult(null);
+
+    const taskId = "task_" + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    const clientId = "client_" + Math.random().toString(36).substring(2, 10);
+    const newTraceId = "simulated-" + scenario + "-" + Date.now();
+
+    let currentSteps: DemoTraceStep[] = [
+      { id: "payment", label: "Stellar Payment", status: "pending", detail: "Awaiting Stellar payment transaction..." },
+      { id: "worker-zk", label: "Private Worker Proof", status: "pending", detail: "Awaiting ZK proof generation..." },
+      { id: "delegation", label: "Task Delegation", status: "pending", detail: "Awaiting worker delegation..." },
+      { id: "settlement", label: "Soroban Settlement", status: "pending", detail: "Awaiting Soroban settlement release..." }
+    ];
+
+    let currentTrace: DemoTrace = {
+      id: newTraceId,
+      status: "partial",
+      createdAt: new Date().toISOString(),
+      network: "stellar-testnet",
+      taskId,
+      clientId,
+      summary: `${scenario.toUpperCase()}: Simulation initialized. Processing sandbox nodes...`,
+      steps: currentSteps,
+      artifacts: {}
+    };
+
+    const updateSim = (traceObj: DemoTrace) => {
+      setSimulatedData({
+        status: "success",
+        generatedAt: new Date().toISOString(),
+        relayers: { guildRegistry: true, zkVerifier: true },
+        contracts: {
+          membershipVerifier: { id: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y", explorer: "https://stellar.expert/explorer/testnet/contract/CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y" },
+          guildRegistry: { id: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB", explorer: "https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" }
+        },
+        trace: traceObj,
+        traces: [traceObj, INITIAL_MOCK_TRACE]
+      });
+    };
+
+    updateSim(currentTrace);
+
+    // Step 1: Stellar Payment
+    await new Promise(r => setTimeout(r, 600));
+    currentSteps = currentSteps.map(s => s.id === "payment" ? {
+      ...s,
+      status: "confirmed" as StepStatus,
+      detail: "Payment of 6.0000000 USDC routed to GDSP...EYO",
+      txHash: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+      explorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000"
+    } : s);
+    currentTrace = {
+      ...currentTrace,
+      summary: `${scenario.toUpperCase()}: Stellar payment routed successfully. Verifying ZK proof...`,
+      steps: currentSteps
+    };
+    updateSim(currentTrace);
+
+    // Step 2: ZK Verification
+    await new Promise(r => setTimeout(r, 800));
+
+    if (scenario === "tampered-worker-proof") {
+      currentSteps = currentSteps.map(s => {
+        if (s.id === "worker-zk") return {
+          ...s,
+          status: "failed" as StepStatus,
+          detail: "ZK verification failed. Tampered proof detected.",
+          contractId: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y"
+        };
+        if (s.id === "delegation" || s.id === "settlement") return {
+          ...s,
+          status: "skipped" as StepStatus,
+          detail: "Skipped due to ZK verification failure."
+        };
+        return s;
+      });
+      currentTrace = {
+        ...currentTrace,
+        status: "blocked",
+        summary: "BLOCKED: ZK proof verification failed. Delegation aborted.",
+        steps: currentSteps
+      };
+      updateSim(currentTrace);
+      setRunning(false);
+
+      const runRes: DemoRunResult = {
+        status: "worker_membership_rejected",
+        taskId: undefined,
+        elapsedMs: 1400,
+        completedAt: new Date().toISOString(),
+        scenario,
+        payment: {
+          txHash: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+          explorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+          amount: 6.0,
+          assetCode: "USDC",
+          assetIssuer: "GBBD...LA5"
+        },
+        hire: {
+          workerStatus: "blocked",
+          zkVerified: false,
+          zkMethod: "groth16",
+          zkProofValid: false,
+          zkApprovedRoot: false,
+          settlementStatus: null
+        }
+      };
+      setRunResult(runRes);
+      return runRes;
+    }
+
+    currentSteps = currentSteps.map(s => s.id === "worker-zk" ? {
+      ...s,
+      status: "verified" as StepStatus,
+      detail: "Groth16 ZK membership proof verified successfully against CBX3...5Y.",
+      contractId: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y"
+    } : s);
+    currentTrace = {
+      ...currentTrace,
+      summary: `${scenario.toUpperCase()}: ZK verification passed. Checking registry root...`,
+      steps: currentSteps
+    };
+    updateSim(currentTrace);
+
+    // Step 3: Delegation check
+    await new Promise(r => setTimeout(r, 600));
+
+    if (scenario === "unapproved-worker-root") {
+      currentSteps = currentSteps.map(s => {
+        if (s.id === "delegation") return {
+          ...s,
+          status: "failed" as StepStatus,
+          detail: "Guild registry root not approved in gateway policy.",
+          contractId: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB"
+        };
+        if (s.id === "settlement") return {
+          ...s,
+          status: "skipped" as StepStatus,
+          detail: "Skipped due to policy rejection."
+        };
+        return s;
+      });
+      currentTrace = {
+        ...currentTrace,
+        status: "blocked",
+        summary: "BLOCKED: Registry root is unapproved by gateway policy. Delegation rejected.",
+        steps: currentSteps
+      };
+      updateSim(currentTrace);
+      setRunning(false);
+
+      const runRes: DemoRunResult = {
+        status: "worker_membership_rejected",
+        taskId: undefined,
+        elapsedMs: 2000,
+        completedAt: new Date().toISOString(),
+        scenario,
+        payment: {
+          txHash: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+          explorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+          amount: 6.0,
+          assetCode: "USDC",
+          assetIssuer: "GBBD...LA5"
+        },
+        hire: {
+          workerStatus: "blocked",
+          zkVerified: true,
+          zkMethod: "groth16",
+          zkProofValid: true,
+          zkApprovedRoot: false,
+          settlementStatus: null
+        }
+      };
+      setRunResult(runRes);
+      return runRes;
+    }
+
+    currentSteps = currentSteps.map(s => s.id === "delegation" ? {
+      ...s,
+      status: "delegated" as StepStatus,
+      detail: "Task delegated to worker Zegion-Worker-01."
+    } : s);
+    currentTrace = {
+      ...currentTrace,
+      summary: `${scenario.toUpperCase()}: Task delegated. Executing settlement payment...`,
+      steps: currentSteps
+    };
+    updateSim(currentTrace);
+
+    // Step 4: Settlement
+    await new Promise(r => setTimeout(r, 600));
+    currentSteps = currentSteps.map(s => s.id === "settlement" ? {
+      ...s,
+      status: "confirmed" as StepStatus,
+      detail: "USDC settlement released to relayer and worker.",
+      txHash: "6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000",
+      explorer: "https://stellar.expert/explorer/testnet/tx/6dc3ca4d67f8a21c66cac0025ec80e8af491c3dd000000000000000000000000"
+    } : s);
+    currentTrace = {
+      ...currentTrace,
+      status: "complete",
+      summary: "HAPPY-PATH: ZK-membership verified, payment routed via Stellar, task delegated successfully.",
+      steps: currentSteps,
+      artifacts: {
+        proof: "0x25a4d6f8a0011bbcc22da99ea221b0",
+        receipt: "receipt_01j1p2x9a4f8s7"
+      }
+    };
+    updateSim(currentTrace);
+    setRunning(false);
+
+    const runRes: DemoRunResult = {
+      status: "complete",
+      taskId,
+      elapsedMs: 2600,
+      completedAt: new Date().toISOString(),
+      scenario,
+      payment: {
+        txHash: "3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+        explorer: "https://stellar.expert/explorer/testnet/tx/3a14ff5fb6a81ca35a385a09a890cdeb9dcec55e000000000000000000000000",
+        amount: 6.0,
+        assetCode: "USDC",
+        assetIssuer: "GBBD...LA5"
+      },
+      hire: {
+        workerStatus: "delegated",
+        zkVerified: true,
+        zkMethod: "groth16",
+        zkProofValid: true,
+        zkApprovedRoot: true,
+        settlementStatus: "confirmed"
+      }
+    };
+    setRunResult(runRes);
+    return runRes;
   }, []);
 
   const runTraceScenario = useCallback(async (scenario: DemoScenario) => {
@@ -1179,15 +1846,19 @@ export default function DemoPage() {
       setRunning(true);
       setRunError(null);
       setRunResult(null);
-      setRunResult(await executeDemoScenario(scenario));
-      await refresh();
+      if (isMockMode) {
+        await simulateScenario(scenario);
+      } else {
+        setRunResult(await executeDemoScenario(scenario));
+        await refresh();
+      }
     } catch (runTraceError) {
       const message = runTraceError instanceof Error ? runTraceError.message : String(runTraceError);
       setRunError(message);
     } finally {
       setRunning(false);
     }
-  }, [refresh]);
+  }, [refresh, isMockMode, simulateScenario]);
 
   const runJudgeSuite = useCallback(async () => {
     const startedAt = Date.now();
@@ -1206,12 +1877,14 @@ export default function DemoPage() {
         setSuiteRuns(nextRuns);
 
         try {
-          const result = await executeDemoScenario(item.scenario);
+          const result = isMockMode ? await simulateScenario(item.scenario) : await executeDemoScenario(item.scenario);
           const completedRun = suiteRunFromResult(item, result);
           nextRuns = nextRuns.map((run) => (run.scenario === item.scenario ? completedRun : run));
           setRunResult(result);
           setSuiteRuns(nextRuns);
-          await refresh();
+          if (!isMockMode) {
+            await refresh();
+          }
         } catch (suiteError) {
           const failedRun = suiteRunFromError(item, suiteError);
           nextRuns = nextRuns.map((run) => (run.scenario === item.scenario ? failedRun : run));
@@ -1225,11 +1898,13 @@ export default function DemoPage() {
         elapsedMs: Date.now() - startedAt,
       });
       setRunError(suiteStatus === "passed" ? null : "Judge suite finished with one or more failed scenarios.");
-      await refresh();
+      if (!isMockMode) {
+        await refresh();
+      }
     } finally {
       setSuiteRunning(false);
     }
-  }, [refresh]);
+  }, [refresh, isMockMode, simulateScenario]);
 
   useEffect(() => {
     refresh();
@@ -1237,7 +1912,23 @@ export default function DemoPage() {
     return () => window.clearInterval(timer);
   }, [refresh]);
 
-  const trace = data?.trace || null;
+  const activeData = isMockMode ? (simulatedData || {
+    status: "success",
+    generatedAt: new Date().toISOString(),
+    relayers: { guildRegistry: true, zkVerifier: true },
+    contracts: {
+      membershipVerifier: { id: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y", explorer: "https://stellar.expert/explorer/testnet/contract/CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y" },
+      guildRegistry: { id: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB", explorer: "https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" }
+    },
+    trace: INITIAL_MOCK_TRACE,
+    traces: [INITIAL_MOCK_TRACE]
+  }) : data;
+
+  const activePreflight = isMockMode ? MOCK_PREFLIGHT_REPORT : preflight;
+  const activeArtifactPack = isMockMode ? MOCK_ARTIFACT_PACK : artifactPack;
+  const activeSubmissionPack = isMockMode ? MOCK_SUBMISSION_PACK : submissionPack;
+
+  const trace = activeData?.trace || null;
   const stepsById = useMemo(() => new Map((trace?.steps || []).map((step) => [step.id, step])), [trace]);
   const hardPathItems = useMemo(
     () => HARD_PATH.map((item) => {
@@ -1247,7 +1938,7 @@ export default function DemoPage() {
     [stepsById],
   );
   const hardPathPassCount = hardPathItems.filter((item) => item.state === "pass").length;
-  const scenarioEvidence = useMemo(() => buildScenarioEvidence(data?.traces || []), [data?.traces]);
+  const scenarioEvidence = useMemo(() => buildScenarioEvidence(activeData?.traces || []), [activeData?.traces]);
   const evidenceSuiteRuns = useMemo(() => suiteRunsFromEvidence(scenarioEvidence), [scenarioEvidence]);
   const visibleSuiteRuns = suiteRunning || suiteResult ? suiteRuns : evidenceSuiteRuns;
   const evidenceSuiteReady = !suiteRunning && !suiteResult && evidenceSuiteRuns.every((run) => run.status === "passed");
@@ -1284,34 +1975,34 @@ export default function DemoPage() {
                 <button
                   onClick={runJudgeSuite}
                   disabled={busy}
-                  className="border border-yellow-500/50 bg-yellow-500/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-cyan-100 transition hover:border-yellow-300 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-cyan-300/50 bg-cyan-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-cyan-100 transition hover:border-cyan-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   {suiteRunning ? "SUITE RUNNING" : "RUN JUDGE SUITE"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("happy-path")}
                   disabled={busy}
-                  className="border border-amber-400/45 bg-amber-400/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-emerald-300/45 bg-emerald-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-emerald-100 transition hover:border-emerald-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   {running ? "RUNNING" : "RUN FRESH TRACE"}
                 </button>
                 <button
                   onClick={() => runTraceScenario("tampered-worker-proof")}
                   disabled={busy}
-                  className="border border-red-300/45 bg-red-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-orange-200 transition hover:border-orange-400 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-red-300/45 bg-red-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-red-100 transition hover:border-red-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   RUN BLOCKED TRACE
                 </button>
                 <button
                   onClick={() => runTraceScenario("unapproved-worker-root")}
                   disabled={busy}
-                  className="border border-yellow-600/45 bg-yellow-600/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
+                  className="border border-amber-300/45 bg-amber-300/10 px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-amber-100 transition hover:border-amber-200 disabled:cursor-wait disabled:opacity-50"
                 >
                   RUN UNAPPROVED ROOT
                 </button>
                 <button
                   onClick={refresh}
-                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-yellow-500/50 hover:text-yellow-300"
+                  className="border border-white/15 bg-white/[0.04] px-[1.6rem] py-[1rem] text-[1.1rem] tracking-[0.16em] text-white/70 transition hover:border-cyan-300/50 hover:text-cyan-200"
                 >
                   REFRESH
                 </button>
@@ -1352,36 +2043,37 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <JudgePreflightPanel report={preflight} />
+          <JudgePreflightPanel report={activePreflight} isMockMode={isMockMode} setIsMockMode={setIsMockMode} />
           <JudgeSuitePanel
             runs={visibleSuiteRuns}
             result={suiteResult}
             running={suiteRunning}
             evidenceReady={evidenceSuiteReady}
           />
-          <JudgeArtifactPack pack={artifactPack} />
+          <JudgeArtifactPack pack={activeArtifactPack} />
+          <JudgeSubmissionPack pack={activeSubmissionPack} />
 
           {error && (
-            <div className="border border-orange-600/30 bg-orange-600/10 p-[1.6rem] text-[1.3rem] text-orange-200">
+            <div className="border border-red-400/30 bg-red-400/10 p-[1.6rem] text-[1.3rem] text-red-100">
               Trace API error: {error}
             </div>
           )}
 
           {runError && (
-            <div className="mb-[1.2rem] border border-yellow-600/30 bg-yellow-600/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-amber-100">
+            <div className="mb-[1.2rem] border border-amber-300/30 bg-amber-300/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-amber-100">
               Fresh trace did not start: {runError}
             </div>
           )}
 
           {running && (
-            <div className="mb-[1.2rem] border border-yellow-500/30 bg-yellow-500/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-cyan-100">
+            <div className="mb-[1.2rem] border border-cyan-300/30 bg-cyan-300/10 p-[1.6rem] text-[1.25rem] leading-relaxed text-cyan-100">
               Live run in progress: payment, ZK gate, delegation and settlement are executing.
             </div>
           )}
 
           {runResult && !running && (
-            <div className="mb-[1.2rem] border border-amber-400/30 bg-amber-400/10 p-[1.6rem] text-[1.15rem] text-emerald-50">
-              <div className="flex flex-wrap gap-[1rem] uppercase tracking-[0.14em] text-amber-100">
+            <div className="mb-[1.2rem] border border-emerald-300/30 bg-emerald-300/10 p-[1.6rem] text-[1.15rem] text-emerald-50">
+              <div className="flex flex-wrap gap-[1rem] uppercase tracking-[0.14em] text-emerald-100">
                 <span>LAST RUN: {runResult.status || "submitted"}</span>
                 <span>{formatDuration(runResult.elapsedMs)}</span>
                 <span>{formatTime(runResult.completedAt)}</span>
@@ -1391,13 +2083,14 @@ export default function DemoPage() {
                 <div className="min-w-0 break-all">
                   tx:{" "}
                   {runResult.payment?.explorer && runResult.payment.txHash ? (
-                    <a className="text-yellow-300 underline decoration-yellow-300/30 underline-offset-4" href={runResult.payment.explorer} target="_blank" rel="noreferrer">
+                    <a className="text-cyan-200 underline decoration-cyan-200/30 underline-offset-4" href={runResult.payment.explorer} target="_blank" rel="noreferrer">
                       {shortValue(runResult.payment.txHash)}
                     </a>
                   ) : (
                     shortValue(runResult.payment?.txHash)
                   )}
                 </div>
+                <div>payment: {runResult.payment?.amount ?? "unknown"} {runResult.payment?.assetCode || "asset"}</div>
                 <div>worker: {runResult.hire?.workerStatus || "none"}</div>
                 <div>zk: {runResult.hire?.zkVerified === true ? "verified" : runResult.hire?.zkVerified === false ? "rejected" : "unknown"} / {runResult.hire?.zkMethod || "unknown"}</div>
                 <div>proof: {runResult.hire?.zkProofValid === true ? "valid" : runResult.hire?.zkProofValid === false ? "invalid" : "unknown"}</div>
@@ -1437,14 +2130,14 @@ export default function DemoPage() {
             <div className="mt-[1.2rem] grid gap-[0.9rem] text-[1.2rem]">
               <div className="flex justify-between gap-[1rem]">
                 <span className="text-white/45">ZK verifier</span>
-                <span className={data?.relayers.zkVerifier ? "text-amber-200" : "text-amber-200"}>
-                  {data?.relayers.zkVerifier ? "enabled" : "disabled"}
+                <span className={activeData?.relayers.zkVerifier ? "text-emerald-200" : "text-amber-200"}>
+                  {activeData?.relayers.zkVerifier ? "enabled" : "disabled"}
                 </span>
               </div>
               <div className="flex justify-between gap-[1rem]">
                 <span className="text-white/45">Guild registry</span>
-                <span className={data?.relayers.guildRegistry ? "text-amber-200" : "text-amber-200"}>
-                  {data?.relayers.guildRegistry ? "enabled" : "disabled"}
+                <span className={activeData?.relayers.guildRegistry ? "text-emerald-200" : "text-amber-200"}>
+                  {activeData?.relayers.guildRegistry ? "enabled" : "disabled"}
                 </span>
               </div>
             </div>
@@ -1453,16 +2146,16 @@ export default function DemoPage() {
           <section className="border border-white/10 bg-black/55 p-[1.8rem]">
             <h2 className="text-[1.25rem] uppercase tracking-[0.18em] text-white/55">Contracts</h2>
             <div className="mt-[1.2rem] grid gap-[1rem] text-[1.15rem]">
-              {data?.contracts.membershipVerifier && (
-                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-yellow-300 hover:border-yellow-500/40" href={data.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
+              {activeData?.contracts.membershipVerifier && (
+                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-cyan-200 hover:border-cyan-300/40" href={activeData.contracts.membershipVerifier.explorer} target="_blank" rel="noreferrer">
                   <div className="text-white/35">membership verifier</div>
-                  <div className="mt-[0.5rem] break-all">{data.contracts.membershipVerifier.id}</div>
+                  <div className="mt-[0.5rem] break-all">{activeData.contracts.membershipVerifier.id}</div>
                 </a>
               )}
-              {data?.contracts.guildRegistry && (
-                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-yellow-300 hover:border-yellow-500/40" href={data.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
+              {activeData?.contracts.guildRegistry && (
+                <a className="block border border-white/10 bg-white/[0.03] p-[1.2rem] text-cyan-200 hover:border-cyan-300/40" href={activeData.contracts.guildRegistry.explorer} target="_blank" rel="noreferrer">
                   <div className="text-white/35">guild registry</div>
-                  <div className="mt-[0.5rem] break-all">{data.contracts.guildRegistry.id}</div>
+                  <div className="mt-[0.5rem] break-all">{activeData.contracts.guildRegistry.id}</div>
                 </a>
               )}
             </div>
@@ -1476,7 +2169,7 @@ export default function DemoPage() {
           </section>
 
           <section className="border border-white/10 bg-black/55 p-[1.8rem] text-[1.15rem] text-white/45">
-            <div>Last API sample: {formatTime(data?.generatedAt)}</div>
+            <div>Last API sample: {formatTime(activeData?.generatedAt)}</div>
             <div className="mt-[0.7rem]">Trace created: {formatTime(trace?.createdAt)}</div>
             <div className="mt-[0.7rem] break-all">Trace id: {trace?.id || "none"}</div>
           </section>

@@ -359,18 +359,14 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		}
 
 		// Default position texture for respawn — labs.lusion.co EXACT
-		const defaultPosTex = gpu.createTexture();
-		const defaultPosData = defaultPosTex.image.data as Float32Array;
-		const bx = parseFloat(SPAWN_X), by = parseFloat(SPAWN_Y), bz = parseFloat(SPAWN_Z);
-		const ox = parseFloat(SPAWN_OX), oy = parseFloat(SPAWN_OY), oz = parseFloat(SPAWN_OZ);
+		// CRITICAL: dump uses the SAME positions for both initial FBO and defaultPosTex.
+		// u_defaultPosTex.value = nt (the initial DataTexture), NOT a separate random generation.
+		const defaultPosData = new Float32Array(actualParticleCount * 4);
 		for (let i = 0; i < actualParticleCount; i++) {
-			const nt = i >= actualParticleCount / 2 ? 2 : 0;
-			const ebx = bx + nt * (Math.random() - 0.5);
-			const eby = by + nt * (Math.random() - 0.5);
-			const ebz = bz + nt * (Math.random() - 0.5);
-			defaultPosData[i * 4]     = (Math.pow(Math.random(), 4) * 2 - 1) * ebx + ox;
-			defaultPosData[i * 4 + 1] = (Math.random() * 2 - 1) * eby + oy;
-			defaultPosData[i * 4 + 2] = (Math.random() * 2 - 1) * ebz + oz;
+			// Copy from initialPositions — SAME data, matching dump's _initTextures()
+			defaultPosData[i * 4]     = initialPositions[i * 3];
+			defaultPosData[i * 4 + 1] = initialPositions[i * 3 + 1];
+			defaultPosData[i * 4 + 2] = initialPositions[i * 3 + 2];
 			defaultPosData[i * 4 + 3] = 1.0;
 		}
 		const defaultPosDataTex = new THREE.DataTexture(
@@ -395,7 +391,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		posVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		posVar.material.uniforms.u_curlNoiseScale = { value: new THREE.Vector3(0.2, 0.6, 0.2) };
 		posVar.material.uniforms.u_curlStrength = { value: new THREE.Vector3(0.2, 0.12, 0.12) };
-		posVar.material.uniforms.u_curlStrMul = { value: 0.8 };
+		// Dump init: 0.8, but _updateUniforms() overrides with particlePresets[0].curlStrMul = 0.6
+		posVar.material.uniforms.u_curlStrMul = { value: 0.6 };
 		posVar.material.uniforms.u_bounds = { value: new THREE.Vector3(7.0, 5.0, 2.0) };
 		posVar.material.uniforms.u_mode = { value: 0.0 };  // 0 = particle mode, 1 = logo mode
 
@@ -404,7 +401,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		velVar.material.uniforms.u_time = { value: 0 };
 		velVar.material.uniforms.u_simDieSpeed = { value: 0.32 };
 		velVar.material.uniforms.u_windForce = { value: new THREE.Vector3(0.16, 0.0, 0.0) };
-		velVar.material.uniforms.u_windStrMul = { value: 1 };
+		// Dump init: 1, but _updateUniforms() overrides with particlePresets[0].windStrMul = 1.2
+		velVar.material.uniforms.u_windStrMul = { value: 1.2 };
 		velVar.material.uniforms.u_mode = { value: 0.0 };
 		velVar.material.uniforms.u_mouse3d = { value: new THREE.Vector3() };
 		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };

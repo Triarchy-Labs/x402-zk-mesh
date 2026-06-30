@@ -56,8 +56,8 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 					borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
 					zIndex: 1,
 				}}
-				exit={{ y: "-100%" }}
-				transition={{ duration: 1.0, ease: [0.76, 0, 0.24, 1] }} // Snappy Awwwards easing
+				exit={{ y: "-105%" }}
+				transition={{ duration: 1.1, ease: [0.76, 0, 0.175, 1.24] }} // Elastic overshoot bezier
 			/>
 
 			{/* Bottom Shutter (Curtain) */}
@@ -70,8 +70,8 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 					borderTop: "1px solid rgba(255, 255, 255, 0.05)",
 					zIndex: 1,
 				}}
-				exit={{ y: "100%" }}
-				transition={{ duration: 1.0, ease: [0.76, 0, 0.24, 1] }} // Snappy Awwwards easing
+				exit={{ y: "105%" }}
+				transition={{ duration: 1.1, ease: [0.76, 0, 0.175, 1.24] }} // Elastic overshoot bezier
 			/>
 
 			{/* Loading Content */}

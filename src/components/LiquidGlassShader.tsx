@@ -7,13 +7,15 @@ import {
 	SMAA,
 } from "@react-three/postprocessing";
 import { SMAAPreset } from "postprocessing";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { useDeviceTier, type DeviceTier } from "../hooks/useDeviceTier";
 import LusionFinalPass from "./LusionFinalPass";
 import FsrRcasPass from "./FsrRcasPass";
 import FsrEasuPass from "./FsrEasuPass";
+import ScreenPaint from "./ScreenPaint";
+import { useUnifiedPointer } from "../hooks/useUnifiedPointer";
 
 // Adaptive constants per device tier (labs.lusion.co: TEX_SIZE=128 → 16384 particles, DPR capped at 1.5)
 const TIER_CONFIG = {
@@ -188,7 +190,7 @@ void main() {
 }
 `;
 
-// ── Velocity Compute Shader — labs.lusion.co bundle + simplified mouse ──
+// ── Velocity Compute Shader ──
 const velocityShader = /* glsl */ `
 uniform float u_deltaTime;
 uniform float u_time;
@@ -196,13 +198,22 @@ uniform float u_simDieSpeed;
 uniform vec3 u_windForce;
 uniform float u_windStrMul;
 uniform float u_mode;
-uniform vec3 u_mouse3d;
 uniform float u_mouseMoveIntensity;
+uniform float u_mouseStrength;
+uniform vec3 u_screenBounds;
+uniform sampler2D u_mousePaintTex;
 
 vec3 hash33(vec3 p3) {
   p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
   p3 += dot(p3, p3.yxz + 33.33);
   return fract((p3.xxy + p3.yxx) * p3.zyx);
+}
+
+vec2 posToUv(vec3 pos) {
+  vec2 uv = pos.xy / u_screenBounds.xy;
+  uv = (uv + vec2(1.0)) / 2.0;
+  uv.y = 1.0 - uv.y;
+  return uv;
 }
 
 void main() {
@@ -226,16 +237,13 @@ void main() {
   windVel /= 1.0 + velInfo.w * u_mode;
   velInfo.xyz += windVel;
 
-  // Mouse interaction (simplified from screenPaint fluid sim)
-  // Original: 2D fluid sim texture with dissipation 0.975 — very viscous, "oil-like"
-  // Our approximation: gentle radial push with tight radius and low force
-  vec3 toMouse = u_mouse3d - positionLife.xyz;
-  float dist2 = dot(toMouse, toMouse);
-  float radius = 0.3;  // tight influence radius (original screenPaint ~100px at screen scale)
-  float falloff = smoothstep(radius * radius, 0.0, dist2);  // hard cutoff vs gaussian
-  float influence = falloff * u_mouseMoveIntensity * 0.04;  // very gentle force
-  vec3 pushDir = normalize(toMouse + vec3(0.001));
-  velInfo.xyz -= pushDir * influence;
+  // Mouse interaction — labs.lusion.co EXACT
+  vec2 posUv = posToUv(positionLife.xyz);
+  vec3 mousePaintVel = (texture2D(u_mousePaintTex, posUv).xyz - 0.5 + 0.001) * 2.0;
+  mousePaintVel.z = 0.0;
+  vec3 mouseFinalVel = mousePaintVel * 0.8 * u_mouseMoveIntensity * u_mouseStrength;
+  mouseFinalVel *= 1.0 + velInfo.w * 0.5 * u_mode;
+  velInfo.xyz += mouseFinalVel;
 
   gl_FragColor = velInfo;
 }
@@ -264,8 +272,8 @@ float sizeFromLife(float life) {
 }
 
 void main() {
-  // Dark: white particles on dark bg. Light: dark particles on light bg.
-  vColor = mix(vec3(1.0), vec3(0.04), uTheme);
+  // Lusion canon: particles are always black, final pass postInvert creates white particles on dark bg
+  vColor = vec3(0.0);
   
   vec4 positionLife = texture2D(u_currPosTex, a_simUv);
   float lifeSize = sizeFromLife(positionLife.w);
@@ -287,7 +295,7 @@ void main() {
 `;
 
 // ── LiquidNebula: GPGPU Particle Component ──
-function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; particleCount: number }) {
+function LiquidNebula({ theme, particleCount, pointerRef }: { theme: "dark" | "light"; particleCount: number; pointerRef: any }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const materialRef = useRef<THREE.ShaderMaterial>(null);
 	const gpuRef = useRef<InstanceType<typeof GPUComputationRenderer> | null>(null);
@@ -295,8 +303,11 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	const velVarRef = useRef<ReturnType<InstanceType<typeof GPUComputationRenderer>["addVariable"]> | null>(null);
 	// Scroll tracking ref — Lusion exact
 	const lerpedWheelDelta = useRef(0);
-	// Mouse tracking refs
-	const mouse3d = useRef(new THREE.Vector3());
+	
+	const mousePaintTexRef = useRef<THREE.Texture | null>(null);
+	const onScreenPaintTextureReady = useCallback((tex: THREE.Texture) => {
+		mousePaintTexRef.current = tex;
+	}, []);
 	const mouseNDC = useRef(new THREE.Vector2());
 	const prevMouseNDC = useRef(new THREE.Vector2());
 	const mouseMoveIntensity = useRef(0);
@@ -404,7 +415,9 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		// Dump init: 1, but _updateUniforms() overrides with particlePresets[0].windStrMul = 1.2
 		velVar.material.uniforms.u_windStrMul = { value: 1.2 };
 		velVar.material.uniforms.u_mode = { value: 0.0 };
-		velVar.material.uniforms.u_mouse3d = { value: new THREE.Vector3() };
+		velVar.material.uniforms.u_mouseStrength = { value: 0.2 };
+		velVar.material.uniforms.u_screenBounds = { value: new THREE.Vector3() };
+		velVar.material.uniforms.u_mousePaintTex = { value: new THREE.Texture() };
 		velVar.material.uniforms.u_mouseMoveIntensity = { value: 0 };
 
 		// Wrapping for seamless noise
@@ -478,10 +491,8 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 			uTheme: { value: theme === "dark" ? 0.0 : 1.0 },
 			// Use actual canvas pixel dimensions — ground truth for gl_PointSize
 			uResolution: { value: new THREE.Vector2(gl.domElement.width, gl.domElement.height) },
-			// Canon: 0.32 (labs.lusion.co). Reduced for white-on-dark rendering path.
-			// Original uses black particles + postInvert = low relative contrast.
-			// White-on-dark has much higher perceived contrast, needs compensation.
-			u_opacity: { value: 0.15 },
+			// Canon: 0.32 (labs.lusion.co).
+			u_opacity: { value: 0.32 },
 			u_pSizeMul: { value: 0.4 },
 			u_pSoftMul: { value: 0.92 },
 			u_focusDist: { value: 0.32 },
@@ -507,13 +518,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		// Decay wheel delta (FPS independent)
 		lerpedWheelDelta.current *= Math.pow(0.95, clampedDelta * 60.0);
 
-		// Mouse: unproject NDC to world z=0 plane — labs.lusion.co _getMouse3d()
-		const _v3 = new THREE.Vector3(mouseNDC.current.x, mouseNDC.current.y, 0.5);
-		_v3.unproject(camera);
-		_v3.sub(camera.position).normalize();
-		const t = -camera.position.z / _v3.z;
-		mouse3d.current.copy(camera.position).add(_v3.multiplyScalar(t));
-		velVarRef.current.material.uniforms.u_mouse3d.value.copy(mouse3d.current);
+		// Update screen bounds for posToUv projection
+		velVarRef.current.material.uniforms.u_screenBounds.value.set(state.viewport.width / 2, state.viewport.height / 2, 0);
+
+		// Pass the mouse paint texture from ScreenPaint
+		if (mousePaintTexRef.current) {
+			velVarRef.current.material.uniforms.u_mousePaintTex.value = mousePaintTexRef.current;
+		}
 
 		// Mouse move intensity — labs.lusion.co exact: speed*32, clamped to 2, lerp 0.072
 		const dx = mouseNDC.current.x - prevMouseNDC.current.x;
@@ -561,24 +572,27 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
     `;
 
 	return (
-		<points ref={pointsRef} frustumCulled={false}>
-			<bufferGeometry>
-				<bufferAttribute attach="attributes-position" args={[fboSeedPositions, 3]} />
-				<bufferAttribute attach="attributes-a_simUv" args={[simUvs, 2]} />
-			</bufferGeometry>
-			<shaderMaterial
-				ref={materialRef}
-				vertexShader={gpgpuVertexShader}
-				fragmentShader={themedFragmentShader}
-				uniforms={uniforms}
-				transparent
-				/* premultipliedAlpha removed — not in labs.lusion.co original */
-				depthWrite={false}
-				depthTest={false}
-				blending={THREE.NormalBlending}  // labs.lusion.co EXACT: always NormalBlending
-				extensions-derivatives={true}
-			/>
-		</points>
+		<>
+			<points ref={pointsRef} frustumCulled={false}>
+				<bufferGeometry>
+					<bufferAttribute attach="attributes-position" args={[fboSeedPositions, 3]} />
+					<bufferAttribute attach="attributes-a_simUv" args={[simUvs, 2]} />
+				</bufferGeometry>
+				<shaderMaterial
+					ref={materialRef}
+					vertexShader={gpgpuVertexShader}
+					fragmentShader={themedFragmentShader}
+					uniforms={uniforms}
+					transparent
+					/* premultipliedAlpha removed — not in labs.lusion.co original */
+					depthWrite={false}
+					depthTest={false}
+					blending={THREE.NormalBlending}  // labs.lusion.co EXACT: always NormalBlending
+					extensions-derivatives={true}
+				/>
+			</points>
+			<ScreenPaint pointerRef={pointerRef} onTextureReady={onScreenPaintTextureReady} />
+		</>
 	);
 }
 
@@ -641,6 +655,7 @@ function AdaptivePostProcessing({ theme, tier }: { theme: "dark" | "light"; tier
 export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" | "light" }) {
 	const tier = useDeviceTier();
 	const cfg = TIER_CONFIG[tier];
+	const pointerRef = useUnifiedPointer();
 
 	// Portal to body — bypass Lenis CSS transforms that break position:fixed
 	const [portalTarget] = useState<HTMLElement | null>(() =>
@@ -661,13 +676,13 @@ export default function LiquidGlassShader({ theme = "dark" }: { theme?: "dark" |
 			}}
 		>
 			<Canvas dpr={cfg.dpr} camera={{ position: [0, 0, 5], fov: 60, near: 0.1, far: 10 }}>
-				<color attach="background" args={[theme === "dark" ? "#010201" : "#fafafa"]} />
+				<color attach="background" args={["#ffffff"]} />
 				
 				{/* Core Lighting & Voltage Surges */}
 				<VoltageLights theme={theme} />
 
 				{/* Stars REMOVED — drei Stars cannot individually drift */}
-				<LiquidNebula theme={theme} particleCount={cfg.particles} />
+				<LiquidNebula theme={theme} particleCount={cfg.particles} pointerRef={pointerRef} />
 				
 				{/* RefractiveCore: DISABLED — MeshTransmission at z=5 causes 6x render pass lag */}
 				{/* {tier !== "low" && <RefractiveCore tier={tier} />} */}

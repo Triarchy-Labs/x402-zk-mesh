@@ -161,7 +161,7 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
       contrast,
       brightness,
       tintOpacity,
-      invert: 0,  // particles use direct color, not scene inversion
+      invert: theme === "dark" ? 1.0 : 0.0,
     });
   }, [theme, vignetteFrom, vignetteTo, saturation, contrast, brightness, tintOpacity]);
 
@@ -182,6 +182,7 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
     effect.uniforms.get("u_vignetteColor")!.value = theme === "dark"
       ? [0, 0, 0]
       : [0.95, 0.95, 0.95];
+    effect.uniforms.get("u_invert")!.value = theme === "dark" ? 1.0 : 0.0;
   });
 
   return <primitive ref={ref} object={effect} dispose={null} />;

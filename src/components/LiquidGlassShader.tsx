@@ -412,7 +412,7 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 		// At windStrMul=1.2, particles need ~24s to reach visible area (x=-3.83).
 		// 1800 frames = 30s @ 60fps → steady-state distribution on first visible frame.
 		const prewarmDt = 1 / 60;
-		const prewarmFrames = 1800;
+		const prewarmFrames = 3000;
 		for (let i = 0; i < prewarmFrames; i++) {
 			posVar.material.uniforms.u_time.value = i * prewarmDt;
 			posVar.material.uniforms.u_deltaTime.value = prewarmDt;
@@ -464,10 +464,11 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 		const clampedDelta = Math.min(delta, 0.05); // cap at 50ms
 
-		// Update compute uniforms — both shaders need time + delta
-		posVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
+		// Update compute uniforms — continue time smoothly from prewarm (50s) to avoid jumps
+		const time = 50.0 + state.clock.elapsedTime;
+		posVarRef.current.material.uniforms.u_time.value = time;
 		posVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
-		velVarRef.current.material.uniforms.u_time.value = state.clock.elapsedTime;
+		velVarRef.current.material.uniforms.u_time.value = time;
 		velVarRef.current.material.uniforms.u_deltaTime.value = clampedDelta;
 
 		// Scroll wheel → wind.y + curlStrength.y — Lusion exact (line 194)

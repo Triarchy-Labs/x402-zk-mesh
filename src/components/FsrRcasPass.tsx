@@ -60,7 +60,7 @@ const fragment = /* glsl */ `
 
     // Weighted average (Lusion exact)
     vec3 col = (lobe * (b + d + h + f) + e) / (4.0 * lobe + 1.0);
-    outputColor = vec4(col, 1.0);
+    outputColor = vec4(col, inputColor.a);
   }
 `;
 

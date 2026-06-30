@@ -74,7 +74,7 @@ const fragment = /* glsl */ `
     // Anti-ringing
     result = clamp(result, minC, maxC);
 
-    outputColor = vec4(result, 1.0);
+    outputColor = vec4(result, inputColor.a);
   }
 `;
 

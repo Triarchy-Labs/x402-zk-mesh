@@ -306,18 +306,18 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 	// Generate initial spawn positions — labs.lusion.co EXACT _getCubePosDistribution()
 	const initialPositions = useMemo(() => {
 		const arr = new Float32Array(actualParticleCount * 3);
-		const bx = parseFloat(SPAWN_X), by = parseFloat(SPAWN_Y), bz = parseFloat(SPAWN_Z);
+		let bx = parseFloat(SPAWN_X), by = parseFloat(SPAWN_Y), bz = parseFloat(SPAWN_Z);
 		const ox = parseFloat(SPAWN_OX), oy = parseFloat(SPAWN_OY), oz = parseFloat(SPAWN_OZ);
 		for (let i = 0; i < actualParticleCount; i++) {
-			// Second half: nt=2 (expanded bounds) — labs.lusion.co exact
-			const nt = i >= actualParticleCount / 2 ? 2 : 0;
-			const ebx = bx + nt * (Math.random() - 0.5);
-			const eby = by + nt * (Math.random() - 0.5);
-			const ebz = bz + nt * (Math.random() - 0.5);
+			// Second half: nt=2 (expanded bounds) — labs.lusion.co exact object mutation drift
+			const nt = i >= actualParticleCount / 2 ? 2.0 : 0.0;
+			bx += nt * (Math.random() - 0.5);
+			by += nt * (Math.random() - 0.5);
+			bz += nt * (Math.random() - 0.5);
 			// X: pow(random,4) center-clustered distribution → range (-7 to 1)
-			arr[i * 3]     = (Math.pow(Math.random(), 4) * 2 - 1) * ebx + ox;
-			arr[i * 3 + 1] = (Math.random() * 2 - 1) * eby + oy;
-			arr[i * 3 + 2] = (Math.random() * 2 - 1) * ebz + oz;
+			arr[i * 3]     = (Math.pow(Math.random(), 4) * 2 - 1) * bx + ox;
+			arr[i * 3 + 1] = (Math.random() * 2 - 1) * by + oy;
+			arr[i * 3 + 2] = (Math.random() * 2 - 1) * bz + oz;
 		}
 		return arr;
 	}, [actualParticleCount]);

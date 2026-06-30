@@ -425,10 +425,13 @@ function LiquidNebula({ theme, particleCount }: { theme: "dark" | "light"; parti
 
 		console.log(`GPGPU initialized: ${texSize}x${texSize} FBO, curl noise + velocity physics`);
 
-		// Prewarm: run 120 simulation frames (~2 sec) to spread particles from offscreen spawn cluster
-		// Labs.lusion.co has a loading screen that runs sim while loading assets — we simulate that
+		// Prewarm: run simulation to spread particles from offscreen spawn cluster (x=-7)
+		// Labs.lusion.co has a loading screen (~10-15s) during which sim runs.
+		// At windStrMul=1.2, particles need ~24s to reach visible area (x=-3.83).
+		// 1800 frames = 30s @ 60fps → steady-state distribution on first visible frame.
 		const prewarmDt = 1 / 60;
-		for (let i = 0; i < 120; i++) {
+		const prewarmFrames = 1800;
+		for (let i = 0; i < prewarmFrames; i++) {
 			posVar.material.uniforms.u_time.value = i * prewarmDt;
 			posVar.material.uniforms.u_deltaTime.value = prewarmDt;
 			velVar.material.uniforms.u_time.value = i * prewarmDt;

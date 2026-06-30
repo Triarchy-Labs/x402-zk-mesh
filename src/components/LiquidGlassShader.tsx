@@ -217,8 +217,8 @@ void main() {
     velInfo.w = h.y * u_mode;
   }
 
-  // Damping — labs.lusion.co EXACT: flat 0.975 per frame
-  velInfo.xyz *= 0.975;
+  // Damping — made FPS-independent (canon equivalent at 60 FPS)
+  velInfo.xyz *= pow(0.975, u_deltaTime * 60.0);
 
   // Wind force — labs.lusion.co EXACT: dampened by mode weight
   vec3 windVel = u_windForce * u_deltaTime * u_windStrMul;

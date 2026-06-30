@@ -172,7 +172,7 @@ const LusionFinalPass = forwardRef(function LusionFinalPass(
     // Lusion vignette aspect formula (Postprocessing.js line 71)
     const w = size.width;
     const h = size.height;
-    const aspectY = h / Math.sqrt(w * w + h * h) * 2;
+    const aspectY = h / Math.sqrt(w * w + h * h);
     effect.uniforms.get("u_vignetteAspect")!.value.set((w / h) * aspectY, aspectY);
 
     // Update theme-dependent uniforms

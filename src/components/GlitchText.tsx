@@ -70,8 +70,8 @@ export default function GlitchText({ text, theme = "dark" }: { text: string; the
 					}}
 					style={{
 						color: theme === "dark" ? "#fff" : "#111",
-						fontSize: "5rem",
-						letterSpacing: char === " " ? "1rem" : "0.15em",
+						fontSize: "6.5rem",
+						letterSpacing: char === " " ? "1.3rem" : "0.15em",
 						fontFamily: "monospace",
 						textShadow: theme === "dark" ? "0 0 40px rgba(255, 170, 0, 0.9)" : "0 0 40px rgba(0, 0, 0, 0.2)",
 						display: "inline-block",

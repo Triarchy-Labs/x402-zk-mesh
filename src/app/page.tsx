@@ -343,8 +343,8 @@ export default function Page() {
 								style={{
 									color: p.accentMuted,
 									fontFamily: FONT_HEADING,
-									fontSize: "1.2rem",
-									marginTop: "2rem",
+									fontSize: "1.5rem",
+									marginTop: "2.5rem",
 									letterSpacing: "0.4em",
 									textTransform: "uppercase",
 									fontWeight: 400,
@@ -362,7 +362,7 @@ export default function Page() {
 									onClick={() => window.location.href = "/bounties"}
 									className="snake-border"
 									style={{
-										padding: "1.5rem 3rem",
+										padding: "1.9rem 3.8rem",
 										border: `1px solid ${hoverCTA ? p.borderHover : p.border}`,
 										borderRadius: "12px",
 										background: hoverCTA ? p.glassBgHover : p.glassBg,
@@ -406,7 +406,7 @@ export default function Page() {
 											margin: 0,
 											fontWeight: 500,
 											letterSpacing: "0.15em",
-											fontSize: "1.1rem",
+											fontSize: "1.4rem",
 											transition: "all 0.6s ease",
 											textShadow: hoverCTA ? `0 0 15px ${p.glowHover}` : "none",
 										}}
@@ -440,7 +440,7 @@ export default function Page() {
 									}}
 									onClick={() => window.location.href = "/demo"}
 									style={{
-										padding: "1.5rem 3rem",
+										padding: "1.9rem 3.8rem",
 										border: `1px solid ${p.border}`,
 										borderRadius: "12px",
 										background: "transparent",
@@ -461,7 +461,7 @@ export default function Page() {
 											margin: 0,
 											fontWeight: 400,
 											letterSpacing: "0.15em",
-											fontSize: "1.1rem",
+											fontSize: "1.4rem",
 											transition: "all 0.6s ease",
 										}}
 									>

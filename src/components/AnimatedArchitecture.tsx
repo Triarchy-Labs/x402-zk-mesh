@@ -4,123 +4,12 @@ import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
 import { useGLTF, Center, Resize, useAnimations } from '@react-three/drei';
 import { EffectComposer } from '@react-three/postprocessing';
-import { Effect, BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import { GLTFLoader, KTX2Loader, DRACOLoader } from 'three-stdlib';
 import FsrEasuPass from './FsrEasuPass';
 import FsrRcasPass from './FsrRcasPass';
 
 useGLTF.preload('/models/tech-rings-v2-optimize.glb');
-
-// ========================================================
-// 100% ТОЧНЫЙ GPU ШЕЙДЕР ИЗ ДАМПА scene_logic_pretty.json
-// Эффект "BLUR AND SHARPEN" с uMouse-трекингом
-// Параметры: uRadius=0.1, uBlurStrength=0.02, uSamples=30,
-//            uSharpenStrength=0.7, fadeWidth=0.05
-// ========================================================
-const blurSharpenFragmentShader = /* glsl */ `
-uniform vec2 uResolution;
-uniform vec2 uMouse;
-uniform float uRadius;
-uniform float uSamples;
-uniform float uBlurStrength;
-uniform float uSharpenStrength;
-
-float gaussian(float x, float sigma) {
-    return exp(-(x * x) / (2.0 * sigma * sigma));
-}
-
-void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-    float dist = distance(uv, uMouse);
-    float fadeWidth = 0.05;
-    float fadeMask = smoothstep(uRadius - fadeWidth, uRadius + fadeWidth, dist);
-
-    vec4 sharpColor = vec4(0.0);
-    vec4 blurredColor = vec4(0.0);
-
-    // SHARPEN (внутри радиуса мышки)
-    if (fadeMask < 1.0) {
-        vec2 texel = 1.0 / uResolution;
-        vec4 center = inputColor;
-        vec4 top    = texture2D(inputBuffer, uv + vec2(0.0, -texel.y));
-        vec4 bottom = texture2D(inputBuffer, uv + vec2(0.0, texel.y));
-        vec4 left   = texture2D(inputBuffer, uv + vec2(-texel.x, 0.0));
-        vec4 right  = texture2D(inputBuffer, uv + vec2(texel.x, 0.0));
-        vec4 edges = (center * 4.0) - (top + bottom + left + right);
-        sharpColor = clamp(center + (edges * uSharpenStrength), 0.0, 1.0);
-    }
-
-    // BLUR (вне радиуса мышки — Gaussian circular)
-    if (fadeMask > 0.0) {
-        float totalWeight = 0.0;
-        int samples = int(uSamples);
-        float fSamples = max(1.0, float(samples));
-        float sigma = max(0.001, uBlurStrength * (dist - (uRadius - fadeWidth)));
-
-        for (int i = 0; i < 64; ++i) {
-            if (i >= samples) break;
-            float offsetAngle = float(i) / fSamples * 2.0 * 3.14159;
-            vec2 offset = vec2(cos(offsetAngle), sin(offsetAngle)) * sigma;
-            vec2 sampleUv = uv + offset;
-            float weight = gaussian(length(offset), sigma);
-            blurredColor += texture2D(inputBuffer, sampleUv) * weight;
-            totalWeight += weight;
-        }
-        blurredColor /= max(totalWeight, 0.001);
-    }
-
-    outputColor = mix(sharpColor, blurredColor, fadeMask);
-}
-`;
-
-// Кастомный Effect для pmndrs postprocessing
-class BlurSharpenEffect extends Effect {
-	constructor() {
-		super('BlurSharpenEffect', blurSharpenFragmentShader, {
-			blendFunction: BlendFunction.NORMAL,
-			uniforms: new Map<string, THREE.Uniform>([
-				['uResolution', new THREE.Uniform(new THREE.Vector2(1920, 1080))],
-				['uMouse', new THREE.Uniform(new THREE.Vector2(0.5, 0.5))],
-				['uRadius', new THREE.Uniform(0.1)],
-				['uSamples', new THREE.Uniform(30.0)],
-				['uBlurStrength', new THREE.Uniform(0.02)],
-				['uSharpenStrength', new THREE.Uniform(0.7)],
-			]),
-		});
-	}
-}
-
-// React-компонент обёртка
-function BlurSharpenPass() {
-	const effectRef = useRef<BlurSharpenEffect | null>(null);
-	const { size } = useThree();
-
-	const effect = useMemo(() => new BlurSharpenEffect(), []);
-
-	useEffect(() => {
-		effectRef.current = effect;
-		return () => { effectRef.current = null; };
-	}, [effect]);
-
-	useFrame(({ pointer }) => {
-		if (effectRef.current) {
-			const mouseUni = effectRef.current.uniforms.get('uMouse');
-			const resUni = effectRef.current.uniforms.get('uResolution');
-			if (mouseUni) {
-				// pointer goes from -1..1, convert to 0..1 UV space
-				mouseUni.value.set(
-					(pointer.x + 1) * 0.5,
-					(pointer.y + 1) * 0.5,
-				);
-			}
-			if (resUni) {
-				resUni.value.set(size.width, size.height);
-			}
-		}
-	});
-
-	return <primitive object={effect} />;
-}
 
 // ========================================================
 // МАТЕРИАЛЫ И МОДЕЛИ
@@ -409,11 +298,9 @@ export function AnimatedArchitecture({ theme: _theme }: { theme: "light" | "dark
 
 				<MirrorRings />
 
-				{/* GPU Blur+Sharpen постобработка из дампа Peachworlds */}
 				<EffectComposer>
 					<FsrEasuPass sharpness={0.2} />
 					<FsrRcasPass sharpness={1.0} />
-					<BlurSharpenPass />
 				</EffectComposer>
 			</Canvas>
 		</div>

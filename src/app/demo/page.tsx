@@ -1600,11 +1600,8 @@ export default function DemoPage() {
       setSubmissionPack(subPack);
 
       const hasFail = preReport.status === "blocked" || preReport.checks?.some((c: any) => c.status === "fail") || !preReport.workers?.some((w: any) => w.alive);
-      if (hasFail) {
-        setIsMockMode(true);
-      }
     } catch (traceError) {
-      setIsMockMode(true);
+      console.error("Trace refresh failed:", traceError);
     } finally {
       setLoading(false);
     }
@@ -1964,7 +1961,7 @@ export default function DemoPage() {
   return (
     <main className="min-h-screen pt-[12rem] pb-[6rem] text-white">
       <Nav />
-      <section className="mx-auto grid w-full max-w-[150rem] gap-[2.4rem] px-[4vw] lg:grid-cols-[minmax(0,1fr)_42rem]">
+      <section className="mx-auto grid w-full max-w-none gap-[3rem] px-[5vw] lg:grid-cols-[minmax(0,1fr)_45rem]">
         <div className="min-w-0">
           <div className="mb-[2.4rem] border-b border-white/10 pb-[2rem]">
             <div className="flex flex-wrap items-end justify-between gap-[1.6rem]">

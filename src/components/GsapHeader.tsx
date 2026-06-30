@@ -23,24 +23,45 @@ export const GsapHeader: React.FC<GsapHeaderProps> = ({
 
 	useGSAP(() => {
 		const ctx = gsap.context(() => {
-			// 1. Animate Title characters (clip slide-up reveal)
+			// 1. Animate Title characters (clip slide-up reveal + rotation + x offset)
 			const chars = titleRef.current?.querySelectorAll(".char-inner");
 			if (chars && chars.length > 0) {
 				gsap.fromTo(
 					chars,
-					{ yPercent: 100, rotate: 3, opacity: 0 },
+					{ 
+						yPercent: 105, 
+						rotate: 8, 
+						opacity: 0,
+						x: 12,
+					},
 					{
 						yPercent: 0,
 						rotate: 0,
 						opacity: 1,
-						duration: 1.2,
-						stagger: 0.02,
-						ease: "expo.out",
+						x: 0,
+						duration: 1.8,
+						stagger: 0.035,
+						delay: 0.8, // deliberate premium delay after mount
+						ease: "power4.out",
 					}
 				);
 			}
 
-			// 2. Animate Subtitle (fade and soft slide-up)
+			// 2. Animate Parent Letter Spacing (gradual expanding expansion/settle)
+			if (titleRef.current) {
+				gsap.fromTo(
+					titleRef.current,
+					{ letterSpacing: "0.25em" },
+					{
+						letterSpacing: "-0.02em",
+						duration: 2.2,
+						delay: 0.8,
+						ease: "power4.out",
+					}
+				);
+			}
+
+			// 3. Animate Subtitle (graceful delayed fade and slide-up)
 			if (subtitleRef.current) {
 				gsap.fromTo(
 					subtitleRef.current,
@@ -48,8 +69,8 @@ export const GsapHeader: React.FC<GsapHeaderProps> = ({
 					{
 						opacity: 1,
 						y: 0,
-						duration: 1.4,
-						delay: 0.4,
+						duration: 1.6,
+						delay: 1.4, // reveals after title is well underway
 						ease: "power3.out",
 					}
 				);
@@ -77,7 +98,7 @@ export const GsapHeader: React.FC<GsapHeaderProps> = ({
 							display: "inline-block",
 							overflow: "hidden",
 							verticalAlign: "bottom",
-							paddingBottom: "0.05em",
+							paddingBottom: "0.08em",
 						}}
 					>
 						<span
@@ -104,7 +125,6 @@ export const GsapHeader: React.FC<GsapHeaderProps> = ({
 				style={{
 					fontSize: "5rem",
 					lineHeight: "1.1",
-					letterSpacing: "-0.02em",
 					marginBottom: "1rem",
 					display: "flex",
 					flexWrap: "wrap",

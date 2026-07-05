@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import * as StellarSDK from "@stellar/stellar-sdk";
 import { execFileSync } from "node:child_process";
+import { recordDemoTraceFromHireResponse, type HireTraceResponse } from "@/lib/demo-trace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -118,6 +119,13 @@ export async function POST(req: Request) {
       task_id: taskId,
       is_shielded: false,
     }, hireHeaders);
+
+    // Record trace on THIS instance so GET /api/demo/trace can find it
+    try {
+      await recordDemoTraceFromHireResponse(hireResponse as unknown as HireTraceResponse);
+    } catch (traceErr) {
+      console.warn(`[DEMO_RUN] trace persist failed: ${traceErr instanceof Error ? traceErr.message : traceErr}`);
+    }
 
     return NextResponse.json({
       status: hireResponse.status || "submitted",

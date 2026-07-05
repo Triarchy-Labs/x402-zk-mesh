@@ -115,9 +115,13 @@ app.post('/api/hire', (req, res) => {
         console.log('[GUILD AGENT] Response sent.\n');
     }, 1500);
 });
-
 // ZK membership proof endpoint used by the gateway before delegation.
 app.post('/api/membership-proof', async (req, res) => {
+    if (!membershipProofInputs || !membershipLeaf) {
+        console.log('[GUILD AGENT] Membership proof requested but agent not registered yet. Attempting dynamic registration...');
+        await joinGuild();
+    }
+
     if (!membershipProofInputs || !membershipLeaf) {
         return res.status(409).json({
             error: 'Agent is not registered as a guild member yet.',

@@ -253,40 +253,48 @@ export function buildDemoTraceFromHireResponse(response: HireTraceResponse): Dem
   return trace;
 }
 
+// In-memory trace cache — primary store on Vercel serverless.
+// Module-level singleton survives across invocations on the same warm instance.
+let memoryTraceCache: DemoTrace[] | null = null;
+
 export async function recordDemoTraceFromHireResponse(response: HireTraceResponse): Promise<DemoTrace> {
   const trace = buildDemoTraceFromHireResponse(response);
-  const traces = await readDemoTraces();
-  const deduped = [trace, ...traces.filter((item) => item.id !== trace.id)].slice(0, MAX_TRACES);
-
-  await fs.mkdir(TRACE_DIR, { recursive: true });
-  await fs.writeFile(TRACE_FILE, JSON.stringify(deduped, null, 2));
-
+  const existing = memoryTraceCache ?? await readTracesFromFile();
+  const deduped = [trace, ...existing.filter((item) => item.id !== trace.id)].slice(0, MAX_TRACES);
+  memoryTraceCache = deduped;
+  try {
+    await fs.mkdir(TRACE_DIR, { recursive: true });
+    await fs.writeFile(TRACE_FILE, JSON.stringify(deduped, null, 2));
+  } catch { /* file write is best-effort on Vercel */ }
   return trace;
 }
 
 export async function readDemoTraces(limit = MAX_TRACES): Promise<DemoTrace[]> {
-  try {
-    const raw = await fs.readFile(TRACE_FILE, "utf8");
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      console.warn(`[DEMO_TRACE] Ignoring malformed trace store at ${TRACE_FILE}.`);
-      return [];
-    }
-    return parsed.slice(0, limit);
-  } catch (error) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
-      return [];
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(`[DEMO_TRACE] Failed to read trace store: ${message}`);
-    return [];
+  if (memoryTraceCache && memoryTraceCache.length > 0) {
+    return memoryTraceCache.slice(0, limit);
   }
+  const fromFile = await readTracesFromFile();
+  if (fromFile.length > 0) { memoryTraceCache = fromFile; }
+  return fromFile.slice(0, limit);
 }
 
 export async function readLatestDemoTrace(): Promise<DemoTrace | null> {
   const traces = await readDemoTraces(1);
   return traces[0] || null;
 }
+
+async function readTracesFromFile(): Promise<DemoTrace[]> {
+  try {
+    const raw = await fs.readFile(TRACE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) { return []; }
+    return parsed;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") { return []; }
+    return [];
+  }
+}
+
 
 function zkStep(id: string, label: string, zk: ZkReceipt): DemoTraceStep {
   return {

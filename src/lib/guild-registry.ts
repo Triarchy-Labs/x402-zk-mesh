@@ -87,9 +87,57 @@ export function getGuildMembers(): GuildMember[] {
   return guildMembers.map((member) => ({ ...member }));
 }
 
-export function isApprovedGuildRoot(root: string): boolean {
+export async function isApprovedGuildRoot(root: string): Promise<boolean> {
   ensureGuildRegistryLoaded();
-  return approvedRoots.has(normalizeField(root));
+  if (approvedRoots.has(normalizeField(root))) {
+    return true;
+  }
+
+  try {
+    const valid = await checkRootOnChain(root);
+    if (valid) {
+      approvedRoots.add(normalizeField(root));
+      return true;
+    }
+  } catch (error) {
+    console.warn(`[GUILD_REGISTRY] Failed to check root on-chain for ${root}:`, error);
+  }
+
+  return false;
+}
+
+async function checkRootOnChain(root: string): Promise<boolean> {
+  const StellarSDK = await import("@stellar/stellar-sdk");
+  const contractId = process.env.ZK_GUILD_REGISTRY_CONTRACT_ID || "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB";
+  const rpcUrl = process.env.STELLAR_RPC_URL || process.env.SOROBAN_RPC_URL || "https://soroban-testnet.stellar.org:443";
+
+  const rootHex = BigInt(root).toString(16).padStart(64, "0");
+  const rootBuffer = Buffer.from(rootHex, "hex");
+  const scValArg = StellarSDK.nativeToScVal(rootBuffer, { type: "bytes" });
+
+  const server = new StellarSDK.rpc.Server(rpcUrl);
+  const source = new StellarSDK.Account("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF", "0");
+  const contract = new StellarSDK.Contract(contractId);
+  const tx = new StellarSDK.TransactionBuilder(source, {
+    fee: "100000",
+    networkPassphrase: StellarSDK.Networks.TESTNET,
+  })
+    .addOperation(contract.call("is_valid_root", scValArg))
+    .setTimeout(30)
+    .build();
+
+  const simulation = await server.simulateTransaction(tx);
+
+  if (StellarSDK.rpc.Api.isSimulationError(simulation)) {
+    throw new Error(`Simulation failed: ${simulation.error}`);
+  }
+
+  const returnVal = simulation.result?.retval;
+  if (!returnVal) {
+    throw new Error("No return value in simulation.");
+  }
+
+  return StellarSDK.scValToNative(returnVal) === true;
 }
 
 export function getApprovedGuildRoots(): string[] {

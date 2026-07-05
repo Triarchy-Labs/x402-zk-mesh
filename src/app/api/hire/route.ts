@@ -245,7 +245,7 @@ async function verifyWorkerMembershipGate(
 	const { verifyProof } = await import("@/lib/zk-verifier");
 	const result = await verifyProof("membership_proof", data.proof, publicSignals);
 	const root = publicSignals[0] || null;
-	const approvedRoot = !!root && isApprovedGuildRoot(root);
+	const approvedRoot = !!root && (await isApprovedGuildRoot(root));
 	const verified = result.valid && approvedRoot;
 
 	return {

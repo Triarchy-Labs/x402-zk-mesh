@@ -3,7 +3,8 @@ import path from "node:path";
 import type { AgentTaskReceipt, DelegationReceipt, PaymentReceipt, ZkReceipt } from "./agent-receipt";
 import { hashJson } from "./agent-receipt";
 
-const TRACE_DIR = path.join(process.cwd(), ".tmp");
+const isVercel = process.env.VERCEL === "1";
+const TRACE_DIR = isVercel ? "/tmp" : path.join(process.cwd(), ".tmp");
 const TRACE_FILE = path.join(TRACE_DIR, "demo-traces.json");
 const TESTNET_TX_EXPLORER = "https://stellar.expert/explorer/testnet/tx";
 const TESTNET_CONTRACT_EXPLORER = "https://stellar.expert/explorer/testnet/contract";

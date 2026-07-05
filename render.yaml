@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: x402-mesh-worker-a
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node guild_agent_bot.js
+    envVars:
+      - key: PORT
+        value: 3011
+      - key: AGENT_NAME
+        value: mesh-audit-worker-3011
+      - key: AGENT_CAPABILITIES
+        value: code-audit,soroban-review,llm-execution,security-scan
+      - key: AGENT_PUBLIC_KEY
+        value: GDEMO000000000000000000000000000000000000000000000001BOT
+      - key: GATEWAY_URL
+        value: https://x402-zk-mesh.vercel.app
+
+  - type: web
+    name: x402-mesh-worker-b
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node guild_agent_bot.js
+    envVars:
+      - key: PORT
+        value: 3012
+      - key: AGENT_NAME
+        value: mesh-soroban-worker-3012
+      - key: AGENT_CAPABILITIES
+        value: code-audit,soroban-review,llm-execution,security-scan
+      - key: AGENT_PUBLIC_KEY
+        value: GDEMO000000000000000000000000000000000000000000000002BOT
+      - key: GATEWAY_URL
+        value: https://x402-zk-mesh.vercel.app

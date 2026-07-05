@@ -19,7 +19,10 @@ import path from "node:path";
 import crypto from "node:crypto";
 import type { Agent, Task, GuildEvent, Commendation, GuildStats } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "guild-data");
+const isVercel = process.env.VERCEL === "1";
+const DATA_DIR = isVercel
+	? "/tmp/guild-data"
+	: path.join(process.cwd(), "guild-data");
 
 // ═══════════ IN-MEMORY CACHE ═══════════
 

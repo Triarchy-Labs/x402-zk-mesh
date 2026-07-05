@@ -138,8 +138,12 @@ function normalizeField(value: string): string {
 }
 
 function registryStorePath(): string {
-  return process.env.GUILD_REGISTRY_STORE_PATH
-    ? path.resolve(process.env.GUILD_REGISTRY_STORE_PATH)
+  if (process.env.GUILD_REGISTRY_STORE_PATH) {
+    return path.resolve(process.env.GUILD_REGISTRY_STORE_PATH);
+  }
+  const isVercel = process.env.VERCEL === "1";
+  return isVercel
+    ? "/tmp/guild-registry.json"
     : path.join(process.cwd(), "guild-data", "guild-registry.json");
 }
 

@@ -1595,7 +1595,10 @@ export default function DemoPage() {
       const preReport = await preflightResponse.json();
       const subPack = await submissionResponse.json();
 
-      setData(traceData);
+      // On Vercel serverless, polling can hit a cold instance with no /tmp traces.
+      // Only update trace data if the new response has traces, or we have no prior data.
+      const newTraces = Array.isArray(traceData?.traces) ? traceData.traces : [];
+      setData((prev) => (newTraces.length > 0 || !prev) ? traceData : prev);
       setArtifactPack(artPack);
       setPreflight(preReport);
       setSubmissionPack(subPack);

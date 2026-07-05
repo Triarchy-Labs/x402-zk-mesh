@@ -210,6 +210,7 @@ interface DemoRunResponse {
     zkApprovedRoot?: boolean | null;
     settlementStatus?: string | null;
   };
+  trace?: DemoTrace | null;
 }
 
 type DemoScenario = "happy-path" | "tampered-worker-proof" | "unapproved-worker-root";
@@ -1850,6 +1851,16 @@ export default function DemoPage() {
     return runRes;
   }, []);
 
+  const mergeTraceIntoData = useCallback((trace: DemoTrace) => {
+    setData((prev) => {
+      if (!prev) return prev;
+      const existingTraces = prev.traces || [];
+      const deduped = [trace, ...existingTraces.filter((t) => t.id !== trace.id)].slice(0, 25);
+      const latest = deduped.find((t) => t.status === "complete") || deduped[0] || null;
+      return { ...prev, trace: latest, traces: deduped };
+    });
+  }, []);
+
   const runTraceScenario = useCallback(async (scenario: DemoScenario) => {
     try {
       setRunning(true);
@@ -1858,7 +1869,9 @@ export default function DemoPage() {
       if (isMockMode) {
         await simulateScenario(scenario);
       } else {
-        setRunResult(await executeDemoScenario(scenario));
+        const result = await executeDemoScenario(scenario);
+        setRunResult(result);
+        if (result.trace) { mergeTraceIntoData(result.trace); }
         await refresh();
       }
     } catch (runTraceError) {
@@ -1867,7 +1880,7 @@ export default function DemoPage() {
     } finally {
       setRunning(false);
     }
-  }, [refresh, isMockMode, simulateScenario]);
+  }, [refresh, isMockMode, simulateScenario, mergeTraceIntoData]);
 
   const runJudgeSuite = useCallback(async () => {
     const startedAt = Date.now();
@@ -1892,6 +1905,7 @@ export default function DemoPage() {
           setRunResult(result);
           setSuiteRuns(nextRuns);
           if (!isMockMode) {
+            if (result.trace) { mergeTraceIntoData(result.trace); }
             await refresh();
           }
         } catch (suiteError) {
@@ -1913,7 +1927,7 @@ export default function DemoPage() {
     } finally {
       setSuiteRunning(false);
     }
-  }, [refresh, isMockMode, simulateScenario]);
+  }, [refresh, isMockMode, simulateScenario, mergeTraceIntoData]);
 
   useEffect(() => {
     refresh();

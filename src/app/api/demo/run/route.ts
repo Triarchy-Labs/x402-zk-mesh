@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import * as StellarSDK from "@stellar/stellar-sdk";
 import { execFileSync } from "node:child_process";
-import { recordDemoTraceFromHireResponse, type HireTraceResponse } from "@/lib/demo-trace";
+import { recordDemoTraceFromHireResponse, buildDemoTraceFromHireResponse, type HireTraceResponse } from "@/lib/demo-trace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -120,8 +120,11 @@ export async function POST(req: Request) {
       is_shielded: false,
     }, hireHeaders);
 
-    // Record trace on THIS instance so GET /api/demo/trace can find it
+    // Build trace from the full hire response (runtime data has all fields)
+    let builtTrace = null;
     try {
+      builtTrace = buildDemoTraceFromHireResponse(hireResponse as unknown as HireTraceResponse);
+      // Also persist for best-effort server-side caching
       await recordDemoTraceFromHireResponse(hireResponse as unknown as HireTraceResponse);
     } catch (traceErr) {
       console.warn(`[DEMO_RUN] trace persist failed: ${traceErr instanceof Error ? traceErr.message : traceErr}`);
@@ -148,6 +151,8 @@ export async function POST(req: Request) {
         zkApprovedRoot: hireResponse.zk?.approvedRoot ?? null,
         settlementStatus: hireResponse.soroban_settlement?.submission?.status || null,
       },
+      // Include the full trace so frontend can update state without relying on server-side storage
+      trace: builtTrace,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

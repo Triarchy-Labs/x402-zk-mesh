@@ -201,7 +201,7 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 					animate={{ x: mousePos.x, y: mousePos.y }}
 					transition={{ type: "spring", stiffness: 100, damping: 25 }}
 				>
-					<motion.div className="flex gap-8 z-10" variants={containerVariants} animate={state} style={{ transformStyle: 'preserve-3d' }}>
+					<motion.div className="flex gap-3 z-10" variants={containerVariants} animate={state} style={{ transformStyle: 'preserve-3d' }}>
 						{/* Left Eye */}
 						<motion.div variants={leftEyeVariants} animate={state} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
 						

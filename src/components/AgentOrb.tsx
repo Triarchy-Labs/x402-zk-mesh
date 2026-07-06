@@ -89,31 +89,31 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 	// Pure White Eye shapes without black UI masks
     // IMPORTANT: ALL borderRadius values MUST have 4 explicit values so framer-motion interpolates without snapping!
 	const leftEyeVariants = {
-		idle: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		typing: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" }, 
-		thinking: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		idle: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		typing: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" }, 
+		thinking: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
 		working: { height: 9, width: 24, rotate: 0, borderRadius: "4px", backgroundColor: "#ffaa00" }, 
-		sneaky: { height: 27, width: 18, rotate: -5, borderRadius: "12px 12px 12px 12px", backgroundColor: "#fff" },
-		success: { height: blink ? 2 : 33, width: 24, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#ffaa00" },
-		error: { height: 15, width: 27, rotate: 30, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" }, 
-		sad: { height: 27, width: 24, rotate: -15, borderRadius: "6px 6px 18px 3px", backgroundColor: "#fff" }, 
-		exhausted: { height: blink ? 2 : 12, width: 21, rotate: 0, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" },
-		surrender: { height: 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 12, width: 27, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
+		sneaky: { height: 18, width: 27, rotate: -5, borderRadius: "12px 12px 12px 12px", backgroundColor: "#fff" },
+		success: { height: blink ? 2 : 24, width: 33, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#ffaa00" },
+		error: { height: 27, width: 15, rotate: 30, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" }, 
+		sad: { height: 24, width: 27, rotate: -15, borderRadius: "18px 3px 6px 6px", backgroundColor: "#fff" }, 
+		exhausted: { height: blink ? 2 : 21, width: 12, rotate: 0, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" },
+		surrender: { height: 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		danger: { height: 27, width: 12, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
 	};
     
 	const rightEyeVariants = {
-		idle: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		typing: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		thinking: { height: blink ? 2 : 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		idle: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		typing: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		thinking: { height: blink ? 2 : 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
 		working: { height: 9, width: 24, rotate: 0, borderRadius: "4px", backgroundColor: "#ffaa00" }, 
-		sneaky: { height: 36, width: 21, rotate: 5, borderRadius: "12px 12px 12px 12px", backgroundColor: "#fff" }, 
-		success: { height: blink ? 2 : 33, width: 24, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#ffaa00" },
-		error: { height: 15, width: 27, rotate: -30, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" }, 
-		sad: { height: 27, width: 24, rotate: 15, borderRadius: "6px 6px 3px 18px", backgroundColor: "#fff" }, 
-		exhausted: { height: blink ? 2 : 12, width: 21, rotate: 0, borderRadius: "6px 6px 15px 15px", backgroundColor: "#fff" },
-		surrender: { height: 39, width: 21, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 12, width: 27, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
+		sneaky: { height: 21, width: 36, rotate: 5, borderRadius: "12px 12px 12px 12px", backgroundColor: "#fff" }, 
+		success: { height: blink ? 2 : 24, width: 33, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#ffaa00" },
+		error: { height: 27, width: 15, rotate: -30, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" }, 
+		sad: { height: 24, width: 27, rotate: 15, borderRadius: "3px 18px 6px 6px", backgroundColor: "#fff" }, 
+		exhausted: { height: blink ? 2 : 21, width: 12, rotate: 0, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" },
+		surrender: { height: 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		danger: { height: 27, width: 12, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
 	};
 
 	return (

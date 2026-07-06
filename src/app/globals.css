@@ -77,8 +77,9 @@ html[data-theme="dark"] .global-bg-canvas {
 
 	/* ── Interactive ── */
 	--tap-target: 4.4rem;
-	--cursor-size: clamp(1.2rem, 1.5vw, 2rem);
-	--orb-size: clamp(10rem, 12vw, 18rem);
+	--cursor-size: clamp(2.4rem, 2vw, 4rem);
+	--orb-size: clamp(12rem, 14vw, 20rem);
+	--orb-nav-size: clamp(4.4rem, 3.5vw, 6.4rem);
 
 	/* ── Palette tokens ── */
 	--color-accent: #ffaa00;

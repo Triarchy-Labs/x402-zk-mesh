@@ -102,11 +102,11 @@ export function Nav() {
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
-						width: "3.2rem",
-						height: "3.2rem",
+						width: "var(--orb-nav-size, 4.8rem)",
+						height: "var(--orb-nav-size, 4.8rem)",
 					}}
 				>
-					<AgentOrb state={hoverLogo ? "typing" : "idle"} size={28} />
+					<AgentOrb state={hoverLogo ? "typing" : "idle"} size={44} />
 				</motion.div>
 				<motion.div
 					initial={{ width: 0, opacity: 0 }}

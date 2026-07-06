@@ -86,9 +86,9 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				cursor: "crosshair",
 				transition: "background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease",
 				boxShadow: isMark53 
-					? "0 0 60px rgba(255, 170, 0, 0.05)"
+					? "0 0 6rem rgba(255, 170, 0, 0.05)"
 					: hovered 
-						? "0 20px 40px rgba(255, 170, 0,0.08)" 
+						? "0 2rem 4rem rgba(255, 170, 0,0.08)" 
 						: "none",
                 minHeight: index === 0 || index === 3 || index === 6 ? "24rem" : "32rem",
                 justifyContent: "space-between",

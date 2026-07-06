@@ -43,7 +43,7 @@ export default function AgentDashboard() {
 				zIndex: 10,
 				padding: "2rem",
 				width: "100%",
-				maxWidth: "1000px",
+				maxWidth: "100rem",
 				margin: "0 auto 5rem",
 			}}
 		>
@@ -63,7 +63,7 @@ export default function AgentDashboard() {
 			<div
 				style={{
 					display: "grid",
-					gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+					gridTemplateColumns: "repeat(auto-fit, minmax(30rem, 1fr))",
 					gap: "2rem",
 					marginTop: "2rem",
 				}}
@@ -74,7 +74,7 @@ export default function AgentDashboard() {
 						style={{
 							background: "rgba(0, 15, 0, 0.4)",
 							border: `1px solid ${agent.status === "active" ? "rgba(255, 255, 255, 0.4)" : agent.status === "quarantined" ? "rgba(255, 85, 0, 0.4)" : "rgba(100, 100, 100, 0.4)"}`,
-							borderRadius: "4px",
+							borderRadius: "var(--radius-btn, 0.4rem)",
 							padding: "1.5rem",
 							backdropFilter: "blur(10px)",
 							fontFamily: "'Helvetica Now Display', 'Inter', sans-serif",

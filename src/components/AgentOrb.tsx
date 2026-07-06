@@ -149,7 +149,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 						initial={{ scale: 0, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1, rotate: 360 }}
 						exit={{ opacity: 0, transition: { duration: 0.2 } }}
-						className="absolute w-[240px] h-[240px] z-30 pointer-events-none"
+						className="absolute w-[24rem] h-[24rem] z-30 pointer-events-none"
                         transition={{ rotate: { duration: 4, repeat: Infinity, ease: "linear" } }}
 					>
                         <motion.div 

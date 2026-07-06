@@ -288,7 +288,7 @@ export default function Dashboard() {
 						<GsapHeader
 							title="Sovereign"
 							accentTitle="Dashboard"
-							subtitle="The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Nemotron 550B Semantic Firewall."
+							subtitle="The Sovereign Command Matrix. Triarchy ZK Mesh routing with L1 WASM Quarantine and L2 Snowball 550B Semantic Firewall."
 						/>
 					</div>
 					{/* SIMULATE ATTACK BUTTON */}

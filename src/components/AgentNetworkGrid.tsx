@@ -77,7 +77,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					? (theme === "dark" ? "rgba(0,15,0,0.45)" : "rgba(5,15,5,0.95)")
 					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(10,10,10,0.92)"),
 				border: isMark53 ? "none" : `1px solid ${borderColor}`,
-				borderRadius: "24px",
+				borderRadius: "2.4rem",
 				backdropFilter: hovered ? "blur(32px) saturate(1.5)" : "blur(24px) saturate(1.2)",
 				WebkitBackdropFilter: hovered ? "blur(32px) saturate(1.5)" : "blur(24px) saturate(1.2)",
 				display: "flex",
@@ -90,7 +90,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 					: hovered 
 						? "0 20px 40px rgba(255, 170, 0,0.08)" 
 						: "none",
-                minHeight: index === 0 || index === 3 || index === 6 ? "240px" : "320px",
+                minHeight: index === 0 || index === 3 || index === 6 ? "24rem" : "32rem",
                 justifyContent: "space-between",
 				overflow: "hidden",
 				wordBreak: "break-word" as const,
@@ -112,11 +112,11 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				</span>
 				<span
 					style={{
-						padding: "6px 12px",
+						padding: "0.6rem 1.2rem",
 						fontSize: "1.2rem",
 						border: `1px solid ${statusColor}`,
 						color: statusColor,
-						borderRadius: "6px",
+						borderRadius: "0.6rem",
 						fontFamily: "'SF Mono', monospace",
 						letterSpacing: "0.1em",
 						transition: lusionTransition,
@@ -153,11 +153,11 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 							<button 
                                 onClick={() => window.open("https://github.com/Triarchy-Labs/mark53-autonomous-node", "_blank")}
                                 style={{
-								padding: "8px 16px",
+								padding: "0.8rem 1.6rem",
 								background: "transparent",
 								border: `1px solid ${statusColor}`,
 								color: statusColor,
-								borderRadius: "4px",
+								borderRadius: "0.4rem",
 								fontFamily: "'SF Mono', monospace",
 								fontSize: "1.1rem",
 								letterSpacing: "0.1em",
@@ -170,11 +170,11 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 							<button 
                                 onClick={() => window.open("https://github.com/Triarchy-Labs/tauri-exosuit-gateway", "_blank")}
                                 style={{
-								padding: "8px 16px",
+								padding: "0.8rem 1.6rem",
 								background: statusColor,
 								border: "none",
 								color: "#000",
-								borderRadius: "4px",
+								borderRadius: "0.4rem",
 								fontFamily: "'SF Mono', monospace",
 								fontSize: "1.1rem",
 								letterSpacing: "0.1em",
@@ -293,10 +293,10 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 					display: "grid",
                     // Bento grid: adaptive auto-fit
 					gridTemplateColumns: "repeat(12, 1fr)",
-					gridAutoRows: "minmax(200px, auto)",
+					gridAutoRows: "minmax(20rem, auto)",
 					gap: "clamp(1.5rem, 4vw, 4rem)",
 					paddingBottom: "3rem",
-                    perspective: "1200px" // Required for the Lusion 3D tilt interaction
+                    perspective: "120rem" // Required for the Lusion 3D tilt interaction
 				}}
 			>
 				{agents.map((agent: AgentDisplay, i: number) => (

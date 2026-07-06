@@ -5,6 +5,7 @@ import { useWallet } from "@/context/WalletContext";
 
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 const FONT_MONO = "'SF Mono', 'Fira Code', monospace";
+const TRANSITION = "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
 
 // Palette aligned with page.tsx Lusion design system
 const P = {
@@ -89,7 +90,6 @@ interface RegistrationResult {
 interface DeployAgentModalProps {
   open: boolean;
   onClose: () => void;
-  theme?: "dark" | "light";
 }
 
 const phaseLabel: Record<RegistrationPhase, string> = {
@@ -180,6 +180,10 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
   const canSubmit = name.trim().length > 0 && capabilities.length > 0 && phase === "idle";
   const isProcessing = phase === "submitting" || phase === "hashing" || phase === "relaying";
 
+  const displayKey = walletKey
+    ? `${walletKey.substring(0, 6)}...${walletKey.substring(walletKey.length - 4)}`
+    : null;
+
   return (
     <AnimatePresence>
       {open && (
@@ -197,31 +201,42 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             alignItems: "center",
             justifyContent: "center",
             background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            backdropFilter: "blur(0.8rem)",
+            WebkitBackdropFilter: "blur(0.8rem)",
           }}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+            initial={{ scale: 0.9, opacity: 0, y: "3rem" }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+            exit={{ scale: 0.9, opacity: 0, y: "3rem" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "min(580px, 90vw)",
+              width: "clamp(40rem, 42vw, 64rem)",
               maxHeight: "85vh",
               overflowY: "auto",
               background: P.glassBg,
               border: `1px solid ${P.border}`,
-              borderRadius: "2px",
-              padding: "3.5rem",
+              borderRadius: "0.2rem",
+              padding: "clamp(2.5rem, 3vw, 4rem)",
               fontFamily: FONT_HEADING,
               color: P.text,
+              boxSizing: "border-box",
             }}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
-              <h2 style={{ fontSize: "1.8rem", fontWeight: 500, letterSpacing: "0.15em", margin: 0 }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "clamp(2rem, 2vw, 3rem)",
+            }}>
+              <h2 style={{
+                fontSize: "var(--text-h2, clamp(1.8rem, 2.5vw, 2.8rem))",
+                fontWeight: 500,
+                letterSpacing: "0.15em",
+                margin: 0,
+              }}>
                 DEPLOY AGENT
               </h2>
               <button
@@ -231,7 +246,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   background: "transparent",
                   border: "none",
                   color: P.textMuted,
-                  fontSize: "1.6rem",
+                  fontSize: "clamp(1.6rem, 1.8vw, 2.2rem)",
                   cursor: isProcessing ? "not-allowed" : "pointer",
                   fontFamily: FONT_MONO,
                   padding: "0.5rem",
@@ -245,19 +260,20 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             {/* Wallet status */}
             {walletKey && (phase === "idle" || phase === "error") && (
               <div style={{
-                marginBottom: "2rem",
-                padding: "1rem 1.4rem",
+                marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)",
+                padding: "clamp(0.8rem, 1vw, 1.4rem)",
                 background: P.accentBg,
                 border: `1px solid ${P.accentBorder}`,
                 fontFamily: FONT_MONO,
-                fontSize: "1.05rem",
+                fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                 color: P.accentDim,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                gap: "1rem",
               }}>
                 <span>WALLET LINKED</span>
-                <span style={{ color: P.text }}>{walletKey.substring(0, 6)}...{walletKey.substring(walletKey.length - 4)}</span>
+                <span style={{ color: P.text }}>{displayKey}</span>
               </div>
             )}
 
@@ -267,8 +283,8 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 style={{
-                  marginBottom: "2rem",
-                  padding: "1.5rem",
+                  marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)",
+                  padding: "clamp(1rem, 1.2vw, 1.8rem)",
                   border: `1px solid ${P.accentBorder}`,
                   background: P.accentBg,
                 }}
@@ -278,7 +294,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   alignItems: "center",
                   gap: "1rem",
                   fontFamily: FONT_MONO,
-                  fontSize: "1.15rem",
+                  fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                   letterSpacing: "0.08em",
                   color: P.accent,
                 }}>
@@ -292,9 +308,9 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                 </div>
                 <div style={{
                   marginTop: "1rem",
-                  height: "2px",
+                  height: "0.2rem",
                   background: "rgba(255,255,255,0.08)",
-                  borderRadius: "1px",
+                  borderRadius: "0.1rem",
                   overflow: "hidden",
                 }}>
                   <motion.div
@@ -312,18 +328,18 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             {/* Success result */}
             {phase === "done" && result && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: "1rem" }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{
-                  marginBottom: "2rem",
-                  padding: "2rem",
+                  marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)",
+                  padding: "clamp(1.5rem, 1.5vw, 2.5rem)",
                   border: `1px solid ${P.accentBorder}`,
                   background: P.accentBg,
                 }}
               >
                 <div style={{
                   fontFamily: FONT_MONO,
-                  fontSize: "1.2rem",
+                  fontSize: "var(--text-body, clamp(1.1rem, 1.2vw, 1.5rem))",
                   letterSpacing: "0.1em",
                   color: P.accent,
                   marginBottom: "1.5rem",
@@ -331,7 +347,12 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   [{phaseLabel.done}]
                 </div>
 
-                <div style={{ display: "grid", gap: "1rem", fontFamily: FONT_MONO, fontSize: "1.1rem" }}>
+                <div style={{
+                  display: "grid",
+                  gap: "1rem",
+                  fontFamily: FONT_MONO,
+                  fontSize: "var(--text-body, clamp(1rem, 1vw, 1.3rem))",
+                }}>
                   <div>
                     <span style={{ color: P.textMuted }}>agent_id: </span>
                     <span>{result.agent.id}</span>
@@ -356,7 +377,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   <div style={{
                     marginTop: "0.5rem",
                     paddingTop: "1rem",
-                    borderTop: `1px solid rgba(255,255,255,0.08)`,
+                    borderTop: "1px solid rgba(255,255,255,0.08)",
                   }}>
                     <span style={{ color: P.textMuted }}>soroban_status: </span>
                     <span style={{
@@ -378,7 +399,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                           color: "rgba(255,255,255,0.7)",
                           textDecoration: "underline",
                           textDecorationColor: "rgba(255,255,255,0.2)",
-                          textUnderlineOffset: "4px",
+                          textUnderlineOffset: "0.4rem",
                           wordBreak: "break-all",
                         }}
                       >
@@ -397,7 +418,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                         color: "rgba(255,255,255,0.7)",
                         textDecoration: "underline",
                         textDecorationColor: "rgba(255,255,255,0.2)",
-                        textUnderlineOffset: "4px",
+                        textUnderlineOffset: "0.4rem",
                         wordBreak: "break-all",
                       }}
                     >
@@ -411,15 +432,15 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             {/* Error state */}
             {phase === "error" && error && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: "1rem" }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{
-                  marginBottom: "2rem",
-                  padding: "1.5rem",
+                  marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)",
+                  padding: "clamp(1rem, 1.2vw, 1.8rem)",
                   border: `1px solid ${P.errorBorder}`,
                   background: P.errorBg,
                   fontFamily: FONT_MONO,
-                  fontSize: "1.15rem",
+                  fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                   color: P.error,
                 }}
               >
@@ -430,10 +451,11 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             {/* Form */}
             {(phase === "idle" || phase === "error") && (
               <>
-                <div style={{ marginBottom: "2rem" }}>
+                {/* Agent Name */}
+                <div style={{ marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "1.15rem",
+                    fontSize: "var(--text-caption, clamp(1rem, 1.1vw, 1.3rem))",
                     letterSpacing: "0.12em",
                     color: P.accentDim,
                     marginBottom: "0.8rem",
@@ -449,15 +471,15 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                     maxLength={48}
                     style={{
                       width: "100%",
-                      padding: "1.2rem 1.4rem",
+                      padding: "clamp(0.8rem, 1vw, 1.4rem) clamp(1rem, 1.2vw, 1.6rem)",
                       background: P.inputBg,
                       border: `1px solid ${P.border}`,
-                      borderRadius: "2px",
+                      borderRadius: "0.2rem",
                       color: P.text,
                       fontFamily: FONT_MONO,
-                      fontSize: "1.3rem",
+                      fontSize: "var(--text-body, clamp(1.1rem, 1.2vw, 1.5rem))",
                       outline: "none",
-                      transition: "border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: TRANSITION,
                       boxSizing: "border-box",
                     }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = P.borderHover; }}
@@ -465,10 +487,11 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   />
                 </div>
 
-                <div style={{ marginBottom: "2.5rem" }}>
+                {/* Capabilities */}
+                <div style={{ marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "1.15rem",
+                    fontSize: "var(--text-caption, clamp(1rem, 1.1vw, 1.3rem))",
                     letterSpacing: "0.12em",
                     color: P.accentDim,
                     marginBottom: "0.8rem",
@@ -476,7 +499,11 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   }}>
                     CAPABILITIES
                   </label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
+                  <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "clamp(0.4rem, 0.5vw, 0.8rem)",
+                  }}>
                     {CAPABILITY_OPTIONS.map((cap) => {
                       const selected = capabilities.includes(cap);
                       return (
@@ -484,16 +511,17 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                           key={cap}
                           onClick={() => toggleCapability(cap)}
                           style={{
-                            padding: "0.7rem 1.3rem",
+                            padding: "clamp(0.5rem, 0.6vw, 0.9rem) clamp(0.8rem, 1vw, 1.5rem)",
                             background: selected ? P.accentBgHover : "transparent",
                             border: `1px solid ${selected ? P.accentBorder : P.border}`,
-                            borderRadius: "2px",
+                            borderRadius: "0.2rem",
                             color: selected ? P.accent : "rgba(255,255,255,0.55)",
                             fontFamily: FONT_MONO,
-                            fontSize: "1.1rem",
+                            fontSize: "var(--text-caption, clamp(0.9rem, 1vw, 1.2rem))",
                             cursor: "pointer",
-                            transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                            transition: TRANSITION,
                             letterSpacing: "0.04em",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {cap}
@@ -504,16 +532,16 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                 </div>
 
                 {/* Worker URL */}
-                <div style={{ marginBottom: "2.5rem" }}>
+                <div style={{ marginBottom: "clamp(1.5rem, 1.5vw, 2.5rem)" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "1.15rem",
+                    fontSize: "var(--text-caption, clamp(1rem, 1.1vw, 1.3rem))",
                     letterSpacing: "0.12em",
                     color: P.accentDim,
                     marginBottom: "0.8rem",
                     fontWeight: 500,
                   }}>
-                    WORKER URL <span style={{ fontSize: "0.9rem", opacity: 0.5 }}>(OPTIONAL)</span>
+                    WORKER URL <span style={{ opacity: 0.5 }}>(OPTIONAL)</span>
                   </label>
                   <input
                     type="url"
@@ -522,15 +550,15 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                     placeholder="https://your-agent.com/api/hire"
                     style={{
                       width: "100%",
-                      padding: "1.2rem 1.4rem",
+                      padding: "clamp(0.8rem, 1vw, 1.4rem) clamp(1rem, 1.2vw, 1.6rem)",
                       background: P.inputBg,
                       border: `1px solid ${P.border}`,
-                      borderRadius: "2px",
+                      borderRadius: "0.2rem",
                       color: P.text,
                       fontFamily: FONT_MONO,
-                      fontSize: "1.2rem",
+                      fontSize: "var(--text-body, clamp(1rem, 1vw, 1.3rem))",
                       outline: "none",
-                      transition: "border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: TRANSITION,
                       boxSizing: "border-box",
                     }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = P.borderHover; }}
@@ -538,7 +566,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   />
                   <p style={{
                     marginTop: "0.6rem",
-                    fontSize: "1rem",
+                    fontSize: "var(--text-caption, clamp(0.8rem, 0.9vw, 1rem))",
                     color: P.textDim,
                     fontFamily: FONT_MONO,
                   }}>
@@ -546,6 +574,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   </p>
                 </div>
 
+                {/* Submit */}
                 <motion.button
                   whileHover={canSubmit ? { scale: 1.02, background: "rgba(255,170,0,0.9)" } : {}}
                   whileTap={canSubmit ? { scale: 0.98 } : {}}
@@ -553,17 +582,17 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   disabled={!canSubmit}
                   style={{
                     width: "100%",
-                    padding: "1.5rem",
+                    padding: "clamp(1rem, 1.2vw, 1.8rem)",
                     background: canSubmit ? P.accent : "rgba(255,255,255,0.06)",
                     color: canSubmit ? "#0a0a0a" : "rgba(255,255,255,0.25)",
                     border: "none",
-                    borderRadius: "2px",
+                    borderRadius: "0.2rem",
                     fontFamily: FONT_HEADING,
-                    fontSize: "1.35rem",
+                    fontSize: "var(--text-h3, clamp(1.2rem, 1.3vw, 1.6rem))",
                     fontWeight: 600,
                     letterSpacing: "0.15em",
                     cursor: canSubmit ? "pointer" : "not-allowed",
-                    transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                    transition: TRANSITION,
                   }}
                 >
                   {phase === "error" ? "RETRY DEPLOYMENT" : "REGISTER IN GUILD"}
@@ -571,7 +600,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
 
                 <p style={{
                   marginTop: "1.5rem",
-                  fontSize: "1.05rem",
+                  fontSize: "var(--text-caption, clamp(0.8rem, 0.9vw, 1.1rem))",
                   color: P.textDim,
                   textAlign: "center",
                   lineHeight: 1.6,
@@ -586,7 +615,7 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
             {/* Done — ZK verification + action buttons */}
             {phase === "done" && (
               <>
-                {/* ZK Membership Verification */}
+                {/* ZK Verify button */}
                 {zkPhase === "idle" && result?.guild?.proofInputs && (
                   <motion.button
                     whileHover={{ scale: 1.02, borderColor: P.accent }}
@@ -616,32 +645,33 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                     }}
                     style={{
                       width: "100%",
-                      padding: "1.3rem",
-                      marginBottom: "1.5rem",
+                      padding: "clamp(1rem, 1.1vw, 1.5rem)",
+                      marginBottom: "clamp(1rem, 1.2vw, 1.8rem)",
                       background: P.accentBg,
                       color: P.accent,
                       border: `1px solid ${P.accentBorder}`,
-                      borderRadius: "2px",
+                      borderRadius: "0.2rem",
                       fontFamily: FONT_HEADING,
-                      fontSize: "1.2rem",
+                      fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                       fontWeight: 600,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
-                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: TRANSITION,
                     }}
                   >
                     VERIFY MEMBERSHIP — ZK PROOF
                   </motion.button>
                 )}
 
+                {/* ZK progress */}
                 {(zkPhase === "generating" || zkPhase === "verifying") && (
                   <div style={{
-                    padding: "1.3rem",
-                    marginBottom: "1.5rem",
+                    padding: "clamp(1rem, 1.1vw, 1.5rem)",
+                    marginBottom: "clamp(1rem, 1.2vw, 1.8rem)",
                     border: `1px solid ${P.accentBorder}`,
                     background: P.accentBg,
                     fontFamily: FONT_MONO,
-                    fontSize: "1.1rem",
+                    fontSize: "var(--text-body, clamp(1rem, 1vw, 1.3rem))",
                     color: P.accent,
                     display: "flex",
                     alignItems: "center",
@@ -657,19 +687,20 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                   </div>
                 )}
 
+                {/* ZK result */}
                 {zkPhase === "done" && zkResult && (
                   <div style={{
-                    padding: "1.5rem",
-                    marginBottom: "1.5rem",
+                    padding: "clamp(1rem, 1.2vw, 1.8rem)",
+                    marginBottom: "clamp(1rem, 1.2vw, 1.8rem)",
                     border: `1px solid ${zkResult.verified ? P.accentBorder : P.errorBorder}`,
                     background: zkResult.verified ? P.accentBg : P.errorBg,
                     fontFamily: FONT_MONO,
-                    fontSize: "1.1rem",
+                    fontSize: "var(--text-body, clamp(1rem, 1vw, 1.3rem))",
                   }}>
                     <div style={{
                       color: zkResult.verified ? P.accent : P.error,
                       marginBottom: "0.8rem",
-                      fontSize: "1.2rem",
+                      fontSize: "var(--text-body, clamp(1.1rem, 1.2vw, 1.4rem))",
                     }}>
                       {zkResult.verified ? "[PASS] MEMBERSHIP PROOF VERIFIED" : "[FAIL] VERIFICATION FAILED"}
                     </div>
@@ -681,28 +712,29 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                         contract: <a href={zkResult.explorer} target="_blank" rel="noreferrer" style={{
                           color: "rgba(255,255,255,0.7)",
                           textDecoration: "underline",
-                          textDecorationColor: "rgba(255,255,255,0.2)",
-                          textUnderlineOffset: "4px",
+                          textUnderlineOffset: "0.4rem",
                         }}>{zkResult.contractId.slice(0, 12)}...{zkResult.contractId.slice(-6)}</a>
                       </div>
                     )}
                   </div>
                 )}
 
+                {/* ZK error */}
                 {zkPhase === "error" && zkError && (
                   <div style={{
-                    padding: "1.3rem",
-                    marginBottom: "1.5rem",
+                    padding: "clamp(1rem, 1.1vw, 1.5rem)",
+                    marginBottom: "clamp(1rem, 1.2vw, 1.8rem)",
                     border: `1px solid ${P.errorBorder}`,
                     background: P.errorBg,
                     fontFamily: FONT_MONO,
-                    fontSize: "1.1rem",
+                    fontSize: "var(--text-body, clamp(1rem, 1vw, 1.3rem))",
                     color: P.error,
                   }}>
                     [ERROR] ZK Proof: {zkError}
                   </div>
                 )}
 
+                {/* Action buttons */}
                 <div style={{ display: "flex", gap: "1rem" }}>
                   <motion.button
                     whileHover={{ scale: 1.02, borderColor: P.accentBorder }}
@@ -710,17 +742,17 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                     onClick={resetForm}
                     style={{
                       flex: 1,
-                      padding: "1.3rem",
+                      padding: "clamp(1rem, 1.1vw, 1.5rem)",
                       background: "transparent",
                       color: "rgba(255,255,255,0.6)",
                       border: `1px solid ${P.border}`,
-                      borderRadius: "2px",
+                      borderRadius: "0.2rem",
                       fontFamily: FONT_HEADING,
-                      fontSize: "1.2rem",
+                      fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                       fontWeight: 500,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
-                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: TRANSITION,
                     }}
                   >
                     DEPLOY ANOTHER
@@ -731,17 +763,17 @@ export default function DeployAgentModal({ open, onClose }: DeployAgentModalProp
                     onClick={handleClose}
                     style={{
                       flex: 1,
-                      padding: "1.3rem",
+                      padding: "clamp(1rem, 1.1vw, 1.5rem)",
                       background: P.accent,
                       color: "#0a0a0a",
                       border: "none",
-                      borderRadius: "2px",
+                      borderRadius: "0.2rem",
                       fontFamily: FONT_HEADING,
-                      fontSize: "1.2rem",
+                      fontSize: "var(--text-body, clamp(1rem, 1.2vw, 1.4rem))",
                       fontWeight: 600,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
-                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      transition: TRANSITION,
                     }}
                   >
                     CLOSE

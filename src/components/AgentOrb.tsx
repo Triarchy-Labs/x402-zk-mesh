@@ -174,7 +174,7 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 
 			<motion.div 
 				ref={orbRef}
-				style={{ width: "var(--orb-size, 12rem)", height: "var(--orb-size, 12rem)" }} 
+				style={{ width: 120, height: 120 }} 
 				className="relative z-10 rounded-full shadow-[inset_0_-10px_20px_rgba(0,0,0,0.8),_0_0_15px_rgba(0,0,0,0.5)] border border-white/5 overflow-hidden flex items-center justify-center bg-[#0a0a0a]"
                 animate={{ 
                     boxShadow: state === "success" 

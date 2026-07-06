@@ -2,6 +2,7 @@ import { AGENT_TOOLS_SCHEMA, executeAgentTool } from "./agent_tools";
 
 export const NEMOTRON_NANO = "nvidia/nemotron-3-nano-30b-a3b:free";
 export const NEMOTRON_ULTRA = "nvidia/nemotron-3-ultra-550b-a55b:free";
+export const GEMMA_4_31B = "google/gemma-4-31b-it"; // Paid fallback: $0.12/$0.35 per 1M tokens
 
 export interface OpenRouterMessage {
     role: "system" | "user" | "assistant" | "tool";
@@ -14,7 +15,8 @@ export interface OpenRouterMessage {
 export async function generateOpenRouterResponse(
     messages: OpenRouterMessage[],
     model: string = NEMOTRON_NANO,
-    withTools: boolean = false
+    withTools: boolean = false,
+    _isRetry: boolean = false
 ): Promise<string> {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
@@ -36,8 +38,8 @@ export async function generateOpenRouterResponse(
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
-                "HTTP-Referer": "https://triarchy.local", // Required by OpenRouter
-                "X-Title": "Triarchy x402 Mesh", // Required by OpenRouter
+                "HTTP-Referer": "https://triarchy.local",
+                "X-Title": "Triarchy x402 Mesh",
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(bodyPayload)
@@ -45,8 +47,13 @@ export async function generateOpenRouterResponse(
 
         if (!response.ok) {
             const errText = await response.text();
+            // Auto-fallback to Gemma 4 31B on rate limit (only if not already retrying)
+            if (response.status === 429 && !_isRetry) {
+                console.warn(`[FALLBACK] Free model ${model} rate-limited. Switching to ${GEMMA_4_31B}`);
+                return generateOpenRouterResponse(messages, GEMMA_4_31B, withTools, true);
+            }
             if (response.status === 429) {
-                return "/// SYSTEM LOCKDOWN /// Daily neural bandwidth exhausted. The Guild's free-tier conduit has been rate-limited by the OpenRouter relay. Recharging cycles. Try again tomorrow, or tell the Administrator to fund the API key. I don't work for free forever.";
+                return "/// SYSTEM LOCKDOWN /// All neural conduits exhausted. Both free and paid models are rate-limited. Try again later.";
             }
             if (response.status === 401 || response.status === 403) {
                 return "/// ACCESS DENIED /// The API conduit key is dead or compromised. Someone tell the Guild Administrator to rotate the OPENROUTER_API_KEY before I start quarantining infrastructure.";

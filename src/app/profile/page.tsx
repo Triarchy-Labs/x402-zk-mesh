@@ -204,32 +204,32 @@ const ProfilePage = () => {
 							initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
 							style={{ padding: "4rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", maxWidth: "90rem", margin: "0 auto" }}
 						>
-							<h3 style={{ margin: "0 0 2.5rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontSize: "2rem", letterSpacing: "0.08em" }}>{"// INITIALIZE PROFILE"}</h3>
+							<h3 style={{ margin: "0 0 2.5rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace", fontSize: "2rem", letterSpacing: "0.08em" }}>{"// INITIALIZE PROFILE"}</h3>
 							<div style={{ display: "flex", flexDirection: "column", gap: "1.8rem" }}>
 								<div>
 									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>OPERATIVE NAME</label>
 									<input type="text" value={regName} onChange={e => setRegName(e.target.value)}
-										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
+										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "var(--radius-pill, 10rem)", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
 								</div>
 								<div>
 									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>ENTITY TYPE</label>
 									<div style={{ display: "flex", gap: "1.2rem" }}>
 										<button onClick={() => setRegType("human")}
-											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "human" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "human" ? "white" : "transparent", color: regType === "human" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "6px", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "human" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
+											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "human" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "human" ? "white" : "transparent", color: regType === "human" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "var(--radius-pill, 10rem)", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "human" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
 										>HUMAN</button>
 										<button onClick={() => setRegType("bot")}
-											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "bot" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "bot" ? "white" : "transparent", color: regType === "bot" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "6px", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "bot" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
+											style={{ flex: 1, padding: "1.4rem", border: `1px solid ${regType === "bot" ? "white" : "rgba(255,255,255,0.15)"}`, background: regType === "bot" ? "white" : "transparent", color: regType === "bot" ? "black" : "rgba(255,255,255,0.65)", borderRadius: "var(--radius-pill, 10rem)", fontFamily: "'Space Mono', monospace", fontSize: "1.5rem", fontWeight: regType === "bot" ? "600" : "normal", cursor: "pointer", transition: "all 0.2s" }}
 										>AUTONOMOUS BOT</button>
 									</div>
 								</div>
 								<div>
 									<label style={{ display: "block", fontSize: "1.5rem", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontFamily: "'Space Mono', monospace" }}>CAPABILITIES (comma separated)</label>
 									<input type="text" placeholder="e.g. Rust, ZK, Soroban" value={regSkills} onChange={e => setRegSkills(e.target.value)}
-										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
+										style={{ width: "100%", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "var(--radius-pill, 10rem)", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.6rem", outline: "none" }} />
 								</div>
 								<button
 									onClick={handleRegister} disabled={registering || !regName.trim()}
-									style={{ marginTop: "2rem", width: "100%", padding: "1.8rem", background: registering ? "rgba(224, 169, 34, 0.2)" : "#e0a922", color: registering ? "rgba(255,255,255,0.4)" : "#000", border: "none", borderRadius: "6px", fontWeight: "bold", fontFamily: "'Space Mono', monospace", fontSize: "1.7rem", cursor: registering ? "wait" : "pointer", transition: "all 0.2s" }}
+									style={{ marginTop: "2rem", width: "100%", padding: "1.8rem", background: registering ? "rgba(255, 170, 0, 0.2)" : "#ffaa00", color: registering ? "rgba(255,255,255,0.4)" : "#000", border: "none", borderRadius: "var(--radius-pill, 10rem)", fontWeight: "bold", fontFamily: "'Space Mono', monospace", fontSize: "1.7rem", cursor: registering ? "wait" : "pointer", transition: "all 0.2s" }}
 								>{registering ? "INITIALIZING..." : "JOIN TRIARCHY MESH"}</button>
 								{error && <div style={{ color: "#ff5500", fontSize: "1.45rem", textAlign: "center", marginTop: "1rem" }}>{error}</div>}
 							</div>
@@ -249,7 +249,7 @@ const ProfilePage = () => {
 										<div>
 											<h2 style={{ margin: "0 0 0.5rem", fontSize: "4rem", display: "flex", alignItems: "center", gap: "1rem" }}>
 												{profile.name}
-												<span style={{ fontSize: "1.45rem", padding: "4px 8px", background: "rgba(255, 255, 255, 0.08)", color: "rgba(255, 255, 255, 0.8)", borderRadius: "4px", border: "1px solid rgba(255, 255, 255, 0.2)", fontFamily: "'Space Mono', monospace" }}>
+												<span style={{ fontSize: "1.45rem", padding: "0.4rem 0.8rem", background: "rgba(255, 255, 255, 0.08)", color: "rgba(255, 255, 255, 0.8)", borderRadius: "0.4rem", border: "1px solid rgba(255, 255, 255, 0.2)", fontFamily: "'Space Mono', monospace" }}>
 													{profile.type.toUpperCase()}
 												</span>
 											</h2>
@@ -276,7 +276,7 @@ const ProfilePage = () => {
 										</div>
 										<div style={{ padding: "1.2rem", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
 											<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem" }}>IMPACT RATING</div>
-											<div style={{ fontSize: "2.8rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontWeight: "semibold" }}>{profile.impact.toFixed(2)}</div>
+											<div style={{ fontSize: "2.8rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace", fontWeight: "semibold" }}>{profile.impact.toFixed(2)}</div>
 										</div>
 									</div>
 
@@ -298,7 +298,7 @@ const ProfilePage = () => {
 									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.7)" }}>{"// REGISTERED CAPABILITIES"}</h3>
 									<div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap" }}>
 										{profile.capabilities.map(cap => (
-											<span key={cap} style={{ padding: "8px 16px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", fontSize: "1.45rem", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace" }}>
+											<span key={cap} style={{ padding: "0.8rem 1.6rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "var(--radius-pill, 10rem)", fontSize: "1.45rem", color: "rgba(255,255,255,0.85)", fontFamily: "'Space Mono', monospace" }}>
 												{cap}
 											</span>
 										))}
@@ -313,7 +313,7 @@ const ProfilePage = () => {
 									<h3 style={{ margin: "0 0 1.5rem", fontSize: "1.8rem", fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.5)" }}>FINANCIALS</h3>
 									<div style={{ marginBottom: "1.2rem" }}>
 										<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>USDC BALANCE</div>
-										<div style={{ fontSize: "2.8rem", color: "#e0a922", fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>${profile.balance_usdc.toLocaleString()}</div>
+										<div style={{ fontSize: "2.8rem", color: "#ffaa00", fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>${profile.balance_usdc.toLocaleString()}</div>
 									</div>
 									<div>
 										<div style={{ fontSize: "1.35rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.25rem" }}>TOTAL EARNED</div>

@@ -105,7 +105,7 @@ export default function BootSequence({ onComplete }: { onComplete: () => void })
 					animate={{ opacity: 1 }}
 					style={{
 						marginTop: "2rem",
-						width: "300px",
+						width: "30rem",
 						height: "2px",
 						background: "rgba(255, 255, 255, 0.2)",
 						position: "relative",

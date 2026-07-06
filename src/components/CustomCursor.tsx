@@ -62,8 +62,9 @@ export default function CustomCursor() {
 			currentPos.current.scale = lerp(currentPos.current.scale, targetScale, LERP * 0.4); 
 
 			if (dotRef.current) {
-				// Offset is 10px because base width/height is 20
-				dotRef.current.style.transform = `translate(${currentPos.current.x - 10}px, ${currentPos.current.y - 10}px) scale(${currentPos.current.scale})`;
+				const size = dotRef.current.offsetWidth;
+				const offset = size / 2;
+				dotRef.current.style.transform = `translate(${currentPos.current.x - offset}px, ${currentPos.current.y - offset}px) scale(${currentPos.current.scale})`;
 			}
 			rafId.current = requestAnimationFrame(tick);
 		};
@@ -90,18 +91,17 @@ export default function CustomCursor() {
 				position: "fixed",
 				top: 0,
 				left: 0,
-				width: 20,
-				height: 20,
+				width: "var(--cursor-size, 2rem)",
+				height: "var(--cursor-size, 2rem)",
 				borderRadius: "50%",
 				backgroundColor: isHovering ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.25)",
 				border: isHovering ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.5)",
 				pointerEvents: "none",
 				zIndex: 99999,
-				// Removed backdropFilter to prevent GPU rendering artifacts (black spots) on Canvas
 				boxShadow: isHovering 
-					? "0 0 10px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.2)" 
-					: "0 2px 5px rgba(0,0,0,0.15)",
-				transition: "background-color 0.4s ease, border 0.4s ease, box-shadow 0.4s ease",
+					? "0 0 1rem rgba(255,255,255,0.3), 0 0.4rem 1.5rem rgba(0,0,0,0.2)" 
+					: "0 0.2rem 0.5rem rgba(0,0,0,0.15)",
+				transition: "background-color 0.4s ease, border 0.4s ease, box-shadow 0.4s ease, width 0.3s ease, height 0.3s ease",
 				willChange: "transform",
 			}}
 		/>

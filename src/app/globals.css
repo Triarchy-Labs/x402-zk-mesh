@@ -32,30 +32,62 @@ html[data-theme="dark"] .global-bg-canvas {
 	--foreground: #171717;
 	--font-heading: 'Helvetica Now Display', 'Inter', 'Helvetica Neue', sans-serif;
 	--font-body: 'Inter', 'DM Sans', 'Helvetica Neue', sans-serif;
+	--font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
 
-	/* Fluid spacing system */
-	--space-nav-x: clamp(16px, 4vw, 40px);
-	--space-nav-y: clamp(12px, 2vw, 20px);
+	/* ── Typography Scale (rem, capped by html clamp) ── */
+	--text-hero:    clamp(3.2rem, 5vw, 5.6rem);
+	--text-h1:      clamp(2.4rem, 3.5vw, 4rem);
+	--text-h2:      clamp(1.8rem, 2.5vw, 3rem);
+	--text-h3:      clamp(1.4rem, 1.8vw, 2.2rem);
+	--text-body:    clamp(1.2rem, 1.4vw, 1.6rem);
+	--text-caption:  clamp(1rem, 1.1vw, 1.3rem);
+	--text-mono:    clamp(0.9rem, 1vw, 1.2rem);
+	--text-small:   clamp(0.8rem, 0.9vw, 1rem);
+
+	/* ── Font Weights ── */
+	--weight-light: 300;
+	--weight-regular: 400;
+	--weight-medium: 500;
+	--weight-semibold: 600;
+	--weight-bold: 700;
+
+	/* ── Spacing (fluid) ── */
+	--space-xs:  clamp(0.4rem, 0.5vw, 0.8rem);
+	--space-sm:  clamp(0.8rem, 1vw, 1.4rem);
+	--space-md:  clamp(1.2rem, 1.5vw, 2rem);
+	--space-lg:  clamp(2rem, 2.5vw, 3.5rem);
+	--space-xl:  clamp(3rem, 4vw, 5rem);
+	--space-nav-x: clamp(1.6rem, 4vw, 4rem);
+	--space-nav-y: clamp(1.2rem, 2vw, 2rem);
 	--space-section: clamp(2rem, 6vw, 4rem);
 	--space-hero-top: clamp(10vh, 15vh, 20vh);
 	--space-content-x: clamp(1rem, 4vw, 2rem);
 
-	/* Fluid typography */
-	--text-hero: clamp(2.2rem, 6vw, 5rem);
-	--text-h2: clamp(1.5rem, 4vw, 2.5rem);
-	--text-h3: clamp(1.1rem, 2.5vw, 1.5rem);
-	--text-body: clamp(0.875rem, 2vw, 1.2rem);
-	--text-caption: clamp(0.7rem, 1.5vw, 0.85rem);
-	--text-mono: clamp(0.65rem, 1.2vw, 0.75rem);
+	/* ── Radii (consistent shapes) ── */
+	--radius-pill:  10rem;
+	--radius-card:  clamp(1.2rem, 1.5vw, 2.4rem);
+	--radius-btn:   0.4rem;
+	--radius-input: 0.2rem;
 
-	/* Fixed element positions — fluid */
-	--pos-logo-top: clamp(20px, 3vw, 50px);
-	--pos-logo-left: clamp(16px, 3vw, 40px);
-	--pos-fab-bottom: clamp(16px, 3vw, 40px);
-	--pos-fab-right: clamp(16px, 3vw, 40px);
+	/* ── Fixed element positions ── */
+	--pos-logo-top: clamp(2rem, 3vw, 5rem);
+	--pos-logo-left: clamp(1.6rem, 3vw, 4rem);
+	--pos-fab-bottom: clamp(1.6rem, 3vw, 4rem);
+	--pos-fab-right: clamp(1.6rem, 3vw, 4rem);
 
-	/* Touch target minimum (Apple HIG) */
-	--tap-target: 44px;
+	/* ── Interactive ── */
+	--tap-target: 4.4rem;
+	--cursor-size: clamp(1.2rem, 1.5vw, 2rem);
+	--orb-size: clamp(10rem, 12vw, 18rem);
+
+	/* ── Palette tokens ── */
+	--color-accent: #ffaa00;
+	--color-accent-dim: rgba(255,170,0,0.5);
+	--color-accent-border: rgba(255,170,0,0.3);
+	--color-accent-bg: rgba(255,170,0,0.05);
+	--color-border: rgba(255,255,255,0.12);
+	--color-glass: rgba(20,20,28,0.45);
+	--color-error: #ff5555;
 }
 
 @theme inline {
@@ -66,24 +98,25 @@ html[data-theme="dark"] .global-bg-canvas {
 }
 
 /* ============================================================
-   MDX VW SCALING ARCHITECTURE (1rem = 10px @ 1920px)
+   VW SCALING — clamped for FHD→5K Retina consistency
+   1rem = 10px @ 1920px, caps at 14px to prevent 4K/5K blowout
    ============================================================ */
 html {
-	font-size: 0.5208333333vw; /* Desktop / Ultrawide */
+	font-size: clamp(8px, 0.5208333333vw, 14px);
 }
 @media screen and (max-width: 991px) {
 	html {
-		font-size: 2.2727272727vw; /* Mobile & small tablet */
+		font-size: clamp(8px, 2.2727272727vw, 16px);
 	}
 }
 @media screen and (min-width: 482px) and (max-width: 991px) {
 	html {
-		font-size: 1.3020833333vw; /* Tablet */
+		font-size: clamp(8px, 1.3020833333vw, 14px);
 	}
 }
 @media (min-width: 992px) and (orientation: portrait) {
 	html {
-		font-size: 1.6666666667vw; /* Portrait Laptop */
+		font-size: clamp(8px, 1.6666666667vw, 14px);
 	}
 }
 

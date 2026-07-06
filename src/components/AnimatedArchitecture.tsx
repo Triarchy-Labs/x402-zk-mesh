@@ -238,7 +238,7 @@ export function AnimatedArchitecture({ theme: _theme }: { theme: "light" | "dark
 			style={{
 				width: "100%",
 				height: "100vh",
-				minHeight: "700px",
+				minHeight: "70rem",
 				margin: "0",
 				position: "relative",
 				zIndex: 10,

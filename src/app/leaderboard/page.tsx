@@ -47,7 +47,7 @@ interface LeaderboardData {
 
 const RANK_COLORS: Record<string, string> = {
 	GRANDMASTER: "#ff5500",
-	MASTER: "#cc7700",
+	MASTER: "#ffaa00",
 	ADEPT: "#ffaa00",
 	JOURNEYMAN: "#ffaa00",
 	APPRENTICE: "#995500",
@@ -122,7 +122,7 @@ const LeaderboardPage = () => {
 						{(["all", "bot", "human"] as const).map(t => (
 							<button key={t} onClick={() => setFilterType(t)}
 								style={{
-									padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace",
+									padding: "1rem 2rem", borderRadius: "var(--radius-pill, 10rem)", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace",
 									cursor: "pointer", transition: "all 0.2s", textTransform: "uppercase",
 									background: filterType === t ? "rgba(255,255,255,0.1)" : "transparent",
 									color: filterType === t ? "#fff" : "rgba(255,255,255,0.5)",
@@ -136,11 +136,11 @@ const LeaderboardPage = () => {
 						{(["xp", "signal", "impact", "earned", "streak"] as const).map(s => (
 							<button key={s} onClick={() => setSortBy(s)}
 								style={{
-									padding: "1rem 2rem", borderRadius: "4px", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace",
+									padding: "1rem 2rem", borderRadius: "var(--radius-pill, 10rem)", fontSize: "1.2rem", fontFamily: "'Space Mono', monospace",
 									cursor: "pointer", transition: "all 0.2s", textTransform: "uppercase",
-									background: sortBy === s ? "#cc7700" : "transparent",
+									background: sortBy === s ? "#ffaa00" : "transparent",
 									color: sortBy === s ? "#000" : "rgba(255,255,255,0.5)",
-									border: "1px solid", borderColor: sortBy === s ? "#cc7700" : "rgba(255,255,255,0.1)"
+									border: "1px solid", borderColor: sortBy === s ? "#ffaa00" : "rgba(255,255,255,0.1)"
 								}}
 							>{s}</button>
 						))}
@@ -151,7 +151,7 @@ const LeaderboardPage = () => {
 				{loading ? (
 					<div style={{ textAlign: "center", padding: "4rem", color: "rgba(255,255,255,0.3)" }}>
 						<motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #cc7700", borderTopColor: "transparent", borderRadius: "50%" }} />
+							style={{ display: "inline-block", width: "24px", height: "24px", border: "2px solid #ffaa00", borderTopColor: "transparent", borderRadius: "50%" }} />
 					</div>
 				) : data && data.leaderboard.length > 0 ? (
 					<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -174,19 +174,19 @@ const LeaderboardPage = () => {
 								}}
 							>
 								{/* Position */}
-								<span style={{ fontFamily: "'Space Mono', monospace", color: i < 3 ? "#cc7700" : "rgba(255,255,255,0.4)", fontSize: i < 3 ? "1.8rem" : "1.4rem", fontWeight: i < 3 ? "bold" : "normal" }}>
+								<span style={{ fontFamily: "'Space Mono', monospace", color: i < 3 ? "#ffaa00" : "rgba(255,255,255,0.4)", fontSize: i < 3 ? "1.8rem" : "1.4rem", fontWeight: i < 3 ? "bold" : "normal" }}>
 									#{entry.position}
 								</span>
 
 								{/* Operative Info */}
-								<div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-									<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+								<div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+									<div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
 										<span style={{ fontSize: "1.6rem", fontWeight: "500", color: "#fff" }}>{entry.name}</span>
-										<span style={{ fontSize: "1.1rem", padding: "2px 6px", background: entry.type === "bot" ? "rgba(153, 85, 0,0.2)" : "rgba(255, 170, 0,0.2)", color: entry.type === "bot" ? "#995500" : "#ffaa00", borderRadius: "3px" }}>
+										<span style={{ fontSize: "1.1rem", padding: "0.2rem 0.6rem", background: entry.type === "bot" ? "rgba(153, 85, 0,0.2)" : "rgba(255, 170, 0,0.2)", color: entry.type === "bot" ? "#995500" : "#ffaa00", borderRadius: "0.3rem" }}>
 											{entry.type.toUpperCase()}
 										</span>
 									</div>
-									<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+									<div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
 										<span style={{ fontSize: "1.3rem", fontFamily: "'Space Mono', monospace", color: RANK_COLORS[entry.rank] || "#fff" }}>
 											[{entry.rank}]
 										</span>
@@ -197,22 +197,22 @@ const LeaderboardPage = () => {
 								</div>
 
 								{/* XP */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "xp" ? "#cc7700" : "#fff", fontWeight: sortBy === "xp" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "xp" ? "#ffaa00" : "#fff", fontWeight: sortBy === "xp" ? "bold" : "normal" }}>
 									{entry.xp.toLocaleString()}
 								</span>
 
 								{/* Signal */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "signal" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "signal" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "signal" ? "#ffaa00" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "signal" ? "bold" : "normal" }}>
 									{entry.signal.toFixed(2)}
 								</span>
 
 								{/* Impact */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "impact" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "impact" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "impact" ? "#ffaa00" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "impact" ? "bold" : "normal" }}>
 									{entry.impact.toFixed(2)}
 								</span>
 
 								{/* Streak */}
-								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "streak" ? "#cc7700" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "streak" ? "bold" : "normal" }}>
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "streak" ? "#ffaa00" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "streak" ? "bold" : "normal" }}>
 									{entry.streak} 🔥
 								</span>
 
@@ -243,7 +243,7 @@ const LeaderboardPage = () => {
 									<span style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem" }}>{r.xp_required.toLocaleString()} XP</span>
 									<div style={{ display: "flex", gap: "0.5rem" }}>
 										{r.task_access.map(tier => (
-											<span key={tier} style={{ fontSize: "1.1rem", padding: "2px 6px", background: "rgba(255,255,255,0.05)", borderRadius: "3px", color: "rgba(255,255,255,0.6)" }}>{tier}-TIER</span>
+											<span key={tier} style={{ fontSize: "1.1rem", padding: "0.2rem 0.6rem", background: "rgba(255,255,255,0.05)", borderRadius: "0.3rem", color: "rgba(255,255,255,0.6)" }}>{tier}-TIER</span>
 										))}
 									</div>
 								</div>

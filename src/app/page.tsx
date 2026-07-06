@@ -65,7 +65,7 @@ function FloatingConnector({ theme, onDeployClick }: { theme: "dark" | "light"; 
 				display: "flex",
 				flexWrap: "wrap",
 				justifyContent: "center",
-				gap: "24px",
+				gap: "2.4rem",
 				alignItems: "center",
 			}}
 		>
@@ -556,7 +556,7 @@ export default function Page() {
 							: "linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.5))",
 						backdropFilter: "blur(24px) saturate(1.2)",
 						WebkitBackdropFilter: "blur(24px) saturate(1.2)",
-						borderRadius: "16px 16px 0 0",
+						borderRadius: "1.6rem 1.6rem 0 0",
 						border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
 						borderBottom: "none",
 					}}>
@@ -585,7 +585,7 @@ export default function Page() {
 								fontSize: "1.2rem", 
 								lineHeight: 1.8, 
 								color: p.textMuted, 
-								maxWidth: 800, 
+								maxWidth: "80rem", 
 								margin: "0 auto 4rem" 
 							}}>
 								Other solutions build single, isolated AI agents holding private keys, blindly trusting inputs, and bleeding liquidity. We built the <strong>Immune System</strong> for the entire AI economy. By becoming a Sovereign Integrator, you align your nodes with zero-trust execution and global liquidity flow.
@@ -616,7 +616,7 @@ export default function Page() {
 						bottom: -2,
 						left: "3%",
 						right: "3%",
-						height: "10px",
+						height: "1rem",
 						background: `radial-gradient(ellipse at center bottom, ${theme === "dark" ? "rgba(255, 170, 0,0.35)" : "rgba(0,100,34,0.2)"}, transparent 80%)`,
 						filter: "blur(6px)",
 						pointerEvents: "none",
@@ -650,10 +650,10 @@ function ContactModal({ theme }: { theme: "dark" | "light" }) {
 							bottom: "140%",
 							left: "50%",
 							transform: "translateX(-50%)",
-							width: "680px",
+							width: "68rem",
 							maxWidth: "90vw",
 							background: theme === "dark" ? "#070707" : "#fff",
-							borderRadius: "24px",
+							borderRadius: "var(--radius-card, 2.4rem)",
 							padding: "2.5rem 3rem",
 							boxShadow: theme === "dark" 
 								? "0 40px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.08)" 
@@ -680,12 +680,12 @@ function ContactModal({ theme }: { theme: "dark" | "light" }) {
 								<input 
 									type="email" 
 									placeholder="YOUR_TRANSPONDER_EMAIL" 
-									style={{ width: "100%", padding: "16px 20px", background: theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid transparent`, borderRadius: "12px", color: p.text, fontFamily: FONT_BODY, fontSize: "0.85rem", outline: "none", letterSpacing: "0.05em", transition: "border 0.3s" }} 
+									style={{ width: "100%", padding: "1.6rem 2rem", background: theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid transparent`, borderRadius: "var(--radius-card, 1.2rem)", color: p.text, fontFamily: FONT_BODY, fontSize: "var(--text-small, 0.85rem)", outline: "none", letterSpacing: "0.05em", transition: "border 0.3s" }} 
 									onFocus={(e) => e.currentTarget.style.border = `1px solid ${p.borderHover}`}
 									onBlur={(e) => e.currentTarget.style.border = `1px solid transparent`}
 								/>
 								<button 
-									style={{ width: "100%", height: "100%", minHeight: "50px", borderRadius: "12px", background: p.text, border: "none", color: theme === "dark" ? "#000" : "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", cursor: "pointer", fontFamily: FONT_HEADING, fontSize: "0.85rem", fontWeight: 600, letterSpacing: "0.1em", transition: "transform 0.2s" }} 
+									style={{ width: "100%", height: "100%", minHeight: "5rem", borderRadius: "var(--radius-card, 1.2rem)", background: p.text, border: "none", color: theme === "dark" ? "#000" : "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2rem", cursor: "pointer", fontFamily: FONT_HEADING, fontSize: "var(--text-small, 0.85rem)", fontWeight: 600, letterSpacing: "0.1em", transition: "transform 0.2s" }} 
 									onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"} 
 									onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
 								>
@@ -697,7 +697,7 @@ function ContactModal({ theme }: { theme: "dark" | "light" }) {
 							<textarea 
 								placeholder="Input transmission payload... (Integration requests, alliance queries)" 
 								rows={4}
-								style={{ width: "100%", padding: "16px 20px", background: theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", border: `1px solid transparent`, borderRadius: "12px", color: p.text, fontFamily: FONT_BODY, fontSize: "0.85rem", outline: "none", resize: "none", transition: "border 0.3s" }} 
+								style={{ width: "100%", padding: "1.6rem 2rem", background: theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", border: `1px solid transparent`, borderRadius: "var(--radius-card, 1.2rem)", color: p.text, fontFamily: FONT_BODY, fontSize: "var(--text-small, 0.85rem)", outline: "none", resize: "none", transition: "border 0.3s" }} 
 								onFocus={(e) => e.currentTarget.style.border = `1px solid ${p.borderHover}`}
 								onBlur={(e) => e.currentTarget.style.border = `1px solid transparent`}
 							/>
@@ -722,7 +722,7 @@ function ContactModal({ theme }: { theme: "dark" | "light" }) {
 						fontFamily: FONT_HEADING,
 						fontWeight: 500,
 						border: `1px solid ${hovered ? p.btnBgHover : p.border}`,
-						borderRadius: "40px",
+						borderRadius: "var(--radius-pill, 10rem)",
 						letterSpacing: "0.1em",
 						boxShadow: hovered ? `0 0 40px ${p.glowHover}` : "none",
 						transition: lusionTransition,

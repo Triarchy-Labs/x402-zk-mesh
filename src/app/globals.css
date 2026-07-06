@@ -99,25 +99,26 @@ html[data-theme="dark"] .global-bg-canvas {
 }
 
 /* ============================================================
-   VW SCALING — clamped for FHD→5K Retina consistency
-   1rem = 10px @ 1920px, caps at 14px to prevent 4K/5K blowout
+   VW SCALING — proportional across FHD / 2K / 4K / 5K Retina
+   1rem = 10px @ 1920px. No upper cap — scales with viewport.
+   Floor 10px prevents micro-text on sub-1920 viewports.
    ============================================================ */
 html {
-	font-size: clamp(8px, 0.5208333333vw, 14px);
+	font-size: max(10px, 0.5208333333vw); /* Desktop / Ultrawide */
 }
 @media screen and (max-width: 991px) {
 	html {
-		font-size: clamp(8px, 2.2727272727vw, 16px);
+		font-size: max(10px, 2.2727272727vw); /* Mobile */
 	}
 }
 @media screen and (min-width: 482px) and (max-width: 991px) {
 	html {
-		font-size: clamp(8px, 1.3020833333vw, 14px);
+		font-size: max(10px, 1.3020833333vw); /* Tablet */
 	}
 }
 @media (min-width: 992px) and (orientation: portrait) {
 	html {
-		font-size: clamp(8px, 1.6666666667vw, 14px);
+		font-size: max(10px, 1.6666666667vw); /* Portrait Laptop */
 	}
 }
 

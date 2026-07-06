@@ -78,19 +78,19 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 			onMouseLeave={() => setHovered(false)}
 			style={{
 				position: "absolute",
-				bottom: 40,
-				left: 40,
-				width: 400,
-				height: 220,
+				bottom: "clamp(1.5rem, 3vw, 3rem)",
+				left: "clamp(1.5rem, 3vw, 3rem)",
+				width: "clamp(20rem, 28vw, 32rem)",
+				minHeight: "clamp(12rem, 16vw, 18rem)",
 				background: hovered 
 					? (theme === "dark" ? "rgba(0,15,0,0.4)" : "rgba(5,15,5,0.95)")
 					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(8,8,8,0.95)"),
 				border: `1px solid ${borderColor}`,
-				borderRadius: 12,
-				padding: 15,
+				borderRadius: "0.75rem",
+				padding: "clamp(1rem, 1.2vw, 1.5rem)",
 				fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
 				color: textColor,
-				fontSize: 10,
+				fontSize: "clamp(0.85rem, 0.9vw, 1.05rem)",
 				overflow: "hidden",
 				boxShadow: glowShadow,
 				backdropFilter: hovered ? "blur(24px) saturate(1.4)" : "blur(24px) saturate(1.2)",
@@ -102,9 +102,9 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 			<div
 				style={{
 					borderBottom: `1px solid ${borderColor}`,
-					paddingBottom: 5,
-					marginBottom: 10,
-					fontSize: 11,
+					paddingBottom: "0.5rem",
+					marginBottom: "0.8rem",
+					fontSize: "clamp(0.9rem, 1vw, 1.15rem)",
 					fontWeight: 500,
 					color: headerColor,
 					transition: lusionTransition,
@@ -113,7 +113,7 @@ export default function HollywoodTelemetry({ theme = "dark" }: { theme?: "dark" 
 			>
 				&gt; SYS_TELEMETRY // [root@triarchy-gateway]
 			</div>
-			<div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+			<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 				{logs.map((logObj, i) => (
 					<div
 						key={logObj.id}

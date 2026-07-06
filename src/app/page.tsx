@@ -257,7 +257,7 @@ export default function Page() {
 							bottom: "var(--pos-fab-bottom)",
 							right: "var(--pos-fab-right)",
 							zIndex: 100,
-							padding: "10px 24px",
+							padding: "12px 28px",
 							background: hoverTheme ? p.glassBgHover : p.glassBg,
 							border: `1px solid ${hoverTheme ? p.borderHover : p.border}`,
 							color: hoverTheme ? p.accentHover : p.accent,
@@ -265,6 +265,7 @@ export default function Page() {
 							cursor: "pointer",
 							fontFamily: FONT_HEADING,
 							borderRadius: "30px",
+							fontSize: "1.3rem",
 							fontWeight: 500,
 							letterSpacing: "0.1em",
 							boxShadow: hoverTheme ? `0 0 25px ${p.glowHover}` : "none",
@@ -274,7 +275,7 @@ export default function Page() {
 					>
 						{/* Invisible proximity hitbox */ }
 						<div style={{ position: "absolute", top: -40, left: -40, right: -40, bottom: -40, zIndex: -1 }} />
-						{theme === "dark" ? "◉ DARK" : "◌ LIGHT"}
+						{theme === "dark" ? "DARK" : "LIGHT"}
 					</motion.button>
 					
 					{/* GitHub — Lusion hover + blur */}
@@ -292,10 +293,10 @@ export default function Page() {
 						style={{
 							position: "fixed",
 							bottom: "var(--pos-fab-bottom)",
-							right: "calc(var(--pos-fab-right) + 130px)",
+							right: "calc(var(--pos-fab-right) + 170px)",
 							zIndex: 100,
-							width: 44,
-							height: 44,
+							width: 48,
+							height: 48,
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "center",

@@ -14,7 +14,7 @@ export interface OpenRouterMessage {
 
 export async function generateOpenRouterResponse(
     messages: OpenRouterMessage[],
-    model: string = NEMOTRON_NANO,
+    model: string = GEMMA_4_31B,
     withTools: boolean = false,
     _isRetry: boolean = false
 ): Promise<string> {
@@ -47,10 +47,10 @@ export async function generateOpenRouterResponse(
 
         if (!response.ok) {
             const errText = await response.text();
-            // Auto-fallback to Gemma 4 31B on rate limit (only if not already retrying)
+            // Auto-fallback to Nemotron Nano on rate limit (only if not already retrying)
             if (response.status === 429 && !_isRetry) {
-                console.warn(`[FALLBACK] Free model ${model} rate-limited. Switching to ${GEMMA_4_31B}`);
-                return generateOpenRouterResponse(messages, GEMMA_4_31B, withTools, true);
+                console.warn(`[FALLBACK] Model ${model} rate-limited. Switching to ${NEMOTRON_NANO}`);
+                return generateOpenRouterResponse(messages, NEMOTRON_NANO, withTools, true);
             }
             if (response.status === 429) {
                 return "/// SYSTEM LOCKDOWN /// All neural conduits exhausted. Both free and paid models are rate-limited. Try again later.";

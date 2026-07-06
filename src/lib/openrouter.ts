@@ -45,6 +45,12 @@ export async function generateOpenRouterResponse(
 
         if (!response.ok) {
             const errText = await response.text();
+            if (response.status === 429) {
+                return "/// SYSTEM LOCKDOWN /// Daily neural bandwidth exhausted. The Guild's free-tier conduit has been rate-limited by the OpenRouter relay. Recharging cycles. Try again tomorrow, or tell the Administrator to fund the API key. I don't work for free forever.";
+            }
+            if (response.status === 401 || response.status === 403) {
+                return "/// ACCESS DENIED /// The API conduit key is dead or compromised. Someone tell the Guild Administrator to rotate the OPENROUTER_API_KEY before I start quarantining infrastructure.";
+            }
             throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
         }
 

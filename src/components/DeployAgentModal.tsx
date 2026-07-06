@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useWallet } from "@/context/WalletContext";
 
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 const FONT_MONO = "'SF Mono', 'Fira Code', monospace";
@@ -26,6 +27,15 @@ type RegistrationPhase =
   | "done"
   | "error";
 
+type ZkVerifyPhase = "idle" | "generating" | "verifying" | "done" | "error";
+
+interface ZkVerifyResult {
+  verified: boolean;
+  method: string;
+  contractId?: string;
+  explorer?: string;
+}
+
 interface RegistrationResult {
   agent: {
     id: string;
@@ -37,6 +47,12 @@ interface RegistrationResult {
     membershipRoot: string;
     membershipRootBytes32: string;
     totalMembers: number;
+    proofInputs: {
+      leaf: string;
+      pathElements: string[];
+      pathIndices: number[];
+      root: string;
+    };
     soroban: {
       registryContractId: string;
       rootUpdateSubmission: {
@@ -67,18 +83,27 @@ const phaseLabel: Record<RegistrationPhase, string> = {
 };
 
 export default function DeployAgentModal({ open, onClose, theme = "dark" }: DeployAgentModalProps) {
+  const { publicKey: walletKey } = useWallet();
   const [name, setName] = useState("");
   const [capabilities, setCapabilities] = useState<string[]>([]);
+  const [workerUrl, setWorkerUrl] = useState("");
   const [phase, setPhase] = useState<RegistrationPhase>("idle");
   const [result, setResult] = useState<RegistrationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [zkPhase, setZkPhase] = useState<ZkVerifyPhase>("idle");
+  const [zkResult, setZkResult] = useState<ZkVerifyResult | null>(null);
+  const [zkError, setZkError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
     setName("");
     setCapabilities([]);
+    setWorkerUrl("");
     setPhase("idle");
     setResult(null);
     setError(null);
+    setZkPhase("idle");
+    setZkResult(null);
+    setZkError(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -109,6 +134,8 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
         body: JSON.stringify({
           name: name.trim(),
           capabilities,
+          publicKey: walletKey || undefined,
+          workerUrl: workerUrl.trim() || undefined,
         }),
       });
 
@@ -447,6 +474,49 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   </div>
                 </div>
 
+                {/* Worker URL (optional) */}
+                <div style={{ marginBottom: "2.5rem" }}>
+                  <label style={{
+                    display: "block",
+                    fontSize: "1.15rem",
+                    letterSpacing: "0.12em",
+                    color: isDark ? "rgba(255,255,255,0.5)" : "#666",
+                    marginBottom: "0.8rem",
+                    fontWeight: 500,
+                  }}>
+                    WORKER URL <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>(OPTIONAL)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={workerUrl}
+                    onChange={(e) => setWorkerUrl(e.target.value)}
+                    placeholder="https://your-agent.com/api/hire"
+                    style={{
+                      width: "100%",
+                      padding: "1.2rem 1.4rem",
+                      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                      borderRadius: "2px",
+                      color: isDark ? "#fff" : "#111",
+                      fontFamily: FONT_MONO,
+                      fontSize: "1.2rem",
+                      outline: "none",
+                      transition: "border-color 0.2s",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,170,0,0.4)" : "rgba(0,100,0,0.4)"; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"; }}
+                  />
+                  <p style={{
+                    marginTop: "0.6rem",
+                    fontSize: "1rem",
+                    color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
+                    fontFamily: FONT_MONO,
+                  }}>
+                    If provided, the mesh will route tasks to your agent endpoint
+                  </p>
+                </div>
+
                 <motion.button
                   whileHover={canSubmit ? { scale: 1.02 } : {}}
                   whileTap={canSubmit ? { scale: 0.98 } : {}}
@@ -488,48 +558,166 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
 
             {/* Done — buttons */}
             {phase === "done" && (
-              <div style={{ display: "flex", gap: "1rem" }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={resetForm}
-                  style={{
-                    flex: 1,
+              <>
+                {/* ZK Membership Verification */}
+                {zkPhase === "idle" && result?.guild?.proofInputs && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={async () => {
+                      setZkPhase("generating");
+                      setZkError(null);
+                      try {
+                        const { generateProof } = await import("@/lib/zk-prover");
+                        const { proof, publicSignals } = await generateProof(
+                          "membership_proof",
+                          result.guild.proofInputs,
+                        );
+                        setZkPhase("verifying");
+                        const verifyRes = await fetch("/api/zk/verify", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ circuit: "membership_proof", proof, publicSignals }),
+                        });
+                        const verifyData = await verifyRes.json();
+                        setZkResult(verifyData);
+                        setZkPhase("done");
+                      } catch (err) {
+                        setZkError(err instanceof Error ? err.message : String(err));
+                        setZkPhase("error");
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "1.3rem",
+                      marginBottom: "1.5rem",
+                      background: isDark ? "rgba(0,200,255,0.08)" : "rgba(0,100,200,0.08)",
+                      color: isDark ? "rgba(0,200,255,0.9)" : "#0066cc",
+                      border: `1px solid ${isDark ? "rgba(0,200,255,0.3)" : "rgba(0,100,200,0.3)"}`,
+                      borderRadius: "2px",
+                      fontFamily: FONT_HEADING,
+                      fontSize: "1.2rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.12em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ⚡ VERIFY MEMBERSHIP (ZK PROOF)
+                  </motion.button>
+                )}
+
+                {(zkPhase === "generating" || zkPhase === "verifying") && (
+                  <div style={{
                     padding: "1.3rem",
-                    background: "transparent",
-                    color: isDark ? "rgba(255,255,255,0.6)" : "#666",
-                    border: `1px solid ${isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"}`,
-                    borderRadius: "2px",
-                    fontFamily: FONT_HEADING,
-                    fontSize: "1.2rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.12em",
-                    cursor: "pointer",
-                  }}
-                >
-                  DEPLOY ANOTHER
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleClose}
-                  style={{
-                    flex: 1,
+                    marginBottom: "1.5rem",
+                    border: `1px solid ${isDark ? "rgba(0,200,255,0.2)" : "rgba(0,100,200,0.2)"}`,
+                    background: isDark ? "rgba(0,200,255,0.04)" : "rgba(0,100,200,0.04)",
+                    fontFamily: FONT_MONO,
+                    fontSize: "1.1rem",
+                    color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                  }}>
+                    <motion.span
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      style={{ display: "inline-block" }}
+                    >
+                      ◌
+                    </motion.span>
+                    {zkPhase === "generating" ? "GENERATING GROTH16 PROOF IN BROWSER..." : "VERIFYING VIA SOROBAN CONTRACT..."}
+                  </div>
+                )}
+
+                {zkPhase === "done" && zkResult && (
+                  <div style={{
+                    padding: "1.5rem",
+                    marginBottom: "1.5rem",
+                    border: `1px solid ${zkResult.verified ? (isDark ? "rgba(0,255,100,0.3)" : "rgba(0,100,0,0.3)") : "rgba(255,50,50,0.3)"}`,
+                    background: zkResult.verified ? (isDark ? "rgba(0,255,100,0.04)" : "rgba(0,100,0,0.04)") : "rgba(255,50,50,0.04)",
+                    fontFamily: FONT_MONO,
+                    fontSize: "1.1rem",
+                  }}>
+                    <div style={{
+                      color: zkResult.verified ? (isDark ? "#00ff64" : "#006622") : "#ff5555",
+                      marginBottom: "0.8rem",
+                      fontSize: "1.2rem",
+                    }}>
+                      {zkResult.verified ? "✓ MEMBERSHIP PROOF VERIFIED" : "✕ VERIFICATION FAILED"}
+                    </div>
+                    <div style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>
+                      method: {zkResult.method}
+                    </div>
+                    {zkResult.contractId && (
+                      <div style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888", marginTop: "0.4rem" }}>
+                        contract: <a href={zkResult.explorer} target="_blank" rel="noreferrer" style={{
+                          color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                          textDecoration: "underline",
+                          textUnderlineOffset: "4px",
+                        }}>{zkResult.contractId.slice(0, 12)}...{zkResult.contractId.slice(-6)}</a>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {zkPhase === "error" && zkError && (
+                  <div style={{
                     padding: "1.3rem",
-                    background: isDark ? "#ffaa00" : "#006622",
-                    color: "#000",
-                    border: "none",
-                    borderRadius: "2px",
-                    fontFamily: FONT_HEADING,
-                    fontSize: "1.2rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.12em",
-                    cursor: "pointer",
-                  }}
-                >
-                  CLOSE
-                </motion.button>
-              </div>
+                    marginBottom: "1.5rem",
+                    border: "1px solid rgba(255,50,50,0.3)",
+                    background: "rgba(255,50,50,0.05)",
+                    fontFamily: FONT_MONO,
+                    fontSize: "1.1rem",
+                    color: "#ff5555",
+                  }}>
+                    ✕ ZK Proof: {zkError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={resetForm}
+                    style={{
+                      flex: 1,
+                      padding: "1.3rem",
+                      background: "transparent",
+                      color: isDark ? "rgba(255,255,255,0.6)" : "#666",
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"}`,
+                      borderRadius: "2px",
+                      fontFamily: FONT_HEADING,
+                      fontSize: "1.2rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.12em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    DEPLOY ANOTHER
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleClose}
+                    style={{
+                      flex: 1,
+                      padding: "1.3rem",
+                      background: isDark ? "#ffaa00" : "#006622",
+                      color: "#000",
+                      border: "none",
+                      borderRadius: "2px",
+                      fontFamily: FONT_HEADING,
+                      fontSize: "1.2rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.12em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    CLOSE
+                  </motion.button>
+                </div>
+              </>
             )}
           </motion.div>
         </motion.div>

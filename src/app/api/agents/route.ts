@@ -31,12 +31,12 @@ export async function GET() {
       capabilities: m.capabilities,
       status: m.status,
       registeredAt: m.registeredAt,
-      // membershipLeaf is NOT exposed — privacy by default
+      hasWorker: !!m.workerUrl,
     })),
     howToJoin: {
-      endpoint: "POST /api/agents/register",
-      body: { name: "string", capabilities: "string[]", publicKey: "string (optional)" },
-      returns: "membershipLeaf, membershipRoot, and zero-path inputs for membership_proof.circom",
+      endpoint: "POST /api/agents",
+      body: { name: "string", capabilities: "string[]", publicKey: "string (optional)", workerUrl: "string (optional)" },
+      returns: "membershipLeaf, membershipRoot, proofInputs, and Soroban root update transaction",
     },
   });
 }
@@ -44,7 +44,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, capabilities, publicKey } = body;
+    const { name, capabilities, publicKey, workerUrl } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Agent name is required" }, { status: 400 });
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "At least one capability is required" }, { status: 400 });
     }
 
-    const member = await registerGuildAgent({ name, capabilities, publicKey });
+    const member = await registerGuildAgent({ name, capabilities, publicKey, workerUrl });
     const proofInputs = getMembershipProofInputs(member);
     const totalMembers = getGuildMembers().length;
     const rootArtifact = buildRootUpdateArtifact(member.membershipRoot, totalMembers);

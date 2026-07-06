@@ -2,75 +2,24 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  isConnected as checkFreighterConnected,
-  requestAccess,
-} from "@stellar/freighter-api";
+import { useWallet } from "@/context/WalletContext";
 import { AgentOrb } from "@/components/AgentOrb";
-import { useEffect } from "react";
 
 export function Nav() {
-	const [connected, setConnected] = useState(false);
-	const [pubKey, setPubKey] = useState("");
-	const [connecting, setConnecting] = useState(false);
-	const [freighterMissing, setFreighterMissing] = useState(false);
+	const { connected, displayKey, connecting, freighterMissing, connect, disconnect } = useWallet();
     const [hoverLogo, setHoverLogo] = useState(false);
     const [showDisconnect, setShowDisconnect] = useState(false);
-
-    // Auto-connect on load across Dashboard and Page
-    useEffect(() => {
-		const checkConn = async () => {
-			try {
-				const status = await checkFreighterConnected();
-				if (status.isConnected) {
-					const access = await requestAccess();
-					if (access.address) {
-						const key = access.address;
-						setPubKey(key.substring(0, 4) + "..." + key.substring(key.length - 4));
-						setConnected(true);
-					}
-				}
-			} catch {}
-		};
-		checkConn();
-	}, []);
 
 	const handleConnect = async () => {
         if (connected) {
             setShowDisconnect(!showDisconnect);
             return;
         }
-
-		if (freighterMissing) {
-			window.open("https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk", "_blank");
-			return;
-		}
-
-		setConnecting(true);
-		try {
-            const status = await checkFreighterConnected();
-            if (status.isConnected) {
-                const access = await requestAccess();
-                if (access.error) {
-                    console.log("Freighter connection rejected.", access.error);
-                } else if (access.address) {
-                    const key = access.address;
-                    setPubKey(key.substring(0, 4) + "..." + key.substring(key.length - 4));
-                    setConnected(true);
-                }
-            } else {
-                setFreighterMissing(true);
-            }
-		} catch (error) {
-			console.error("Freighter connect failed", error);
-		} finally {
-			setConnecting(false);
-		}
+		await connect();
 	};
 
     const handleDisconnect = () => {
-        setConnected(false);
-        setPubKey("");
+        disconnect();
         setShowDisconnect(false);
     };
 
@@ -248,7 +197,7 @@ export function Nav() {
                         onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
                         onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                     >
-                        <span>{connecting ? "[ CONNECTING... ]" : connected ? `[ ${pubKey} ]` : freighterMissing ? "[ GET FREIGHTER ]" : "[ CONNECT WALLET ]"}</span>
+                        <span>{connecting ? "[ CONNECTING... ]" : connected ? `[ ${displayKey} ]` : freighterMissing ? "[ GET FREIGHTER ]" : "[ CONNECT WALLET ]"}</span>
                     </button>
 
                     {/* Disconnect Bubble */}

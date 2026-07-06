@@ -11,7 +11,7 @@ import {
 	type ZkReceipt,
 } from "@/lib/agent-receipt";
 import { recordDemoTraceFromHireResponse, type HireTraceResponse } from "@/lib/demo-trace";
-import { isApprovedGuildRoot } from "@/lib/guild-registry";
+import { isApprovedGuildRoot, getActiveWorkerUrls } from "@/lib/guild-registry";
 import { buildSettlementArtifact } from "@/lib/soroban-guild-registry";
 import { submitGuildSettlement } from "@/lib/stellar-guild-relayer";
 import { StellarTransactor, TransactorContext } from "@/lib/stellar-transactor";
@@ -62,11 +62,14 @@ function getWorkerHealthUrl(workerUrl: string): string {
 
 function getP2PWorkerUrls(): string[] {
 	const configured = process.env.P2P_WORKER_URLS || P2P_WORKER_URL;
-	const urls = configured
+	const envUrls = configured
 		.split(/[,\s]+/)
 		.map((url) => url.trim())
 		.filter(Boolean);
-	return Array.from(new Set(urls.length > 0 ? urls : [DEFAULT_P2P_WORKER_URL]));
+	// Merge dynamically registered guild member worker URLs
+	const guildUrls = getActiveWorkerUrls();
+	const allUrls = [...envUrls, ...guildUrls];
+	return Array.from(new Set(allUrls.length > 0 ? allUrls : [DEFAULT_P2P_WORKER_URL]));
 }
 
 function requiredCapabilityForTask(description: string): string | null {

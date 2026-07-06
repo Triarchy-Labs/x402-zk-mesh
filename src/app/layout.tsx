@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/components/Providers";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import GlobalBackground from "@/components/GlobalBackground";
 
@@ -43,7 +44,9 @@ export default function RootLayout({
 			</head>
 			<body className="flex flex-col">
 				<GlobalBackground />
-				<SmoothScroller>{children}</SmoothScroller>
+				<Providers>
+					<SmoothScroller>{children}</SmoothScroller>
+				</Providers>
 			</body>
 		</html>
 	);

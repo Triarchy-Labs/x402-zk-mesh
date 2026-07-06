@@ -29,6 +29,7 @@ export interface GuildMember {
   name: string;
   capabilities: string[];
   publicKey?: string;
+  workerUrl?: string;
   membershipLeaf: string;
   membershipRoot: string;
   membershipRootBytes32: string;
@@ -40,6 +41,7 @@ interface RegisterAgentInput {
   name: string;
   capabilities: string[];
   publicKey?: string;
+  workerUrl?: string;
 }
 
 interface PersistedGuildRegistry {
@@ -68,6 +70,7 @@ export async function registerGuildAgent(input: RegisterAgentInput): Promise<Gui
     name: input.name,
     capabilities: input.capabilities,
     publicKey: input.publicKey,
+    workerUrl: input.workerUrl,
     membershipLeaf,
     membershipRoot,
     membershipRootBytes32: fieldDecimalToBytes32Hex(membershipRoot),
@@ -85,6 +88,13 @@ export async function registerGuildAgent(input: RegisterAgentInput): Promise<Gui
 export function getGuildMembers(): GuildMember[] {
   ensureGuildRegistryLoaded();
   return guildMembers.map((member) => ({ ...member }));
+}
+
+export function getActiveWorkerUrls(): string[] {
+  ensureGuildRegistryLoaded();
+  return guildMembers
+    .filter((m) => m.workerUrl && m.status === "active")
+    .map((m) => m.workerUrl!);
 }
 
 export async function isApprovedGuildRoot(root: string): Promise<boolean> {

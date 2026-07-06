@@ -205,13 +205,16 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 					const members = data.members;
 					if (members && Array.isArray(members) && members.length > 0) {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						const mapped: AgentDisplay[] = members.map((a: any) => ({
-							id: a.name || a.id,
-							task: a.capabilities?.[0] || "General",
-							rep: "—",
-							earned: "—",
-							status: a.status?.toUpperCase() || "ACTIVE",
-						}));
+						const mapped: AgentDisplay[] = members.map((a: any) => {
+							const regAge = a.registeredAt ? (Date.now() - new Date(a.registeredAt).getTime()) / 3600000 : 999;
+							return {
+								id: a.name || a.id,
+								task: a.capabilities?.[0] || "General",
+								rep: regAge < 24 ? "NEW" : "GUILD",
+								earned: a.hasWorker ? "MESH NODE" : "REGISTERED",
+								status: a.status?.toUpperCase() || "ACTIVE",
+							};
+						});
 						// Always append Mark 53 golden template
 						const hasMark53 = mapped.some(a => a.id === "mark_53_sarcophagus");
 						if (!hasMark53) {

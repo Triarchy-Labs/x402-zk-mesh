@@ -202,14 +202,15 @@ export default function AgentNetworkGrid({ theme = "dark" }: { theme?: "dark" | 
 				const res = await fetch("/api/agents");
 				if (res.ok) {
 					const data = await res.json();
-					if (data.agents && data.agents.length > 0) {
+					const members = data.members;
+					if (members && Array.isArray(members) && members.length > 0) {
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						const mapped: AgentDisplay[] = data.agents.map((a: any) => ({
-							id: a.id,
+						const mapped: AgentDisplay[] = members.map((a: any) => ({
+							id: a.name || a.id,
 							task: a.capabilities?.[0] || "General",
-							rep: a.reputationScore?.toFixed(1) || "0.0",
-							earned: `$${(a.usdcSettled || 0).toFixed(2)}`,
-							status: a.status?.toUpperCase() || "IDLE",
+							rep: "—",
+							earned: "—",
+							status: a.status?.toUpperCase() || "ACTIVE",
 						}));
 						// Always append Mark 53 golden template
 						const hasMark53 = mapped.some(a => a.id === "mark_53_sarcophagus");

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import DeployAgentModal from "@/components/DeployAgentModal";
 
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 const FONT_BODY = "'Inter', 'DM Sans', sans-serif";
@@ -49,7 +50,7 @@ const palette = {
 const lusionTransition = "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
 
 
-function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
+function FloatingConnector({ theme, onDeployClick }: { theme: "dark" | "light"; onDeployClick: () => void }) {
 	const p = palette[theme];
 	return (
 		<motion.div
@@ -93,7 +94,7 @@ function FloatingConnector({ theme }: { theme: "dark" | "light" }) {
 			<motion.button
 				whileHover={{ scale: 1.05, background: theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }}
 				whileTap={{ scale: 0.95 }}
-				onClick={() => document.getElementById("agent-registry")?.scrollIntoView({ behavior: "smooth" })}
+				onClick={onDeployClick}
 				style={{
 					background: "transparent",
 					color: p.text,
@@ -214,6 +215,7 @@ export default function Page() {
 	const [hoverGithub, setHoverGithub] = useState(false);
 	const [hoverCTA, setHoverCTA] = useState(false);
 	const [hover3d, setHover3d] = useState(false);
+	const [deployModalOpen, setDeployModalOpen] = useState(false);
 
 	// Magnetic cursor offsets
 	const [offsetTheme, setOffsetTheme] = useState({ x: 0, y: 0 });
@@ -532,13 +534,15 @@ export default function Page() {
 							<AnimatedArchitecture theme={theme} />
 							<FloatingModules hovered={hover3d} />
 						</div>
-						<FloatingConnector theme={theme} />
+						<FloatingConnector theme={theme} onDeployClick={() => setDeployModalOpen(true)} />
 					</section>
 
 					{/* AGENT REGISTRY */}
 					<div id="agent-registry">
 						<AgentNetworkGrid theme={theme} />
 					</div>
+
+					<DeployAgentModal open={deployModalOpen} onClose={() => setDeployModalOpen(false)} theme={theme} />
 
 					{/* FOOTER — Lusion hover on CTA */}
 					<footer style={{ 

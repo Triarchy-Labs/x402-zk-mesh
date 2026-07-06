@@ -6,6 +6,25 @@ import { useWallet } from "@/context/WalletContext";
 const FONT_HEADING = "'Helvetica Now Display', 'Inter', sans-serif";
 const FONT_MONO = "'SF Mono', 'Fira Code', monospace";
 
+// Palette aligned with page.tsx Lusion design system
+const P = {
+  accent: "#ffaa00",
+  accentDim: "rgba(255,170,0,0.5)",
+  accentBorder: "rgba(255,170,0,0.3)",
+  accentBg: "rgba(255,170,0,0.05)",
+  accentBgHover: "rgba(255,170,0,0.12)",
+  border: "rgba(255,255,255,0.12)",
+  borderHover: "rgba(255,170,0,0.4)",
+  glassBg: "rgba(12,12,18,0.95)",
+  text: "#fff",
+  textMuted: "rgba(255,255,255,0.45)",
+  textDim: "rgba(255,255,255,0.25)",
+  inputBg: "rgba(255,255,255,0.04)",
+  error: "#ff5555",
+  errorBorder: "rgba(255,50,50,0.3)",
+  errorBg: "rgba(255,50,50,0.05)",
+};
+
 const CAPABILITY_OPTIONS = [
   "Code Audit",
   "Security Matrix",
@@ -75,14 +94,14 @@ interface DeployAgentModalProps {
 
 const phaseLabel: Record<RegistrationPhase, string> = {
   idle: "",
-  submitting: "SUBMITTING REGISTRATION...",
-  hashing: "GENERATING POSEIDON MEMBERSHIP HASH...",
-  relaying: "RELAYING ROOT UPDATE TO SOROBAN...",
+  submitting: "SUBMITTING REGISTRATION",
+  hashing: "GENERATING POSEIDON MEMBERSHIP HASH",
+  relaying: "RELAYING ROOT UPDATE TO SOROBAN",
   done: "AGENT DEPLOYED SUCCESSFULLY",
   error: "REGISTRATION FAILED",
 };
 
-export default function DeployAgentModal({ open, onClose, theme = "dark" }: DeployAgentModalProps) {
+export default function DeployAgentModal({ open, onClose }: DeployAgentModalProps) {
   const { publicKey: walletKey } = useWallet();
   const [name, setName] = useState("");
   const [capabilities, setCapabilities] = useState<string[]>([]);
@@ -156,9 +175,8 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
       setError(err instanceof Error ? err.message : String(err));
       setPhase("error");
     }
-  }, [name, capabilities]);
+  }, [name, capabilities, walletKey, workerUrl]);
 
-  const isDark = theme === "dark";
   const canSubmit = name.trim().length > 0 && capabilities.length > 0 && phase === "idle";
   const isProcessing = phase === "submitting" || phase === "hashing" || phase === "relaying";
 
@@ -193,12 +211,12 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
               width: "min(580px, 90vw)",
               maxHeight: "85vh",
               overflowY: "auto",
-              background: isDark ? "rgba(12,12,18,0.95)" : "rgba(255,255,255,0.97)",
-              border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+              background: P.glassBg,
+              border: `1px solid ${P.border}`,
               borderRadius: "2px",
               padding: "3.5rem",
               fontFamily: FONT_HEADING,
-              color: isDark ? "#fff" : "#111",
+              color: P.text,
             }}
           >
             {/* Header */}
@@ -212,16 +230,36 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 style={{
                   background: "transparent",
                   border: "none",
-                  color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
-                  fontSize: "2rem",
+                  color: P.textMuted,
+                  fontSize: "1.6rem",
                   cursor: isProcessing ? "not-allowed" : "pointer",
                   fontFamily: FONT_MONO,
                   padding: "0.5rem",
+                  lineHeight: 1,
                 }}
               >
-                ✕
+                X
               </button>
             </div>
+
+            {/* Wallet status */}
+            {walletKey && (phase === "idle" || phase === "error") && (
+              <div style={{
+                marginBottom: "2rem",
+                padding: "1rem 1.4rem",
+                background: P.accentBg,
+                border: `1px solid ${P.accentBorder}`,
+                fontFamily: FONT_MONO,
+                fontSize: "1.05rem",
+                color: P.accentDim,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+                <span>WALLET LINKED</span>
+                <span style={{ color: P.text }}>{walletKey.substring(0, 6)}...{walletKey.substring(walletKey.length - 4)}</span>
+              </div>
+            )}
 
             {/* Phase indicator */}
             {isProcessing && (
@@ -231,8 +269,8 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 style={{
                   marginBottom: "2rem",
                   padding: "1.5rem",
-                  border: `1px solid ${isDark ? "rgba(255,170,0,0.3)" : "rgba(0,100,0,0.3)"}`,
-                  background: isDark ? "rgba(255,170,0,0.05)" : "rgba(0,100,0,0.05)",
+                  border: `1px solid ${P.accentBorder}`,
+                  background: P.accentBg,
                 }}
               >
                 <div style={{
@@ -242,21 +280,20 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   fontFamily: FONT_MONO,
                   fontSize: "1.15rem",
                   letterSpacing: "0.08em",
-                  color: isDark ? "#ffaa00" : "#006622",
+                  color: P.accent,
                 }}>
                   <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                    style={{ display: "inline-block" }}
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    ◌
+                    //
                   </motion.span>
                   {phaseLabel[phase]}
                 </div>
                 <div style={{
                   marginTop: "1rem",
                   height: "2px",
-                  background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                  background: "rgba(255,255,255,0.08)",
                   borderRadius: "1px",
                   overflow: "hidden",
                 }}>
@@ -266,7 +303,7 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                       width: phase === "submitting" ? "30%" : phase === "hashing" ? "60%" : "90%",
                     }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                    style={{ height: "100%", background: isDark ? "#ffaa00" : "#006622" }}
+                    style={{ height: "100%", background: P.accent }}
                   />
                 </div>
               </motion.div>
@@ -280,52 +317,51 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 style={{
                   marginBottom: "2rem",
                   padding: "2rem",
-                  border: `1px solid ${isDark ? "rgba(0,255,100,0.3)" : "rgba(0,100,0,0.3)"}`,
-                  background: isDark ? "rgba(0,255,100,0.04)" : "rgba(0,100,0,0.04)",
+                  border: `1px solid ${P.accentBorder}`,
+                  background: P.accentBg,
                 }}
               >
                 <div style={{
                   fontFamily: FONT_MONO,
                   fontSize: "1.2rem",
                   letterSpacing: "0.1em",
-                  color: isDark ? "#00ff64" : "#006622",
+                  color: P.accent,
                   marginBottom: "1.5rem",
                 }}>
-                  ✓ {phaseLabel.done}
+                  [{phaseLabel.done}]
                 </div>
 
                 <div style={{ display: "grid", gap: "1rem", fontFamily: FONT_MONO, fontSize: "1.1rem" }}>
                   <div>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>agent_id: </span>
+                    <span style={{ color: P.textMuted }}>agent_id: </span>
                     <span>{result.agent.id}</span>
                   </div>
                   <div>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>membership_leaf: </span>
+                    <span style={{ color: P.textMuted }}>membership_leaf: </span>
                     <span style={{ wordBreak: "break-all" }}>
                       {result.guild.membershipLeaf.slice(0, 24)}...
                     </span>
                   </div>
                   <div>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>merkle_root: </span>
+                    <span style={{ color: P.textMuted }}>merkle_root: </span>
                     <span style={{ wordBreak: "break-all" }}>
                       {result.guild.membershipRoot.slice(0, 24)}...
                     </span>
                   </div>
                   <div>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>total_members: </span>
+                    <span style={{ color: P.textMuted }}>total_members: </span>
                     <span>{result.guild.totalMembers}</span>
                   </div>
 
                   <div style={{
                     marginTop: "0.5rem",
                     paddingTop: "1rem",
-                    borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                    borderTop: `1px solid rgba(255,255,255,0.08)`,
                   }}>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>soroban_status: </span>
+                    <span style={{ color: P.textMuted }}>soroban_status: </span>
                     <span style={{
                       color: result.guild.soroban.rootUpdateSubmission.status === "confirmed"
-                        ? (isDark ? "#00ff64" : "#006622")
-                        : (isDark ? "#ffaa00" : "#cc8800"),
+                        ? P.accent : P.accentDim,
                     }}>
                       {result.guild.soroban.rootUpdateSubmission.status?.toUpperCase() || "PENDING"}
                     </span>
@@ -333,15 +369,15 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
 
                   {result.guild.soroban.rootUpdateSubmission.txHash && (
                     <div>
-                      <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>tx_hash: </span>
+                      <span style={{ color: P.textMuted }}>tx_hash: </span>
                       <a
                         href={result.guild.soroban.rootUpdateSubmission.explorer || result.guild.explorer}
                         target="_blank"
                         rel="noreferrer"
                         style={{
-                          color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                          color: "rgba(255,255,255,0.7)",
                           textDecoration: "underline",
-                          textDecorationColor: isDark ? "rgba(0,200,255,0.3)" : "rgba(0,100,200,0.3)",
+                          textDecorationColor: "rgba(255,255,255,0.2)",
                           textUnderlineOffset: "4px",
                           wordBreak: "break-all",
                         }}
@@ -352,15 +388,15 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   )}
 
                   <div>
-                    <span style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>contract: </span>
+                    <span style={{ color: P.textMuted }}>contract: </span>
                     <a
                       href={result.guild.explorer}
                       target="_blank"
                       rel="noreferrer"
                       style={{
-                        color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                        color: "rgba(255,255,255,0.7)",
                         textDecoration: "underline",
-                        textDecorationColor: isDark ? "rgba(0,200,255,0.3)" : "rgba(0,100,200,0.3)",
+                        textDecorationColor: "rgba(255,255,255,0.2)",
                         textUnderlineOffset: "4px",
                         wordBreak: "break-all",
                       }}
@@ -380,14 +416,14 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 style={{
                   marginBottom: "2rem",
                   padding: "1.5rem",
-                  border: "1px solid rgba(255,50,50,0.3)",
-                  background: "rgba(255,50,50,0.05)",
+                  border: `1px solid ${P.errorBorder}`,
+                  background: P.errorBg,
                   fontFamily: FONT_MONO,
                   fontSize: "1.15rem",
-                  color: "#ff5555",
+                  color: P.error,
                 }}
               >
-                ✕ {error}
+                [ERROR] {error}
               </motion.div>
             )}
 
@@ -399,7 +435,7 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                     display: "block",
                     fontSize: "1.15rem",
                     letterSpacing: "0.12em",
-                    color: isDark ? "rgba(255,255,255,0.5)" : "#666",
+                    color: P.accentDim,
                     marginBottom: "0.8rem",
                     fontWeight: 500,
                   }}>
@@ -414,18 +450,18 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                     style={{
                       width: "100%",
                       padding: "1.2rem 1.4rem",
-                      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                      background: P.inputBg,
+                      border: `1px solid ${P.border}`,
                       borderRadius: "2px",
-                      color: isDark ? "#fff" : "#111",
+                      color: P.text,
                       fontFamily: FONT_MONO,
                       fontSize: "1.3rem",
                       outline: "none",
-                      transition: "border-color 0.2s",
+                      transition: "border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                       boxSizing: "border-box",
                     }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,170,0,0.4)" : "rgba(0,100,0,0.4)"; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"; }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = P.borderHover; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = P.border; }}
                   />
                 </div>
 
@@ -434,7 +470,7 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                     display: "block",
                     fontSize: "1.15rem",
                     letterSpacing: "0.12em",
-                    color: isDark ? "rgba(255,255,255,0.5)" : "#666",
+                    color: P.accentDim,
                     marginBottom: "0.8rem",
                     fontWeight: 500,
                   }}>
@@ -449,42 +485,35 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                           onClick={() => toggleCapability(cap)}
                           style={{
                             padding: "0.7rem 1.3rem",
-                            background: selected
-                              ? (isDark ? "rgba(255,170,0,0.15)" : "rgba(0,100,0,0.12)")
-                              : "transparent",
-                            border: `1px solid ${selected
-                              ? (isDark ? "rgba(255,170,0,0.5)" : "rgba(0,100,0,0.5)")
-                              : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)")
-                            }`,
+                            background: selected ? P.accentBgHover : "transparent",
+                            border: `1px solid ${selected ? P.accentBorder : P.border}`,
                             borderRadius: "2px",
-                            color: selected
-                              ? (isDark ? "#ffaa00" : "#006622")
-                              : (isDark ? "rgba(255,255,255,0.55)" : "#666"),
+                            color: selected ? P.accent : "rgba(255,255,255,0.55)",
                             fontFamily: FONT_MONO,
                             fontSize: "1.1rem",
                             cursor: "pointer",
-                            transition: "all 0.2s",
+                            transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                             letterSpacing: "0.04em",
                           }}
                         >
-                          {selected ? "✓ " : ""}{cap}
+                          {cap}
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Worker URL (optional) */}
+                {/* Worker URL */}
                 <div style={{ marginBottom: "2.5rem" }}>
                   <label style={{
                     display: "block",
                     fontSize: "1.15rem",
                     letterSpacing: "0.12em",
-                    color: isDark ? "rgba(255,255,255,0.5)" : "#666",
+                    color: P.accentDim,
                     marginBottom: "0.8rem",
                     fontWeight: 500,
                   }}>
-                    WORKER URL <span style={{ fontSize: "0.9rem", opacity: 0.6 }}>(OPTIONAL)</span>
+                    WORKER URL <span style={{ fontSize: "0.9rem", opacity: 0.5 }}>(OPTIONAL)</span>
                   </label>
                   <input
                     type="url"
@@ -494,23 +523,23 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                     style={{
                       width: "100%",
                       padding: "1.2rem 1.4rem",
-                      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                      background: P.inputBg,
+                      border: `1px solid ${P.border}`,
                       borderRadius: "2px",
-                      color: isDark ? "#fff" : "#111",
+                      color: P.text,
                       fontFamily: FONT_MONO,
                       fontSize: "1.2rem",
                       outline: "none",
-                      transition: "border-color 0.2s",
+                      transition: "border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                       boxSizing: "border-box",
                     }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,170,0,0.4)" : "rgba(0,100,0,0.4)"; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"; }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = P.borderHover; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = P.border; }}
                   />
                   <p style={{
                     marginTop: "0.6rem",
                     fontSize: "1rem",
-                    color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
+                    color: P.textDim,
                     fontFamily: FONT_MONO,
                   }}>
                     If provided, the mesh will route tasks to your agent endpoint
@@ -518,17 +547,15 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 </div>
 
                 <motion.button
-                  whileHover={canSubmit ? { scale: 1.02 } : {}}
+                  whileHover={canSubmit ? { scale: 1.02, background: "rgba(255,170,0,0.9)" } : {}}
                   whileTap={canSubmit ? { scale: 0.98 } : {}}
                   onClick={handleDeploy}
                   disabled={!canSubmit}
                   style={{
                     width: "100%",
                     padding: "1.5rem",
-                    background: canSubmit
-                      ? (isDark ? "#ffaa00" : "#006622")
-                      : (isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"),
-                    color: canSubmit ? "#000" : (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)"),
+                    background: canSubmit ? P.accent : "rgba(255,255,255,0.06)",
+                    color: canSubmit ? "#0a0a0a" : "rgba(255,255,255,0.25)",
                     border: "none",
                     borderRadius: "2px",
                     fontFamily: FONT_HEADING,
@@ -536,7 +563,7 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                     fontWeight: 600,
                     letterSpacing: "0.15em",
                     cursor: canSubmit ? "pointer" : "not-allowed",
-                    transition: "all 0.25s",
+                    transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
                   {phase === "error" ? "RETRY DEPLOYMENT" : "REGISTER IN GUILD"}
@@ -545,24 +572,24 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                 <p style={{
                   marginTop: "1.5rem",
                   fontSize: "1.05rem",
-                  color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+                  color: P.textDim,
                   textAlign: "center",
                   lineHeight: 1.6,
                   fontFamily: FONT_MONO,
                   letterSpacing: "0.03em",
                 }}>
-                  Poseidon hash → Merkle leaf → Soroban root update → Stellar Testnet
+                  Poseidon hash / Merkle leaf / Soroban root update / Stellar Testnet
                 </p>
               </>
             )}
 
-            {/* Done — buttons */}
+            {/* Done — ZK verification + action buttons */}
             {phase === "done" && (
               <>
                 {/* ZK Membership Verification */}
                 {zkPhase === "idle" && result?.guild?.proofInputs && (
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, borderColor: P.accent }}
                     whileTap={{ scale: 0.98 }}
                     onClick={async () => {
                       setZkPhase("generating");
@@ -591,18 +618,19 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                       width: "100%",
                       padding: "1.3rem",
                       marginBottom: "1.5rem",
-                      background: isDark ? "rgba(0,200,255,0.08)" : "rgba(0,100,200,0.08)",
-                      color: isDark ? "rgba(0,200,255,0.9)" : "#0066cc",
-                      border: `1px solid ${isDark ? "rgba(0,200,255,0.3)" : "rgba(0,100,200,0.3)"}`,
+                      background: P.accentBg,
+                      color: P.accent,
+                      border: `1px solid ${P.accentBorder}`,
                       borderRadius: "2px",
                       fontFamily: FONT_HEADING,
                       fontSize: "1.2rem",
                       fontWeight: 600,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
+                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
-                    ⚡ VERIFY MEMBERSHIP (ZK PROOF)
+                    VERIFY MEMBERSHIP — ZK PROOF
                   </motion.button>
                 )}
 
@@ -610,23 +638,22 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   <div style={{
                     padding: "1.3rem",
                     marginBottom: "1.5rem",
-                    border: `1px solid ${isDark ? "rgba(0,200,255,0.2)" : "rgba(0,100,200,0.2)"}`,
-                    background: isDark ? "rgba(0,200,255,0.04)" : "rgba(0,100,200,0.04)",
+                    border: `1px solid ${P.accentBorder}`,
+                    background: P.accentBg,
                     fontFamily: FONT_MONO,
                     fontSize: "1.1rem",
-                    color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                    color: P.accent,
                     display: "flex",
                     alignItems: "center",
                     gap: "1rem",
                   }}>
                     <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      style={{ display: "inline-block" }}
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     >
-                      ◌
+                      //
                     </motion.span>
-                    {zkPhase === "generating" ? "GENERATING GROTH16 PROOF IN BROWSER..." : "VERIFYING VIA SOROBAN CONTRACT..."}
+                    {zkPhase === "generating" ? "GENERATING GROTH16 PROOF IN BROWSER" : "VERIFYING VIA SOROBAN CONTRACT"}
                   </div>
                 )}
 
@@ -634,26 +661,27 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   <div style={{
                     padding: "1.5rem",
                     marginBottom: "1.5rem",
-                    border: `1px solid ${zkResult.verified ? (isDark ? "rgba(0,255,100,0.3)" : "rgba(0,100,0,0.3)") : "rgba(255,50,50,0.3)"}`,
-                    background: zkResult.verified ? (isDark ? "rgba(0,255,100,0.04)" : "rgba(0,100,0,0.04)") : "rgba(255,50,50,0.04)",
+                    border: `1px solid ${zkResult.verified ? P.accentBorder : P.errorBorder}`,
+                    background: zkResult.verified ? P.accentBg : P.errorBg,
                     fontFamily: FONT_MONO,
                     fontSize: "1.1rem",
                   }}>
                     <div style={{
-                      color: zkResult.verified ? (isDark ? "#00ff64" : "#006622") : "#ff5555",
+                      color: zkResult.verified ? P.accent : P.error,
                       marginBottom: "0.8rem",
                       fontSize: "1.2rem",
                     }}>
-                      {zkResult.verified ? "✓ MEMBERSHIP PROOF VERIFIED" : "✕ VERIFICATION FAILED"}
+                      {zkResult.verified ? "[PASS] MEMBERSHIP PROOF VERIFIED" : "[FAIL] VERIFICATION FAILED"}
                     </div>
-                    <div style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888" }}>
+                    <div style={{ color: P.textMuted }}>
                       method: {zkResult.method}
                     </div>
                     {zkResult.contractId && (
-                      <div style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#888", marginTop: "0.4rem" }}>
+                      <div style={{ color: P.textMuted, marginTop: "0.4rem" }}>
                         contract: <a href={zkResult.explorer} target="_blank" rel="noreferrer" style={{
-                          color: isDark ? "rgba(0,200,255,0.8)" : "#0066cc",
+                          color: "rgba(255,255,255,0.7)",
                           textDecoration: "underline",
+                          textDecorationColor: "rgba(255,255,255,0.2)",
                           textUnderlineOffset: "4px",
                         }}>{zkResult.contractId.slice(0, 12)}...{zkResult.contractId.slice(-6)}</a>
                       </div>
@@ -665,46 +693,47 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                   <div style={{
                     padding: "1.3rem",
                     marginBottom: "1.5rem",
-                    border: "1px solid rgba(255,50,50,0.3)",
-                    background: "rgba(255,50,50,0.05)",
+                    border: `1px solid ${P.errorBorder}`,
+                    background: P.errorBg,
                     fontFamily: FONT_MONO,
                     fontSize: "1.1rem",
-                    color: "#ff5555",
+                    color: P.error,
                   }}>
-                    ✕ ZK Proof: {zkError}
+                    [ERROR] ZK Proof: {zkError}
                   </div>
                 )}
 
                 <div style={{ display: "flex", gap: "1rem" }}>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, borderColor: P.accentBorder }}
                     whileTap={{ scale: 0.98 }}
                     onClick={resetForm}
                     style={{
                       flex: 1,
                       padding: "1.3rem",
                       background: "transparent",
-                      color: isDark ? "rgba(255,255,255,0.6)" : "#666",
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"}`,
+                      color: "rgba(255,255,255,0.6)",
+                      border: `1px solid ${P.border}`,
                       borderRadius: "2px",
                       fontFamily: FONT_HEADING,
                       fontSize: "1.2rem",
                       fontWeight: 500,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
+                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     DEPLOY ANOTHER
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, background: "rgba(255,170,0,0.9)" }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleClose}
                     style={{
                       flex: 1,
                       padding: "1.3rem",
-                      background: isDark ? "#ffaa00" : "#006622",
-                      color: "#000",
+                      background: P.accent,
+                      color: "#0a0a0a",
                       border: "none",
                       borderRadius: "2px",
                       fontFamily: FONT_HEADING,
@@ -712,6 +741,7 @@ export default function DeployAgentModal({ open, onClose, theme = "dark" }: Depl
                       fontWeight: 600,
                       letterSpacing: "0.12em",
                       cursor: "pointer",
+                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     CLOSE

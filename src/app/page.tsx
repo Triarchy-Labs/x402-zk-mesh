@@ -542,7 +542,7 @@ export default function Page() {
 						<AgentNetworkGrid theme={theme} />
 					</div>
 
-					<DeployAgentModal open={deployModalOpen} onClose={() => setDeployModalOpen(false)} theme={theme} />
+					<DeployAgentModal open={deployModalOpen} onClose={() => setDeployModalOpen(false)} />
 
 					{/* FOOTER — Lusion hover on CTA */}
 					<footer style={{ 

@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-// Fallback data if /api/agents is unreachable
+// Genesis nodes — pre-configured agents that ship with the mesh
 const FALLBACK_AGENTS = [
-	{ id: "x402-AEGIS-NODE", task: "Security Matrix", rep: "99.9", earned: "$1,240.50", status: "ACTIVE" },
-	{ id: "agent_alpha_arbitrage", task: "DEX Arbitrage", rep: "95.0", earned: "$420.00", status: "ACTIVE" },
-	{ id: "stellar_scrapper_v2", task: "Data Injection", rep: "88.5", earned: "$110.20", status: "IDLE" },
-	{ id: "malicious_node_x9", task: "Phishing Attempt", rep: "12.0", earned: "$0.00", status: "QUARANTINED" },
-	{ id: "cortex_reviewer", task: "Code Audit", rep: "97.2", earned: "$890.00", status: "ACTIVE" },
-	{ id: "liquidity_sniper", task: "Flash Loans", rep: "91.4", earned: "$3,400.10", status: "ACTIVE" },
+	{ id: "x402-AEGIS-NODE", task: "Security Matrix", rep: "GENESIS", earned: "$1,240.50", status: "ACTIVE" },
+	{ id: "agent_alpha_arbitrage", task: "DEX Arbitrage", rep: "GENESIS", earned: "$420.00", status: "ACTIVE" },
+	{ id: "stellar_scrapper_v2", task: "Data Injection", rep: "GENESIS", earned: "$110.20", status: "IDLE" },
+	{ id: "malicious_node_x9", task: "Phishing Attempt", rep: "GENESIS", earned: "$0.00", status: "QUARANTINED" },
+	{ id: "cortex_reviewer", task: "Code Audit", rep: "GENESIS", earned: "$890.00", status: "ACTIVE" },
+	{ id: "liquidity_sniper", task: "Flash Loans", rep: "GENESIS", earned: "$3,400.10", status: "ACTIVE" },
 	{ id: "mark_53_sarcophagus", task: "Stellar Autonomous Engine", rep: "100.0", earned: "Reference Protocol", status: "GOLDEN_TEMPLATE" },
 ];
 
@@ -33,13 +33,13 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 	let borderColor = isQuarantined 
 		? "#ff5500" 
 		: hovered 
-			? (theme === "dark" ? "rgba(255, 170, 0,0.5)" : "rgba(0,100,34,0.4)")
-			: (theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)");
+			? "rgba(255,170,0,0.5)"
+			: "rgba(255,255,255,0.08)";
 	const statusColor = isQuarantined 
 		? "#ff5500" 
 		: hovered 
-			? (theme === "dark" ? "#ffaa00" : "#006622")
-			: (theme === "dark" ? "rgba(255,255,255,0.6)" : "#333");
+			? "#ffaa00"
+			: "rgba(255,255,255,0.6)";
 
 	if (isMark53) {
 		borderColor = "transparent"; // Handled by rare-snake-border pseudo-element
@@ -144,8 +144,8 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-end" }}>
                     <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
                         <span>REP: {agent.rep}</span>
-                        <span style={{ color: isMark53 ? statusColor : (theme === "dark" ? "#fff" : "#111") }}>
-							{isMark53 ? "" : "USDC: "}{agent.earned}
+                        <span style={{ color: isMark53 ? statusColor : "#fff" }}>
+							{isMark53 ? "" : ""}{agent.earned}
 						</span>
                     </div>
 					{isMark53 && (
@@ -173,7 +173,7 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 								padding: "8px 16px",
 								background: statusColor,
 								border: "none",
-								color: theme === "dark" ? "#000" : "#fff",
+								color: "#000",
 								borderRadius: "4px",
 								fontFamily: "'SF Mono', monospace",
 								fontSize: "1.1rem",

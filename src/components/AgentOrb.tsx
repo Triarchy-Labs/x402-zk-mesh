@@ -13,7 +13,26 @@ interface AgentOrbProps {
 export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 	const [blink, setBlink] = useState(false);
 	const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+	const [isHovered, setIsHovered] = useState(false);
+	const [microExpr, setMicroExpr] = useState<string | null>(null);
 	const orbRef = useRef<HTMLDivElement>(null);
+
+	// Micro-expression system — rare emotions on hover
+	const MICRO_EXPRESSIONS = ["curious", "wink", "surprised", "squint", "playful", "shy"] as const;
+	useEffect(() => {
+		if (!isHovered || state !== "idle") { setMicroExpr(null); return; }
+		const timer = setInterval(() => {
+			if (Math.random() < 0.30) {
+				const expr = MICRO_EXPRESSIONS[Math.floor(Math.random() * MICRO_EXPRESSIONS.length)];
+				setMicroExpr(expr);
+				setTimeout(() => setMicroExpr(null), 1200 + Math.random() * 800);
+			}
+		}, 3000 + Math.random() * 3000);
+		return () => clearInterval(timer);
+	}, [isHovered, state]);
+
+	// Effective display state: micro-expression overrides idle
+	const displayState = microExpr || state;
 
 	// Compute actual px from rem so orb scales with viewport
 	const [pxSize, setPxSize] = useState(120);
@@ -83,7 +102,14 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 		sad:       { x: 0, y: 8, transition: { duration: 1.5, ease: "easeOut" as const } },
 		exhausted: { x: 0, y: 12, scale: 0.95, transition: { duration: 2.5, ease: "easeOut" as const } },
 		surrender: { x: 0, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
-		danger:    { x: [-4, 4, -4, 4, 0], y: 0, transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" as const } }
+		danger:    { x: [-4, 4, -4, 4, 0], y: 0, transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" as const } },
+		// Micro-expressions
+		curious:   { x: 6, y: -3, scale: 1.02, rotate: 5, transition: { duration: 0.4, ease: "easeOut" as const } },
+		wink:      { x: 0, y: 0, scale: 1, rotate: -3, transition: { duration: 0.3, ease: "easeOut" as const } },
+		surprised: { x: 0, y: -6, scale: 1.08, rotate: 0, transition: { duration: 0.25, ease: "easeOut" as const } },
+		squint:    { x: 0, y: 2, scale: 0.97, rotate: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+		playful:   { x: [-3, 3, 0], y: [0, -4, 0], scale: 1.03, rotate: [-4, 4, 0], transition: { duration: 0.8, ease: "easeInOut" as const } },
+		shy:       { x: -8, y: 4, scale: 0.92, rotate: -8, transition: { duration: 0.6, ease: "easeOut" as const } },
 	};
 
 	// Pure White Eye shapes without black UI masks
@@ -99,7 +125,14 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 		sad: { height: 24, width: 27, rotate: -15, borderRadius: "18px 3px 6px 6px", backgroundColor: "#fff" }, 
 		exhausted: { height: blink ? 2 : 21, width: 12, rotate: 0, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" },
 		surrender: { height: 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 27, width: 12, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
+		danger: { height: 27, width: 12, rotate: 30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" },
+		// Micro-expressions
+		curious:   { height: 24, width: 42, rotate: 8, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		wink:      { height: 2, width: 30, rotate: -5, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		surprised: { height: 30, width: 30, rotate: 0, borderRadius: "50px 50px 50px 50px", backgroundColor: "#fff" },
+		squint:    { height: 8, width: 36, rotate: -2, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		playful:   { height: 18, width: 33, rotate: -10, borderRadius: "18px 6px 18px 6px", backgroundColor: "#fff" },
+		shy:       { height: 15, width: 27, rotate: -12, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
 	};
     
 	const rightEyeVariants = {
@@ -113,11 +146,18 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 		sad: { height: 24, width: 27, rotate: 15, borderRadius: "3px 18px 6px 6px", backgroundColor: "#fff" }, 
 		exhausted: { height: blink ? 2 : 21, width: 12, rotate: 0, borderRadius: "15px 15px 6px 6px", backgroundColor: "#fff" },
 		surrender: { height: 21, width: 39, rotate: 0, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
-		danger: { height: 27, width: 12, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" } 
+		danger: { height: 27, width: 12, rotate: -30, borderRadius: "3px 3px 3px 3px", backgroundColor: "#ff5500" },
+		// Micro-expressions
+		curious:   { height: 16, width: 30, rotate: -4, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		wink:      { height: 21, width: 39, rotate: 3, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		surprised: { height: 30, width: 30, rotate: 0, borderRadius: "50px 50px 50px 50px", backgroundColor: "#fff" },
+		squint:    { height: 8, width: 36, rotate: 2, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
+		playful:   { height: 18, width: 33, rotate: 10, borderRadius: "6px 18px 6px 18px", backgroundColor: "#fff" },
+		shy:       { height: 12, width: 21, rotate: 8, borderRadius: "15px 15px 15px 15px", backgroundColor: "#fff" },
 	};
 
 	return (
-		<div style={{ width: pxSize, height: pxSize, display: "flex", alignItems: "center", justifyContent: "center" }}>
+		<div style={{ width: pxSize, height: pxSize, display: "flex", alignItems: "center", justifyContent: "center" }} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
 			<div style={{ width: 120, height: 120, transform: `scale(${pxSize / 120})`, transformOrigin: "center" }} className="relative flex items-center justify-center perspective-1000">
 			
 			{/* Flag Props mapped to State */}
@@ -201,12 +241,12 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 					animate={{ x: mousePos.x, y: mousePos.y }}
 					transition={{ type: "spring", stiffness: 100, damping: 25 }}
 				>
-					<motion.div className="flex gap-3 z-10" variants={containerVariants} animate={state} style={{ transformStyle: 'preserve-3d' }}>
+					<motion.div className="flex gap-3 z-10" variants={containerVariants} animate={displayState} style={{ transformStyle: 'preserve-3d' }}>
 						{/* Left Eye */}
-						<motion.div variants={leftEyeVariants} animate={state} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
+						<motion.div variants={leftEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
 						
 						{/* Right Eye */}
-						<motion.div variants={rightEyeVariants} animate={state} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
+						<motion.div variants={rightEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
 					</motion.div>
 				</motion.div>
 				

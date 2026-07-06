@@ -106,7 +106,7 @@ export function Nav() {
 						height: "var(--orb-nav-size, 4.8rem)",
 					}}
 				>
-					<AgentOrb state={hoverLogo ? "typing" : "idle"} size={88} />
+					<AgentOrb state={hoverLogo ? "typing" : "idle"} size={6} />
 				</motion.div>
 				<motion.div
 					initial={{ width: 0, opacity: 0 }}

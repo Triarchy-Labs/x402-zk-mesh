@@ -7,13 +7,25 @@ export type AgentState = "idle" | "thinking" | "working" | "success" | "error" |
 
 interface AgentOrbProps {
 	state: AgentState;
-	size?: number;
+	size?: number; // size in rem (e.g., 12 = 12rem)
 }
 
-export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
+export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 	const [blink, setBlink] = useState(false);
 	const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 	const orbRef = useRef<HTMLDivElement>(null);
+
+	// Compute actual px from rem so orb scales with viewport
+	const [pxSize, setPxSize] = useState(120);
+	useEffect(() => {
+		const compute = () => {
+			const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+			setPxSize(Math.round(rem * size));
+		};
+		compute();
+		window.addEventListener("resize", compute);
+		return () => window.removeEventListener("resize", compute);
+	}, [size]);
 
 	// Blinking logic
 	useEffect(() => {
@@ -105,8 +117,8 @@ export function AgentOrb({ state, size = 120 }: AgentOrbProps) {
 	};
 
 	return (
-		<div style={{ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center" }}>
-			<div style={{ width: 120, height: 120, transform: `scale(${size / 120})`, transformOrigin: "center" }} className="relative flex items-center justify-center perspective-1000">
+		<div style={{ width: pxSize, height: pxSize, display: "flex", alignItems: "center", justifyContent: "center" }}>
+			<div style={{ width: 120, height: 120, transform: `scale(${pxSize / 120})`, transformOrigin: "center" }} className="relative flex items-center justify-center perspective-1000">
 			
 			{/* Flag Props mapped to State */}
 			<AnimatePresence>

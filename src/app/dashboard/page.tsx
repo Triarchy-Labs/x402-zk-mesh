@@ -321,7 +321,7 @@ export default function Dashboard() {
                             { scale: 1.05, x: 0, y: -20 }
                         }
                     >
-                        <AgentOrb state={agentState} size={180} />
+                        <AgentOrb state={agentState} size={18} />
                     </motion.div>
 				</section>
 

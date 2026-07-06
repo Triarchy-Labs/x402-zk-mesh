@@ -60,13 +60,13 @@ function ModuleCard({ module, showSnake }: { module: ModuleInfo; showSnake: bool
 			style={{
 				position: "absolute",
 				...module.position,
-				width: 210,
-				padding: "14px 16px",
+				width: "21rem",
+				padding: "1.4rem 1.6rem",
 				background: "rgba(255,255,255,0.05)",
 				backdropFilter: "blur(24px) saturate(1.2)",
 				WebkitBackdropFilter: "blur(24px) saturate(1.2)",
 				border: showSnake ? "1px solid rgba(255, 170, 0,0.2)" : "1px solid rgba(255,255,255,0.08)",
-				borderRadius: 12,
+				borderRadius: "var(--radius-card, 1.2rem)",
 				zIndex: 30,
 				pointerEvents: "none",
 			}}
@@ -77,7 +77,7 @@ function ModuleCard({ module, showSnake }: { module: ModuleInfo; showSnake: bool
 				fontWeight: 600,
 				letterSpacing: "0.14em",
 				color: showSnake ? "#ffaa00" : "rgba(255,255,255,0.8)",
-				marginBottom: 6,
+				marginBottom: "0.6rem",
 				transition: "color 1s ease",
 			}}>
 				<TypewriterText text={module.name} />
@@ -94,13 +94,13 @@ function ModuleCard({ module, showSnake }: { module: ModuleInfo; showSnake: bool
 			{/* Subtle glow indicator dot */}
 			<div style={{
 				position: "absolute",
-				top: 8,
-				right: 10,
-				width: 4,
-				height: 4,
+				top: "0.8rem",
+				right: "1rem",
+				width: "0.4rem",
+				height: "0.4rem",
 				borderRadius: "50%",
 				background: showSnake ? "#ffaa00" : "rgba(255,255,255,0.3)",
-				boxShadow: showSnake ? "0 0 8px rgba(255, 170, 0,0.6)" : "none",
+				boxShadow: showSnake ? "0 0 0.8rem rgba(255, 170, 0,0.6)" : "none",
 				transition: "all 1s",
 			}} />
 		</motion.div>

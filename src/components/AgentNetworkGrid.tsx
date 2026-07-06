@@ -74,8 +74,8 @@ function AgentCard({ agent, theme, index }: { agent: AgentDisplay; theme: "dark"
 				...gridPlacement,
 				padding: "clamp(1.5rem, 3vw, 3rem)",
 			background: hovered 
-					? (theme === "dark" ? "rgba(0,15,0,0.45)" : "rgba(5,15,5,0.95)")
-					: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(10,10,10,0.92)"),
+				? (theme === "dark" ? "rgba(255,170,0,0.04)" : "rgba(255,170,0,0.06)")
+				: (theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(10,10,10,0.92)"),
 				border: isMark53 ? "none" : `1px solid ${borderColor}`,
 				borderRadius: "2.4rem",
 				backdropFilter: hovered ? "blur(32px) saturate(1.5)" : "blur(24px) saturate(1.2)",

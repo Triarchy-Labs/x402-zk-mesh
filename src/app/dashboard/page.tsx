@@ -333,7 +333,7 @@ export default function Dashboard() {
                         {/* Chat Log */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-black/80 border border-white/10 rounded-xl backdrop-blur-md p-[2rem] flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.8)] font-mono min-h-[30rem]">
                             <div className="flex justify-between items-center text-[1.2rem] text-white/30 tracking-widest mb-[1.5rem] border-b border-white/5 pb-[1rem]">
-                                <span>SYS_LOG /// NEMOTRON 30B (ORB) {walletId !== "guest" && <span className="text-[#ffaa00] ml-2">[{walletId.substring(0,6)}...{walletId.substring(walletId.length-4)}]</span>}</span>
+                                <span>SYS_LOG /// SNOWBALL (ORB) {walletId !== "guest" && <span className="text-[#ffaa00] ml-2">[{walletId.substring(0,6)}...{walletId.substring(walletId.length-4)}]</span>}</span>
                                 <div className="flex gap-4">
                                     <button onClick={() => setShowArchives(!showArchives)} className="hover:text-[#ffaa00] transition-colors font-bold">
                                         {showArchives ? "[CLOSE ARCHIVE]" : "[ARCHIVE]"}

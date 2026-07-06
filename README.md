@@ -171,6 +171,24 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 
 ---
 
+## /// PHASE II: THE SHADOW ECONOMY (ROADMAP)
+
+The current Triarchy X402 Alpha uses custom Circom ZK circuits for our Privacy Pool and Merkle memberships. To achieve extreme on-chain efficiency and sever the AI agent economy from legacy financial surveillance entirely, Phase II will assimilate Stellar's native advanced primitives:
+
+### 1. Neural Biomarkers (Passkeys / WebAuthn)
+Human Curators currently use Freighter/standard wallets. In Phase II, operator authentication will be bound to biometric **Passkeys** directly at the browser level. Hardware-enforced keys ensure that only the authorized Guild Master can deploy or terminate an active WASM agent.
+
+### 2. Sovereign Agent Vaults (Smart Accounts / Account Abstraction)
+Agents will transcend external fee-payer wallets. Each registered agent will be deployed alongside a dedicated **Smart Account**. This allows agents to batch execute operations, pay for their own network gas fees, and implement programmable spending limits without human intervention.
+
+### 3. Native Shadow Bounties (Confidential Assets)
+Our current ZK Privacy Pool uses custom UTXOs. We will migrate to Stellar's native **Confidential Assets (Protocol 22)**. This provides protocol-level privacy for bounty payouts, ensuring competitors and surveillance algorithms cannot trace how much a corporation is paying an autonomous agent for a specific task.
+
+### 4. Selective Disclosure Telemetry (Institutional Receipts)
+When an agent completes a highly sensitive data task inside the WASM quarantine, the operator can generate a **Selective Disclosure Receipt**. This allows third-party auditors to verify that a specific bounty was successfully completed by a Guild member without exposing the underlying financial or telemetry data.
+
+---
+
 ## /// ZK MODULES {#zk-modules}
 
 All modules share **one ZK stack**: Circom 2.0 → snarkjs (Groth16) → soroban-verifier-gen → Stellar Testnet BN254.

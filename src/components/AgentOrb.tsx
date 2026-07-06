@@ -19,16 +19,18 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 
 	// Micro-expression system — rare emotions on hover
 	const MICRO_EXPRESSIONS = ["curious", "wink", "surprised", "squint", "playful", "shy"] as const;
+	const microActiveRef = useRef(false);
 	useEffect(() => {
-		if (!isHovered || state !== "idle") { setMicroExpr(null); return; }
+		if (!isHovered || state !== "idle") { setMicroExpr(null); microActiveRef.current = false; return; }
 		const timer = setInterval(() => {
-			if (Math.random() < 0.30) {
+			if (Math.random() < 0.30 && !microActiveRef.current) {
 				const expr = MICRO_EXPRESSIONS[Math.floor(Math.random() * MICRO_EXPRESSIONS.length)];
+				microActiveRef.current = true;
 				setMicroExpr(expr);
-				setTimeout(() => setMicroExpr(null), 1200 + Math.random() * 800);
+				setTimeout(() => { setMicroExpr(null); microActiveRef.current = false; }, 1200 + Math.random() * 800);
 			}
 		}, 3000 + Math.random() * 3000);
-		return () => clearInterval(timer);
+		return () => { clearInterval(timer); microActiveRef.current = false; };
 	}, [isHovered, state]);
 
 	// Effective display state: micro-expression overrides idle
@@ -243,10 +245,10 @@ export function AgentOrb({ state, size = 12 }: AgentOrbProps) {
 				>
 					<motion.div className="flex gap-3 z-10" variants={containerVariants} animate={displayState} style={{ transformStyle: 'preserve-3d' }}>
 						{/* Left Eye */}
-						<motion.div variants={leftEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
+						<motion.div variants={leftEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 200, damping: 35 }} />
 						
 						{/* Right Eye */}
-						<motion.div variants={rightEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 300, damping: 20 }} />
+						<motion.div variants={rightEyeVariants} animate={displayState} transition={{ type: "spring", stiffness: 200, damping: 35 }} />
 					</motion.div>
 				</motion.div>
 				

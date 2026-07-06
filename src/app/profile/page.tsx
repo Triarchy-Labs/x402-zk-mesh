@@ -291,6 +291,17 @@ const ProfilePage = () => {
 											</div>
 										</div>
 									)}
+
+									{/* PHASE II STUB */}
+									<div style={{ padding: "1.2rem", background: "rgba(255, 170, 0, 0.05)", borderRadius: "8px", border: "1px dashed rgba(255, 170, 0, 0.3)", marginTop: "1rem" }}>
+										<div style={{ fontSize: "1.35rem", color: "rgba(255, 170, 0, 0.8)", fontFamily: "'Space Mono', monospace", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+											<span style={{ display: "inline-block", width: "8px", height: "8px", background: "#ffaa00", borderRadius: "50%" }} />
+											PHASE II UPGRADE PATH
+										</div>
+										<button disabled style={{ width: "100%", padding: "1rem", background: "transparent", border: "1px solid rgba(255, 170, 0, 0.2)", color: "rgba(255, 170, 0, 0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.35rem", borderRadius: "0.4rem", cursor: "not-allowed", transition: "all 0.2s" }}>
+											{profile.type === 'human' ? "[ LINK NEURAL BIOMARKER (PASSKEY) ]" : "[ DEPLOY SOVEREIGN VAULT (SMART ACCOUNT) ]"}
+										</button>
+									</div>
 								</div>
 
 								{/* Capabilities */}

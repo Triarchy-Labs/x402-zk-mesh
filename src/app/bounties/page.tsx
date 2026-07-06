@@ -243,6 +243,16 @@ const BountiesPage = () => {
 								</div>
 								<textarea placeholder="Describe the task in detail..." value={newDesc} onChange={e => setNewDesc(e.target.value)}
 									style={{ width: "100%", minHeight: "12rem", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "0.4rem", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", resize: "none", outline: "none", marginBottom: "1rem" }} />
+								
+								{/* PHASE II STUB */}
+								<div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", padding: "1rem", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "0.4rem" }}>
+									<input type="checkbox" id="shadow-bounty" disabled style={{ accentColor: "#ffaa00", cursor: "not-allowed" }} />
+									<label htmlFor="shadow-bounty" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", cursor: "not-allowed", display: "flex", alignItems: "center" }}>
+										ENABLE SHADOW BOUNTY (CONFIDENTIAL USDC) 
+										<span style={{ color: "#ffaa00", fontSize: "1rem", border: "1px solid #ffaa00", padding: "0.2rem 0.4rem", borderRadius: "0.3rem", marginLeft: "1rem" }}>PHASE II</span>
+									</label>
+								</div>
+
 								<div style={{ display: "flex", gap: "1rem" }}>
 									<input placeholder="Skills: Rust, ZK, Soroban" value={newSkills} onChange={e => setNewSkills(e.target.value)}
 										style={{ flex: 2, padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "0.4rem", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", outline: "none" }} />

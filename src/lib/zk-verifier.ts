@@ -25,7 +25,7 @@ const VERIFIER_WASM_DIR = path.join(process.cwd(), "contracts", "target", "wasm3
 const CONTRACT_IDS: Record<string, string> = {
   deposit_commitment: process.env.ZK_VERIFIER_DEPOSIT || "CAEWGDTGCIDBFKLSYW5EYANR227JXO7G4WGGHYD5WTGZMYL7YNPP44UE",
   membership_proof: process.env.ZK_VERIFIER_MEMBERSHIP || "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y",
-  execution_proof: process.env.ZK_VERIFIER_EXECUTION || "CCJRM2X4Y7RPUHL5GE6LXSPWQH2LLBV6LGHB4CXPJ4SCWXL5PP6JIQKQ",
+  execution_proof: process.env.ZK_VERIFIER_EXECUTION || "CACRD3O5VOIIVZG5XPPNWSWXSHH6H2VERFT7MBN3DGPPUXVX4KJ6W64S",
 };
 
 const PRIVACY_POOL_ID = "CDGTAPVSKG5EWJIJUCGDHFXJ5YWDKEOAICVFBFLZ7QPAX5HII2IBB74X";
@@ -136,11 +136,40 @@ async function verifySoroban(
   const result = spec.funcResToNative("verify_proof", returnVal);
   const valid = normalizeSorobanBool(result);
 
+  let finalTxHash = `sim-ledger-${simulation.latestLedger}`;
+
+  // If we have a relayer secret and the proof is valid, submit a real transaction
+  const relayerSecret = process.env.ZK_VERIFIER_RELAYER_SECRET;
+  if (relayerSecret && valid) {
+    try {
+      const relayerKeypair = StellarSDK.Keypair.fromSecret(relayerSecret);
+      const relayerAccount = await server.getAccount(relayerKeypair.publicKey());
+      
+      const realTx = new StellarSDK.TransactionBuilder(relayerAccount, {
+        fee: process.env.STELLAR_SIMULATION_FEE || "100000",
+        networkPassphrase: StellarSDK.Networks.TESTNET,
+      })
+        .addOperation(contract.call("verify_proof", ...args))
+        .setTimeout(30)
+        .build();
+        
+      const preparedTx = await server.prepareTransaction(realTx);
+      preparedTx.sign(relayerKeypair);
+      
+      const sendResponse = await server.sendTransaction(preparedTx);
+      if (sendResponse.hash) {
+        finalTxHash = sendResponse.hash;
+      }
+    } catch (submitErr) {
+      console.warn(`[zk-verifier] Failed to submit real verification tx: ${submitErr}`);
+    }
+  }
+
   return {
     valid,
     method: "soroban",
     contractId,
-    txHash: `sim-ledger-${simulation.latestLedger}`,
+    txHash: finalTxHash,
   };
 }
 

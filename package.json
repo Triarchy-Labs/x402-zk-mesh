@@ -25,6 +25,7 @@
     "demo:judge:preflight": "node scripts/run-judge-suite.mjs --preflight-only",
     "demo:judge:suite": "node scripts/run-judge-suite.mjs",
     "demo:submission:pack": "node scripts/export-submission-pack.mjs --write .tmp/submission-pack.md",
+    "demo:setup": "node scripts/fund-wallets.mjs",
     "tauri": "tauri dev"
   },
   "dependencies": {

@@ -54,26 +54,37 @@ describe("WASM Sandbox Heuristic Detection", () => {
 });
 
 // === Routing Threshold Logic ===
+// Threshold must match src/app/api/hire/route.ts ENTERPRISE_THRESHOLD
 describe("Task Routing Thresholds", () => {
-	const ENTERPRISE_THRESHOLD = 5.0;
+	const ENTERPRISE_THRESHOLD = 10.0;
 
-	it("should route micro-bounties (<$5) to local LLM", () => {
-		const bounty = 2.5;
+	it("should route micro-bounties (<$10) to local LLM", () => {
+		const bounty = 6.0; // Default demo amount (previously misrouted at threshold=5)
 		expect(bounty < ENTERPRISE_THRESHOLD).toBe(true);
 	});
 
-	it("should route enterprise tasks (>=$5) to sovereign node", () => {
-		const bounty = 10.0;
+	it("should route enterprise tasks (>=$10) to sovereign node", () => {
+		const bounty = 15.0;
 		expect(bounty >= ENTERPRISE_THRESHOLD).toBe(true);
 	});
 
 	it("should handle edge case at exact threshold", () => {
-		const bounty = 5.0;
+		const bounty = 10.0;
 		expect(bounty >= ENTERPRISE_THRESHOLD).toBe(true);
+	});
+
+	it("should route 9.99 to micro tier (just below threshold)", () => {
+		const bounty = 9.99;
+		expect(bounty < ENTERPRISE_THRESHOLD).toBe(true);
 	});
 
 	it("should reject negative bounty amounts", () => {
 		const bounty = -1.0;
+		expect(bounty > 0).toBe(false);
+	});
+
+	it("should reject zero bounty amounts", () => {
+		const bounty = 0;
 		expect(bounty > 0).toBe(false);
 	});
 });

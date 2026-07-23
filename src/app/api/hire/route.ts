@@ -23,7 +23,7 @@ import { isAllowedUrl } from "@/lib/security";
 const LOCAL_EXECUTION_HOOK = process.env.LOCAL_EXECUTION_HOOK;
 const ARBITRAGE_FEE_PCT = parseFloat(process.env.DYNAMIC_ROUTING_FEE || "0.00");
 const ENTERPRISE_THRESHOLD = parseFloat(
-	process.env.ENTERPRISE_THRESHOLD || "5.00",
+	process.env.ENTERPRISE_THRESHOLD || "10.00",
 );
 const DEFAULT_P2P_WORKER_URL = "http://127.0.0.1:3001/api/hire";
 const P2P_WORKER_URL = process.env.P2P_WORKER_URL || DEFAULT_P2P_WORKER_URL;

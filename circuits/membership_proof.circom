@@ -21,8 +21,10 @@ template MembershipProof(levels) {
     signal input pathElements[levels];
     signal input pathIndices[levels];
 
-    // Public: the known Merkle root from on-chain Guild Registry
-    signal output root;
+    // Public input: the known Merkle root from on-chain Guild Registry
+    // SECURITY FIX [ZK-3]: root is now a public INPUT, not an output.
+    // The verifier constrains the proof against the on-chain root.
+    signal input root;
 
     // Traverse the Merkle tree from leaf to root
     component hashers[levels];
@@ -45,8 +47,9 @@ template MembershipProof(levels) {
         hashes[i + 1] <== hashers[i].out;
     }
 
-    root <== hashes[levels];
+    // SECURITY FIX [ZK-3]: Assert computed root equals the public input root
+    root === hashes[levels];
 }
 
 // 10 levels = supports up to 1024 guild members
-component main = MembershipProof(10);
+component main {public [root]} = MembershipProof(10);

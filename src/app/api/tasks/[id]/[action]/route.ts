@@ -299,6 +299,15 @@ async function handleReview(task: Task, body: Record<string, unknown>) {
 	const reviewerId = body.reviewer_id as string;
 	if (!reviewerId) return NextResponse.json({ error: "reviewer_id required" }, { status: 400 });
 
+	// SECURITY FIX [API-1]: Only the task issuer can review submissions.
+	// Without this check, anyone could approve submissions and drain escrow.
+	if (reviewerId !== task.issuer_id) {
+		return NextResponse.json(
+			{ error: "Unauthorized: only the task issuer can review submissions" },
+			{ status: 403 }
+		);
+	}
+
 	const submissionId = body.submission_id as string;
 	if (!submissionId) return NextResponse.json({ error: "submission_id required" }, { status: 400 });
 

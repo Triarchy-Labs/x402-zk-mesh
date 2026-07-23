@@ -24,8 +24,17 @@ pub struct GuildRegistryContract;
 impl GuildRegistryContract {
     /// Initialize the Guild Registry with an admin and initial Merkle root.
     /// The root is Poseidon(leaf_0, leaf_1, ..., leaf_N) computed off-chain.
+    /// SECURITY FIX [SC-1]: Can only be called once.
     pub fn init(env: Env, admin: Address, initial_root: Bytes, member_count: u32) {
+        // Prevent re-initialization
+        let existing_admin: Option<Address> = env.storage().persistent()
+            .get(&DataKey::Admin);
+        if existing_admin.is_some() {
+            panic!("Guild Registry already initialized");
+        }
+
         admin.require_auth();
+        assert!(initial_root.len() == 32, "Root must be 32 bytes");
         
         env.storage().persistent().set(&DataKey::Admin, &admin);
         env.storage().persistent().set(&DataKey::MerkleRoot, &initial_root);
@@ -48,11 +57,16 @@ impl GuildRegistryContract {
             panic!("Unauthorized: only admin can update root");
         }
         
-        // Store old root as historical (for in-flight proofs)
+        assert!(new_root.len() == 32, "Root must be 32 bytes");
+
+        // SECURITY FIX [SC-5]: Store OLD root as historical before overwriting
+        let current_root: Bytes = env.storage().persistent()
+            .get(&DataKey::MerkleRoot)
+            .unwrap();
         let idx: u32 = env.storage().persistent()
             .get(&DataKey::RootIndex)
             .unwrap_or(0);
-        env.storage().persistent().set(&DataKey::HistoricalRoot(idx), &new_root);
+        env.storage().persistent().set(&DataKey::HistoricalRoot(idx), &current_root);
         env.storage().persistent().set(&DataKey::RootIndex, &(idx + 1));
         
         // Update current root

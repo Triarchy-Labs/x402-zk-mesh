@@ -286,7 +286,11 @@ export async function POST(req: Request) {
 		const authHeader = req.headers.get("authorization") || req.headers.get("x-l402-txhash");
 		let txHash = req.headers.get("x-l402-txhash") || "";
 		const l402Mode = req.headers.get("x-l402-mode");
-		const demoScenarioHeader = req.headers.get("x-zk-mesh-demo-scenario");
+		const demoScenarioRaw = req.headers.get("x-zk-mesh-demo-scenario");
+		// SECURITY FIX [DM-4]: Demo scenario header only works in non-production.
+		// In production, this header is silently ignored to prevent external
+		// attackers from corrupting ZK public signals in legitimate requests.
+		const demoScenarioHeader = process.env.NODE_ENV !== "production" ? demoScenarioRaw : null;
 		if (
 			demoScenarioHeader &&
 			demoScenarioHeader !== "tampered-worker-proof" &&
@@ -414,8 +418,8 @@ export async function POST(req: Request) {
 			}
 		}
 
-		// --- PIPELINE STAGE 1.5: REPLAY GUARD (atomic check-and-mark to prevent TOCTOU race) ---
-		if (replayGuard.checkAndMark(ctx.txHash)) {
+		// --- PIPELINE STAGE 1.5: REPLAY GUARD (reserve txHash — release on failure, confirm on success) ---
+		if (replayGuard.reserve(ctx.txHash)) {
 			return NextResponse.json(
 				{ error: "Payment signature or ZK Nullifier already used.", detail: "Each txHash/nullifier can only be used once." },
 				{ status: 402 }
@@ -447,7 +451,7 @@ export async function POST(req: Request) {
 			);
 		}
 
-		// txHash already marked atomically in checkAndMark above
+		// txHash is RESERVED (pending). Will be confirmed on success or released on failure.
 
 		const price = ctx.bountyUsdc;
 		const description = ctx.description;
@@ -769,6 +773,16 @@ export async function POST(req: Request) {
 			external_agent_receipt: externalAgentResponse?.receipt || null,
 		};
 		await persistDemoTrace(responsePayload);
+
+		// SECURITY FIX [API-2]: Confirm txHash on successful execution.
+		// On worker_unavailable (503), release so client can retry.
+		const httpStatus = membershipRejected ? 403 : responsePayload.status === "worker_unavailable" ? 503 : 200;
+		if (httpStatus === 503) {
+			replayGuard.release(ctx.txHash);
+		} else {
+			replayGuard.confirm(ctx.txHash);
+		}
+
 		return NextResponse.json(
 			{
 				...responsePayload,
@@ -777,9 +791,12 @@ export async function POST(req: Request) {
 				mercenary_paid: foreignPrice,
 				network_fee: networkFee,
 			},
-			{ status: membershipRejected ? 403 : responsePayload.status === "worker_unavailable" ? 503 : 200 },
+			{ status: httpStatus },
 		);
 	} catch (error: any) {
+		// SECURITY FIX [API-2]: Release txHash on crash so client can retry.
+		// Note: txHash may not be set if error occurs before parsing.
+		try { replayGuard.release(req.headers.get("x-l402-txhash") || ""); } catch (_) {}
 		return NextResponse.json(
 			{ error: "Internal Server Error", details: error.message },
 			{ status: 500 },

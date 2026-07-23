@@ -37,4 +37,4 @@ template ExecutionProof() {
     executionId <== hasher.out;
 }
 
-component main = ExecutionProof();
+component main {public [taskHash, resultHash]} = ExecutionProof();

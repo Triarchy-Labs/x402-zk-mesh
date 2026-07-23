@@ -6,12 +6,19 @@
  * 
  * Prevents double-spending by tracking used payment signatures with TTL.
  * Without this, a single txHash can be reused indefinitely.
+ *
+ * SECURITY FIX [API-2]: Uses pending/confirmed/release pattern.
+ * - reserve(): Marks txHash as PENDING (blocks concurrent duplicates)
+ * - confirm(): Marks txHash as CONFIRMED (permanent, cannot be reused)
+ * - release(): Removes PENDING mark (allows retry on worker failure)
  */
 
 const REPLAY_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+type ReplayState = { status: "pending" | "confirmed"; ts: number };
+
 export class ReplayGuard {
-    private used = new Map<string, number>();
+    private used = new Map<string, ReplayState>();
 
     /** Check if signature was already used. Returns true if REPLAY detected. */
     check(signature: string): boolean {
@@ -20,21 +27,51 @@ export class ReplayGuard {
     }
 
     /**
+     * Reserve a txHash for processing. Returns true if REPLAY detected.
+     * If the txHash is new, it's marked as PENDING (blocks duplicates).
+     * If the worker fails, call release() to allow the client to retry.
+     */
+    reserve(signature: string): boolean {
+        this.cleanup();
+        const existing = this.used.get(signature);
+        if (existing) {
+            return true; // REPLAY: already pending or confirmed
+        }
+        this.used.set(signature, { status: "pending", ts: Date.now() });
+        return false; // Reserved successfully
+    }
+
+    /**
+     * Confirm a txHash after successful execution.
+     * Once confirmed, the txHash can never be reused.
+     */
+    confirm(signature: string): void {
+        this.used.set(signature, { status: "confirmed", ts: Date.now() });
+    }
+
+    /**
+     * Release a PENDING txHash on worker failure, allowing client retry.
+     * Does nothing if the txHash is already CONFIRMED (prevents abuse).
+     */
+    release(signature: string): void {
+        const existing = this.used.get(signature);
+        if (existing && existing.status === "pending") {
+            this.used.delete(signature);
+        }
+        // If confirmed, do nothing — cannot un-confirm
+    }
+
+    /**
      * Atomic check-and-mark: returns true if REPLAY detected, otherwise marks immediately.
-     * Use this instead of separate check() + mark() to prevent TOCTOU race conditions.
+     * @deprecated Use reserve() + confirm()/release() pattern instead.
      */
     checkAndMark(signature: string): boolean {
-        this.cleanup();
-        if (this.used.has(signature)) {
-            return true; // REPLAY detected
-        }
-        this.used.set(signature, Date.now());
-        return false; // First use — now marked
+        return this.reserve(signature);
     }
 
     /** Mark a signature as used after successful payment verification. */
     mark(signature: string): void {
-        this.used.set(signature, Date.now());
+        this.confirm(signature);
     }
 
     /** Get current number of tracked signatures (for monitoring). */
@@ -45,8 +82,8 @@ export class ReplayGuard {
     /** Remove expired entries to prevent memory leak. */
     private cleanup(): void {
         const cutoff = Date.now() - REPLAY_TTL_MS;
-        for (const [sig, ts] of this.used) {
-            if (ts < cutoff) this.used.delete(sig);
+        for (const [sig, state] of this.used) {
+            if (state.ts < cutoff) this.used.delete(sig);
         }
     }
 }

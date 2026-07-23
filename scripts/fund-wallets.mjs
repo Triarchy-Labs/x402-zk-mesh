@@ -8,12 +8,15 @@ async function fundWallet(publicKey, label) {
     const response = await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
     if (response.ok) {
       console.log(`[fund-wallets] Successfully funded ${label} wallet.`);
+      return true;
     } else {
       const errorText = await response.text();
       console.error(`[fund-wallets] Failed to fund ${label} wallet: ${response.status} ${errorText}`);
+      return false;
     }
   } catch (error) {
     console.error(`[fund-wallets] Error funding ${label} wallet:`, error);
+    return false;
   }
 }
 
@@ -30,25 +33,40 @@ async function run() {
 
   if (!envContent.includes("STELLAR_DEMO_PAYER_SECRET")) {
     const payer = Keypair.random();
-    await fundWallet(payer.publicKey(), "Payer");
-    envContent += `\nSTELLAR_DEMO_PAYER_SECRET="${payer.secret()}"\n`;
-    changed = true;
+    const funded = await fundWallet(payer.publicKey(), "Payer");
+    if (funded) {
+      envContent += `\nSTELLAR_DEMO_PAYER_SECRET="${payer.secret()}"\n`;
+      changed = true;
+    } else {
+      console.error("[fund-wallets] ABORT: Payer wallet not funded. Secrets will not be saved.");
+      process.exit(1);
+    }
   }
 
   if (!envContent.includes("STELLAR_PLATFORM_WALLET")) {
     const platform = Keypair.random();
-    await fundWallet(platform.publicKey(), "Platform");
-    envContent += `\nSTELLAR_PLATFORM_WALLET="${platform.publicKey()}"\n`;
-    envContent += `STELLAR_PLATFORM_SECRET="${platform.secret()}"\n`;
-    changed = true;
+    const funded = await fundWallet(platform.publicKey(), "Platform");
+    if (funded) {
+      envContent += `\nSTELLAR_PLATFORM_WALLET="${platform.publicKey()}"\n`;
+      envContent += `STELLAR_PLATFORM_SECRET="${platform.secret()}"\n`;
+      changed = true;
+    } else {
+      console.error("[fund-wallets] ABORT: Platform wallet not funded. Secrets will not be saved.");
+      process.exit(1);
+    }
   }
 
   if (!envContent.includes("ZK_VERIFIER_RELAYER_SECRET")) {
     const relayer = Keypair.random();
-    await fundWallet(relayer.publicKey(), "Relayer");
-    envContent += `\nZK_VERIFIER_RELAYER_PUBLIC_KEY="${relayer.publicKey()}"\n`;
-    envContent += `ZK_VERIFIER_RELAYER_SECRET="${relayer.secret()}"\n`;
-    changed = true;
+    const funded = await fundWallet(relayer.publicKey(), "Relayer");
+    if (funded) {
+      envContent += `\nZK_VERIFIER_RELAYER_PUBLIC_KEY="${relayer.publicKey()}"\n`;
+      envContent += `ZK_VERIFIER_RELAYER_SECRET="${relayer.secret()}"\n`;
+      changed = true;
+    } else {
+      console.error("[fund-wallets] ABORT: Relayer wallet not funded. Secrets will not be saved.");
+      process.exit(1);
+    }
   }
 
   if (changed) {

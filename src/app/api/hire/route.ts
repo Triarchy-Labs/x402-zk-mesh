@@ -325,6 +325,15 @@ export async function POST(req: Request) {
 		};
 
 		const isShielded = !!body.is_shielded;
+
+		// Validate bounty amount (guards against negative, NaN, and Infinity)
+		if (isNaN(ctx.bountyUsdc) || !isFinite(ctx.bountyUsdc) || ctx.bountyUsdc < 0) {
+			return NextResponse.json(
+				{ error: "Invalid bounty_usdc: must be a non-negative finite number." },
+				{ status: 400 }
+			);
+		}
+
 		if (!txHash) {
 			return NextResponse.json(
 				{
@@ -405,8 +414,8 @@ export async function POST(req: Request) {
 			}
 		}
 
-		// --- PIPELINE STAGE 1.5: REPLAY GUARD ---
-		if (replayGuard.check(ctx.txHash)) {
+		// --- PIPELINE STAGE 1.5: REPLAY GUARD (atomic check-and-mark to prevent TOCTOU race) ---
+		if (replayGuard.checkAndMark(ctx.txHash)) {
 			return NextResponse.json(
 				{ error: "Payment signature or ZK Nullifier already used.", detail: "Each txHash/nullifier can only be used once." },
 				{ status: 402 }
@@ -438,8 +447,7 @@ export async function POST(req: Request) {
 			);
 		}
 
-		// Mark txHash as used AFTER successful preclaim
-		replayGuard.mark(ctx.txHash);
+		// txHash already marked atomically in checkAndMark above
 
 		const price = ctx.bountyUsdc;
 		const description = ctx.description;

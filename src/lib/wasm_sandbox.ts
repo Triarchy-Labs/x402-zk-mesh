@@ -84,21 +84,24 @@ export async function validateForeignPayload(
 				},
 			);
 
-			const output = await plugin.call("validate", normalized);
-			await plugin.close();
+			try {
+				const output = await plugin.call("validate", normalized);
 
-			if (output) {
-				const result = JSON.parse(output.text());
-				if (!result.safe) {
-					return {
-						safe: false,
-						error: `[WASM QUARANTINE] Plugin detected violation: ${result.reason}`,
-						engine: "extism_wasm",
-					};
+				if (output) {
+					const result = JSON.parse(output.text());
+					if (!result.safe) {
+						return {
+							safe: false,
+							error: `[WASM QUARANTINE] Plugin detected violation: ${result.reason}`,
+							engine: "extism_wasm",
+						};
+					}
+					return { safe: true, clean_payload: data, engine: "extism_wasm" };
 				}
-				return { safe: true, clean_payload: data, engine: "extism_wasm" };
+				// Plugin returned null — fall through to heuristic
+			} finally {
+				await plugin.close();
 			}
-			// Plugin returned null — fall through to heuristic
 		} catch {
 			// WASM plugin not available — use heuristic fallback
 		}

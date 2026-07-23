@@ -19,6 +19,19 @@ export class ReplayGuard {
         return this.used.has(signature);
     }
 
+    /**
+     * Atomic check-and-mark: returns true if REPLAY detected, otherwise marks immediately.
+     * Use this instead of separate check() + mark() to prevent TOCTOU race conditions.
+     */
+    checkAndMark(signature: string): boolean {
+        this.cleanup();
+        if (this.used.has(signature)) {
+            return true; // REPLAY detected
+        }
+        this.used.set(signature, Date.now());
+        return false; // First use — now marked
+    }
+
     /** Mark a signature as used after successful payment verification. */
     mark(signature: string): void {
         this.used.set(signature, Date.now());

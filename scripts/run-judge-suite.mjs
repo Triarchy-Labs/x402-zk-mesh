@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 const DEFAULT_GATEWAY_URL = "http://localhost:3010";
 const DEFAULT_AMOUNT = "6.0000000";
@@ -98,6 +99,28 @@ if (artifactPack.status !== "ready" || artifactPack.coverage?.recorded !== 3) {
   throw new Error(`Artifact pack is not ready: ${JSON.stringify(artifactPack.coverage)}`);
 }
 
+// LAYER 3: Verdict hash verification — recompute and assert match.
+// Inspired by Conatus rubric + OFT Sentinel PDR hash.
+const latestTraces = await getJson(`${gatewayUrl}/api/demo/trace`);
+let verdictVerified = 0;
+let verdictTotal = 0;
+for (const trace of (latestTraces.traces || [])) {
+  if (!trace.verdictHash) continue;
+  verdictTotal++;
+  const recomputeInputs = JSON.stringify({
+    artifacts: trace.artifacts,
+    stepStatuses: trace.steps.map(s => ({ id: s.id, status: s.status })),
+    network: trace.network,
+    taskId: trace.taskId,
+    createdAt: trace.createdAt,
+  });
+  const recomputed = createHash('sha256').update(recomputeInputs).digest('hex');
+  if (recomputed !== trace.verdictHash) {
+    throw new Error(`Verdict hash mismatch for trace ${trace.id}: expected ${trace.verdictHash}, got ${recomputed}`);
+  }
+  verdictVerified++;
+}
+
 console.log(JSON.stringify({
   status: "passed",
   elapsedMs: Date.now() - startedAt,
@@ -108,6 +131,11 @@ console.log(JSON.stringify({
     status: artifactPack.status,
     coverage: artifactPack.coverage,
     verdict: artifactPack.verdict,
+  },
+  verdictHashVerification: {
+    verified: verdictVerified,
+    total: verdictTotal,
+    status: verdictVerified === verdictTotal && verdictTotal > 0 ? "all_verified" : verdictTotal === 0 ? "no_hashes" : "partial",
   },
   runs,
 }, null, 2));

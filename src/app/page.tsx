@@ -338,6 +338,29 @@ export default function Page() {
 							}}
 						>
 							<GlitchText text="SOVEREIGN GATEWAY" theme={theme} />
+
+							<motion.p
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ delay: 1.2, duration: 1 }}
+								style={{
+									color: p.accentMuted,
+									fontFamily: FONT_BODY,
+									fontSize: "1.1rem",
+									marginTop: "2rem",
+									letterSpacing: "0.08em",
+									textAlign: "center",
+									maxWidth: "38rem",
+									lineHeight: "1.7",
+									fontWeight: 300,
+								}}
+							>
+								Prove membership. Prove execution. Verify on-chain.
+								<br />
+								<span style={{ opacity: 0.6, fontSize: "0.9rem" }}>
+									The security pipeline is math and code — LLM never touches keys.
+								</span>
+							</motion.p>
 							
 							<motion.p
 								initial={{ opacity: 0 }}
@@ -347,7 +370,7 @@ export default function Page() {
 									color: p.accentMuted,
 									fontFamily: FONT_HEADING,
 									fontSize: "1.5rem",
-									marginTop: "2.5rem",
+									marginTop: "2rem",
 									letterSpacing: "0.4em",
 									textTransform: "uppercase",
 									fontWeight: 400,

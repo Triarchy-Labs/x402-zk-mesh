@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { AgentTaskReceipt, DelegationReceipt, PaymentReceipt, ZkReceipt } from "./agent-receipt";
 import { hashJson } from "./agent-receipt";
+import { createHash } from "node:crypto";
 
 const isVercel = process.env.VERCEL === "1";
 const TRACE_DIR = isVercel ? "/tmp" : path.join(process.cwd(), ".tmp");
@@ -52,6 +53,8 @@ export interface DemoTrace {
     resultHash?: string | null;
     workerResultHash?: string | null;
   };
+  /** sha256(canonical JSON of artifacts + step statuses) — recompute to verify */
+  verdictHash: string;
 }
 
 export interface HireTraceResponse {
@@ -224,30 +227,46 @@ export function buildDemoTraceFromHireResponse(response: HireTraceResponse): Dem
   });
 
   const status = traceStatus(steps);
+  const traceCreatedAt = receipt?.createdAt || new Date().toISOString();
+  const traceArtifacts = {
+    receiptId: receipt?.receiptId || null,
+    taskHash: receipt?.taskHash || null,
+    paymentHash: receipt?.paymentHash || null,
+    zkHash: receipt?.zkHash || null,
+    delegationHash: receipt?.delegationHash || null,
+    resultHash: receipt?.resultHash || null,
+    workerResultHash: workerReceipt?.result_hash || null,
+  };
+  const traceTaskId = payment?.taskId || workerReceipt?.task_id || null;
+
+  // LAYER 1: Verdict hash — anyone can recompute to verify trace integrity.
+  // Inspired by Conatus (Grand Champion) + OFT Sentinel verdict hashing.
+  const verdictInputs = JSON.stringify({
+    artifacts: traceArtifacts,
+    stepStatuses: steps.map(s => ({ id: s.id, status: s.status })),
+    network: "stellar-testnet",
+    taskId: traceTaskId,
+    createdAt: traceCreatedAt,
+  });
+  const verdictHash = createHash('sha256').update(verdictInputs).digest('hex');
+
   const trace: DemoTrace = {
     id: hashJson({
       receiptId: receipt?.receiptId || null,
       paymentTx: payment?.txHash || null,
       zkTx: workerZk?.txHash || null,
       settlementTx: settlementSubmission?.txHash || null,
-      createdAt: receipt?.createdAt || new Date().toISOString(),
+      createdAt: traceCreatedAt,
     }),
     status,
-    createdAt: receipt?.createdAt || new Date().toISOString(),
+    createdAt: traceCreatedAt,
     network: "stellar-testnet",
-    taskId: payment?.taskId || workerReceipt?.task_id || null,
+    taskId: traceTaskId,
     clientId: payment?.clientId || null,
     summary: summaryFor(status, response.status),
     steps,
-    artifacts: {
-      receiptId: receipt?.receiptId || null,
-      taskHash: receipt?.taskHash || null,
-      paymentHash: receipt?.paymentHash || null,
-      zkHash: receipt?.zkHash || null,
-      delegationHash: receipt?.delegationHash || null,
-      resultHash: receipt?.resultHash || null,
-      workerResultHash: workerReceipt?.result_hash || null,
-    },
+    artifacts: traceArtifacts,
+    verdictHash,
   };
 
   return trace;

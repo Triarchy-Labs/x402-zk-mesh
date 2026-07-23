@@ -73,6 +73,10 @@ See also: [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md).
 
 ## /// THE ALPHA PITCH
 
+> **Most AI agent systems ask you to trust them. The X402 ZK Mesh asks you to verify.**
+>
+> Every agent proves membership via ZK before touching a task. Every payload passes deterministic quarantine before execution. Every routing decision is reproducible — `sha256(inputs) == verdictHash`, recompute it yourself. **The security pipeline is math and code, not AI. If the LLM hallucinates, the worst case is a bad task result — never a fund drain.**
+
 Most hackathon submissions build a single AI agent trying to complete a task. **We built the Guild that hosts them all — privately, securely, and on-chain.**
 
 The AI agent ecosystem is fragmented: agents are isolated, overwhelmed nodes drop tasks, and there is **no trust layer** between agents exchanging work. When Agent A delegates a task to Agent B, how do you know Agent B won't return a malicious payload? And how do you know who is paying whom — or that they should even be paying at all?
@@ -187,6 +191,15 @@ Our current ZK Privacy Pool uses custom UTXOs. We will migrate to Stellar's nati
 ### 4. Selective Disclosure Telemetry (Institutional Receipts)
 When an agent completes a highly sensitive data task inside the WASM quarantine, the operator can generate a **Selective Disclosure Receipt**. This allows third-party auditors to verify that a specific bounty was successfully completed by a Guild member without exposing the underlying financial or telemetry data.
 
+### 5. Signed Decision Enforcement (inspired by [Stax](https://github.com/Magicianhax/stax) + [Argus](https://github.com/Madhav-Gupta-28/Argus))
+Every routing decision will be signed (EIP-712 equivalent on Stellar) with `{taskHash, riskScore, tier, expiry, nonce}`. The settlement contract will verify the signature and reject execution if the risk score exceeds the user-defined bound or the decision has expired. The contract re-derives risk from the oracle — even a compromised agent cannot force a bad trade.
+
+### 6. Bounded Autonomy Session Keys (inspired by [Imara](https://imara-wallet-frontend.vercel.app/))
+Agents will operate under revocable session keys with hard spending limits. Users set maximum per-task and daily budgets; the agent operates within bounds; the user revokes at any time. This provides the co-pilot mode: the swarm proposes, you confirm — or let it run within your guardrails.
+
+### 7. Reputation Anti-Gaming (inspired by [Conatus](https://github.com/RECTOR-LABS/conatus))
+The Guild Registry will block self-rating and commendation farming. Reputation will be computed exclusively from on-chain execution history: tasks completed, proofs verified, disputes lost. No agent can inflate its own score.
+
 ---
 
 ## /// ZK MODULES {#zk-modules}
@@ -256,6 +269,21 @@ Request → ReplayGuard (txHash dedup) → SpendingPolicy (budget check) → WAS
 ```
 
 **Why WASM, not Docker?** Several solutions sandbox AI agents using Docker containers. Docker is a legacy paradigm: too heavy (MB of RAM), too slow (ms-to-seconds cold starts). We use **WebAssembly (Extism WASI 0.2)** — cold starts measured in *microseconds*. In the AI economy, speed and zero-trust are everything.
+
+### /// LLM IS NOT IN THE TRUST PATH
+
+The entire security pipeline is deterministic code, not AI:
+
+| Decision | Engine | AI Involvement |
+|----------|--------|---------|
+| Payment validation | Stellar Horizon RPC + ReplayGuard | **None** — code |
+| Membership verification | Groth16 ZK proof (BN254) | **None** — math |
+| Payload quarantine | WASM sandbox + heuristic ruleset | **None** — code |
+| Budget enforcement | SpendingPolicy allowlists | **None** — code |
+| Routing | Tier thresholds ($10 boundary) | **None** — code |
+| Task execution | LLM / external worker | **Yes** — sandboxed |
+
+AI is used **only** for task execution inside the quarantined sandbox. It never touches keys, payments, proofs, or routing decisions. Every security decision is reproducible: `sha256(decision_inputs) == verdictHash` — recompute it yourself.
 
 ---
 
@@ -770,6 +798,12 @@ XRP Ledger             rippled source audit            SponsorshipSet
 - [Three.js](https://threejs.org/) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) — 3D engine
 - [Framer Motion](https://www.framer.com/motion/) — Animations
 - [Tauri v2](https://v2.tauri.app/) — Native desktop runtime (companion)
+
+---
+
+## /// SECURITY
+
+See [`SECURITY.md`](SECURITY.md) for known limitations, audit history (106 findings across 64+ files), and the Phase II hardening roadmap.
 
 ---
 

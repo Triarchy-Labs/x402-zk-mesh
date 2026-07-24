@@ -241,12 +241,25 @@ export function buildDemoTraceFromHireResponse(response: HireTraceResponse): Dem
 
   // LAYER 1: Verdict hash — anyone can recompute to verify trace integrity.
   // Inspired by Conatus (Grand Champion) + OFT Sentinel verdict hashing.
+  // Covers 12+ decision-critical inputs (payment, ZK, routing, quarantine, settlement).
   const verdictInputs = JSON.stringify({
     artifacts: traceArtifacts,
-    stepStatuses: steps.map(s => ({ id: s.id, status: s.status })),
     network: "stellar-testnet",
     taskId: traceTaskId,
     createdAt: traceCreatedAt,
+    stepStatuses: steps.map(s => ({ id: s.id, status: s.status })),
+    paymentTxHash: payment?.txHash || null,
+    paymentScheme: payment?.scheme || null,
+    paymentAmount: payment?.amount ?? payment?.amountUsdc ?? null,
+    zkProofValid: workerZk?.proofValid ?? null,
+    zkApprovedRoot: workerZk?.approvedRoot ?? null,
+    zkMethod: workerZk?.method ?? null,
+    delegationMode: delegation?.mode || null,
+    routingStrategy: routing?.strategy || null,
+    routingCandidateCount: routing?.candidates?.length ?? null,
+    quarantineEngine: delegation?.executor || null,
+    settlementStatus: settlementSubmission?.status || null,
+    settlementTxHash: settlementSubmission?.txHash || null,
   });
   const verdictHash = createHash('sha256').update(verdictInputs).digest('hex');
 

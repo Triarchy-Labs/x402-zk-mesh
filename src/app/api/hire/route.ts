@@ -100,10 +100,11 @@ function tamperFieldSignal(value: unknown): string {
 
 async function persistDemoTrace(payload: HireTraceResponse) {
 	try {
-		await recordDemoTraceFromHireResponse(payload);
+		return await recordDemoTraceFromHireResponse(payload);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		console.warn(`[DEMO_TRACE] Failed to persist hire trace: ${message}`);
+		return null;
 	}
 }
 
@@ -547,13 +548,14 @@ export async function POST(req: Request) {
 						delegation,
 						receipt,
 					};
-					await persistDemoTrace(responsePayload);
+					const _trace = await persistDemoTrace(responsePayload);
 					return NextResponse.json(
 						{
 							...responsePayload,
 							executor: OPENROUTER_KEY ? "OpenRouter Cloud" : "Local Micro-Node",
 							usdc_charged: price,
 							result,
+							verdictHash: _trace?.verdictHash || null,
 						},
 						{ status: 200 },
 					);
@@ -607,13 +609,14 @@ export async function POST(req: Request) {
 					delegation,
 					receipt,
 				};
-				await persistDemoTrace(responsePayload);
+				const _trace = await persistDemoTrace(responsePayload);
 				return NextResponse.json(
 					{
 						...responsePayload,
 						executor: "Enterprise Sovereign Node",
 						usdc_charged: price,
 						fee: 0, // Zero routing fee for enterprise-tier tasks
+						verdictHash: _trace?.verdictHash || null,
 					},
 					{ status: 202 },
 				);
@@ -772,7 +775,7 @@ export async function POST(req: Request) {
 			external_agent_result: externalResult,
 			external_agent_receipt: externalAgentResponse?.receipt || null,
 		};
-		await persistDemoTrace(responsePayload);
+		const _trace = await persistDemoTrace(responsePayload);
 
 		// SECURITY FIX [API-2]: Confirm txHash on successful execution.
 		// On worker_unavailable (503), release so client can retry.
@@ -787,6 +790,7 @@ export async function POST(req: Request) {
 			{
 				...responsePayload,
 				executor: "Peer-to-Peer ZK Mesh Worker",
+				verdictHash: _trace?.verdictHash || null,
 				usdc_charged: price,
 				mercenary_paid: foreignPrice,
 				network_fee: networkFee,

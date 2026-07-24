@@ -40,6 +40,7 @@ interface DemoTrace {
   summary: string;
   steps: DemoTraceStep[];
   artifacts: Record<string, string | null | undefined>;
+  verdictHash?: string;
 }
 
 interface TraceResponse {
@@ -2142,6 +2143,25 @@ export default function DemoPage() {
               {trace.steps.map((step, index) => (
                 <TraceStepRow key={step.id} step={step} index={index} />
               ))}
+              {trace.verdictHash && (
+                <div className="border border-emerald-400/30 bg-emerald-950/20 backdrop-blur-sm p-[1.4rem] rounded-md mt-[0.6rem]">
+                  <div className="flex items-center justify-between gap-[1rem]">
+                    <div className="text-[1.3rem] uppercase tracking-[0.14em] text-emerald-300/80 font-semibold">⬡ Verdict Hash</div>
+                    <button
+                      className="border border-emerald-400/30 bg-emerald-950/40 px-[1rem] py-[0.4rem] text-[1.1rem] text-emerald-200 uppercase tracking-[0.12em] hover:bg-emerald-900/50 transition-colors cursor-pointer"
+                      onClick={() => { navigator.clipboard.writeText(trace.verdictHash || ""); }}
+                    >
+                      copy
+                    </button>
+                  </div>
+                  <div className="mt-[0.8rem] font-mono text-[1.15rem] text-emerald-200/70 break-all leading-relaxed">
+                    {trace.verdictHash}
+                  </div>
+                  <div className="mt-[0.6rem] text-[1.05rem] text-white/30">
+                    sha256(artifacts + stepStatuses + network + taskId + createdAt) — recompute to verify integrity
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

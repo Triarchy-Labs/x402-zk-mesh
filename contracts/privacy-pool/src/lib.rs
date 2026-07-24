@@ -150,25 +150,23 @@ impl PrivacyPoolContract {
         }
 
         // SECURITY FIX [SC-4]: Verify proof via ZK Verifier contract
-        // Instead of trusting a bool parameter, we call the actual verifier.
-        // For production: uncomment cross-contract call below.
-        // let verifier_addr: Address = env.storage().persistent()
-        //     .get(&DataKey::VerifierContract)
-        //     .unwrap();
-        // let verified = env.invoke_contract::<bool>(
-        //     &verifier_addr,
-        //     &Symbol::new(&env, "verify_proof"),
-        //     (proof_bytes.clone(), pub_signals.clone(),).into_val(&env),
-        // );
-        // if !verified {
-        //     log!(&env, "Withdrawal rejected: ZK proof verification failed");
-        //     return false;
-        // }
-
-        // TEMPORARY: Validate proof_bytes and pub_signals are non-empty
-        // This replaces the old `proof_verified: bool` parameter trust
+        // Cross-contract call to the real Groth16 verifier on Soroban.
+        // Pre-check: reject empty inputs before expensive cross-contract call.
         if proof_bytes.len() == 0 || pub_signals.len() == 0 {
             log!(&env, "Withdrawal rejected: empty proof or signals");
+            return false;
+        }
+
+        let verifier_addr: Address = env.storage().persistent()
+            .get(&DataKey::VerifierContract)
+            .unwrap();
+        let verified = env.invoke_contract::<bool>(
+            &verifier_addr,
+            &Symbol::new(&env, "verify_proof"),
+            (proof_bytes.clone(), pub_signals.clone(),).into_val(&env),
+        );
+        if !verified {
+            log!(&env, "Withdrawal rejected: ZK proof verification failed");
             return false;
         }
         

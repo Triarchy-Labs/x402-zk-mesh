@@ -325,6 +325,21 @@ export default function Dashboard() {
                     </motion.div>
 				</section>
 
+				{/* ZK TRUST METRICS */}
+				<section className="w-full grid grid-cols-2 lg:grid-cols-4 gap-[1.2rem] z-20 mt-[1rem]">
+					{[
+						{ label: "ZK VERIFIER", value: "BN254 GROTH16", accent: "#22c55e" },
+						{ label: "DEPLOYED CONTRACTS", value: "6 ON SOROBAN", accent: "#22c55e" },
+						{ label: "PROOF METHOD", value: "PAIRING_CHECK()", accent: "#3b82f6" },
+						{ label: "TRUST MODEL", value: "ZERO-TRUST", accent: "#f59e0b" },
+					].map((m) => (
+						<div key={m.label} className="bg-black/60 border border-white/8 backdrop-blur-sm rounded-lg p-[1.4rem]">
+							<div className="text-[1.05rem] uppercase tracking-[0.16em] text-white/30 mb-[0.6rem]">{m.label}</div>
+							<div className="text-[1.35rem] font-bold tracking-wider" style={{ color: m.accent }}>{m.value}</div>
+						</div>
+					))}
+				</section>
+
 				{/* 2. BOTTOM: Control Panels */}
                 <section className="w-full flex flex-col lg:flex-row gap-6 z-20 mt-4 px-2 xl:px-0">
                     

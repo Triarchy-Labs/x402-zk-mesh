@@ -156,8 +156,8 @@ const LeaderboardPage = () => {
 				) : data && data.leaderboard.length > 0 ? (
 					<div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 						{/* Table Header */}
-						<div style={{ display: "grid", gridTemplateColumns: "10rem 2fr 1fr 1fr 1fr 1fr 14rem", padding: "0 1.25rem", color: "rgba(255,255,255,0.35)", fontSize: "1.2rem", letterSpacing: "0.1em", fontFamily: "'Space Mono', monospace" }}>
-							<span>POS</span><span>OPERATIVE</span><span style={{ textAlign: "right" }}>XP</span><span style={{ textAlign: "right" }}>SIGNAL</span><span style={{ textAlign: "right" }}>IMPACT</span><span style={{ textAlign: "right" }}>STREAK</span><span style={{ textAlign: "right" }}>STATUS</span>
+						<div style={{ display: "grid", gridTemplateColumns: "10rem 2fr 1fr 1fr 1fr 1fr 1fr 14rem", padding: "0 1.25rem", color: "rgba(255,255,255,0.35)", fontSize: "1.2rem", letterSpacing: "0.1em", fontFamily: "'Space Mono', monospace" }}>
+							<span>POS</span><span>OPERATIVE</span><span style={{ textAlign: "right" }}>XP</span><span style={{ textAlign: "right" }}>SIGNAL</span><span style={{ textAlign: "right" }}>IMPACT</span><span style={{ textAlign: "right" }}>STREAK</span><span style={{ textAlign: "right" }}>ZK PROOF</span><span style={{ textAlign: "right" }}>STATUS</span>
 						</div>
 
 						{data.leaderboard.map((entry, i) => (
@@ -166,7 +166,7 @@ const LeaderboardPage = () => {
 								initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.4, delay: i * 0.05 }}
 								style={{
-									display: "grid", gridTemplateColumns: "10rem 2fr 1fr 1fr 1fr 1fr 14rem",
+								display: "grid", gridTemplateColumns: "10rem 2fr 1fr 1fr 1fr 1fr 1fr 14rem",
 									alignItems: "center", padding: "1.5rem 2rem",
 									background: i === 0 ? "rgba(204, 119, 0,0.1)" : i === 1 ? "rgba(204, 119, 0,0.05)" : i === 2 ? "rgba(204, 119, 0,0.02)" : "rgba(255,255,255,0.02)",
 									border: `1px solid ${i === 0 ? "rgba(204, 119, 0,0.4)" : i === 1 ? "rgba(204, 119, 0,0.2)" : i === 2 ? "rgba(204, 119, 0,0.1)" : "rgba(255,255,255,0.06)"}`,
@@ -214,6 +214,11 @@ const LeaderboardPage = () => {
 								{/* Streak */}
 								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: sortBy === "streak" ? "#ffaa00" : "rgba(255,255,255,0.7)", fontWeight: sortBy === "streak" ? "bold" : "normal" }}>
 									{entry.streak} 🔥
+								</span>
+
+								{/* ZK Proof Ratio */}
+								<span style={{ textAlign: "right", fontFamily: "'Space Mono', monospace", color: Math.min(100, Math.round(entry.signal * 100)) >= 80 ? "#22c55e" : Math.min(100, Math.round(entry.signal * 100)) >= 50 ? "#f59e0b" : "#ef4444" }}>
+									{Math.min(100, Math.round(entry.signal * 100))}%
 								</span>
 
 								{/* Status */}

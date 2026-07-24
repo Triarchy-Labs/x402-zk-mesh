@@ -66,6 +66,21 @@ function launch(item) {
   return child;
 }
 
+// Jeremy's feedback: quickstart must provision wallets automatically.
+// Run fund-wallets.mjs before launching gateway to ensure payer + platform + relayer exist.
+import { execFileSync } from "node:child_process";
+console.log("[judge-stack] Provisioning demo wallets (friendbot)...");
+try {
+  execFileSync(process.execPath, [path.join(process.cwd(), "scripts", "fund-wallets.mjs")], {
+    cwd: process.cwd(),
+    env: process.env,
+    stdio: "inherit",
+  });
+  console.log("[judge-stack] Wallet provisioning complete.");
+} catch (e) {
+  console.warn("[judge-stack] Wallet provisioning failed (wallets may already exist):", e?.message || e);
+}
+
 launch(processes[0]);
 await waitForJson(`${gatewayUrl}/api/contracts`, (data) => data?.status === "live", "gateway");
 

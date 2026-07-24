@@ -20,8 +20,8 @@ export async function generateOpenRouterResponse(
 ): Promise<string> {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-        console.warn("OPENROUTER_API_KEY is not set. Returning mock response.");
-        return "ERROR: OPENROUTER_API_KEY is missing.";
+        console.warn("OPENROUTER_API_KEY not configured. LLM tier unavailable, routing to P2P mesh.");
+        return "LLM_UNAVAILABLE: Cloud LLM tier requires OPENROUTER_API_KEY. Task will route to P2P mesh workers.";
     }
 
     const bodyPayload: Record<string, unknown> = {

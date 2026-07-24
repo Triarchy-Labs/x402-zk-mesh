@@ -158,7 +158,7 @@ export async function releaseEscrow(
 		const payout = await submitPayout(agent.public_key, agentPayout);
 		if (payout.txHash) {
 			payoutTxHash = payout.txHash;
-			console.log(
+			console.debug(
 				"[ESCROW] On-chain payout settled:",
 				JSON.stringify({
 					task_id: taskId,

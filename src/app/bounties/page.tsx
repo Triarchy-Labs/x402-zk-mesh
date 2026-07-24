@@ -244,7 +244,7 @@ const BountiesPage = () => {
 								<textarea placeholder="Describe the task in detail..." value={newDesc} onChange={e => setNewDesc(e.target.value)}
 									style={{ width: "100%", minHeight: "12rem", padding: "1.6rem", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "0.4rem", color: "#fff", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", resize: "none", outline: "none", marginBottom: "1rem" }} />
 								
-								{/* PHASE II STUB */}
+								{/* Phase II: Planned for SCF Milestone 2 */}
 								<div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem", padding: "1rem", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "0.4rem" }}>
 									<input type="checkbox" id="shadow-bounty" disabled style={{ accentColor: "#ffaa00", cursor: "not-allowed" }} />
 									<label htmlFor="shadow-bounty" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace", fontSize: "1.3rem", cursor: "not-allowed", display: "flex", alignItems: "center" }}>

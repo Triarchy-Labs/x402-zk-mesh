@@ -976,12 +976,12 @@ function JudgeSuitePanel({
 
 function JudgePreflightPanel({
   report,
-  isMockMode,
-  setIsMockMode,
+  isOfflineMode,
+  setIsOfflineMode,
 }: {
   report: PreflightReport | null;
-  isMockMode: boolean;
-  setIsMockMode: (val: boolean) => void;
+  isOfflineMode: boolean;
+  setIsOfflineMode: (val: boolean) => void;
 }) {
   if (!report) {
     return (
@@ -1005,15 +1005,15 @@ function JudgePreflightPanel({
         </div>
         <div className="flex items-center gap-[0.5rem] border border-white/10 p-[0.3rem] bg-black/30 rounded backdrop-blur-sm">
           <button
-            onClick={() => setIsMockMode(false)}
-            className={`px-[1rem] py-[0.5rem] text-[1.35rem] tracking-[0.12em] uppercase transition ${!isMockMode ? "bg-white text-black font-semibold" : "text-white/45 hover:text-white/80"}`}
+            onClick={() => setIsOfflineMode(false)}
+            className={`px-[1rem] py-[0.5rem] text-[1.35rem] tracking-[0.12em] uppercase transition ${!isOfflineMode ? "bg-white text-black font-semibold" : "text-white/45 hover:text-white/80"}`}
             style={{ fontFamily: FONT_HEADING }}
           >
             Stellar Testnet
           </button>
           <button
-            onClick={() => setIsMockMode(true)}
-            className={`px-[1rem] py-[0.5rem] text-[1.35rem] tracking-[0.12em] uppercase transition ${isMockMode ? "bg-white text-black font-semibold" : "text-white/45 hover:text-white/80"}`}
+            onClick={() => setIsOfflineMode(true)}
+            className={`px-[1rem] py-[0.5rem] text-[1.35rem] tracking-[0.12em] uppercase transition ${isOfflineMode ? "bg-white text-black font-semibold" : "text-white/45 hover:text-white/80"}`}
             style={{ fontFamily: FONT_HEADING }}
           >
             Sandbox Simulator
@@ -1024,7 +1024,7 @@ function JudgePreflightPanel({
         </span>
       </div>
 
-      {isMockMode && (
+      {isOfflineMode && (
         <div className="mt-[1.2rem] border border-white/20 bg-white/5 px-[1.2rem] py-[0.8rem] text-[1.5rem] tracking-[0.08em] text-white flex items-center justify-between gap-[1rem] rounded">
           <span>⚠️ AUTO-FALLBACK: Sandbox Simulator Enabled (Horizon Testnet Offline or Unconfigured)</span>
           <span className="text-[1.25rem] text-white/50 uppercase">[ mock execution sandbox ]</span>
@@ -1358,7 +1358,7 @@ function ArtifactList({ artifacts }: { artifacts: Record<string, string | null |
   );
 }
 
-const MOCK_PREFLIGHT_REPORT: PreflightReport = {
+const OFFLINE_FALLBACK_PREFLIGHT: PreflightReport = {
   status: "ready",
   generatedAt: new Date().toISOString(),
   network: "stellar-testnet",
@@ -1410,7 +1410,7 @@ const MOCK_PREFLIGHT_REPORT: PreflightReport = {
   copyText: "Preflight Check Passed."
 };
 
-const INITIAL_MOCK_TRACE: DemoTrace = {
+const OFFLINE_FALLBACK_TRACE: DemoTrace = {
   id: "simulated-happy-path",
   status: "complete",
   createdAt: new Date(Date.now() - 3600000).toISOString(),
@@ -1430,7 +1430,7 @@ const INITIAL_MOCK_TRACE: DemoTrace = {
   }
 };
 
-const MOCK_ARTIFACT_PACK: ArtifactPackResponse = {
+const OFFLINE_FALLBACK_ARTIFACT_PACK: ArtifactPackResponse = {
   status: "ready",
   generatedAt: new Date().toISOString(),
   network: "stellar-testnet",
@@ -1528,7 +1528,7 @@ const MOCK_ARTIFACT_PACK: ArtifactPackResponse = {
   copyText: "Preflight Check Passed."
 };
 
-const MOCK_SUBMISSION_PACK: SubmissionPackResponse = {
+const OFFLINE_FALLBACK_SUBMISSION_PACK: SubmissionPackResponse = {
   status: "ready",
   generatedAt: new Date().toISOString(),
   readinessScore: 100,
@@ -1578,7 +1578,7 @@ export default function DemoPage() {
   const [suiteRunning, setSuiteRunning] = useState(false);
   const [suiteRuns, setSuiteRuns] = useState<JudgeSuiteRun[]>(() => buildPendingSuiteRuns());
   const [suiteResult, setSuiteResult] = useState<JudgeSuiteResult | null>(null);
-  const [isMockMode, setIsMockMode] = useState(false);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -1651,7 +1651,7 @@ export default function DemoPage() {
           guildRegistry: { id: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB", explorer: "https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" }
         },
         trace: traceObj,
-        traces: [traceObj, INITIAL_MOCK_TRACE]
+        traces: [traceObj, OFFLINE_FALLBACK_TRACE]
       });
     };
 
@@ -1867,7 +1867,7 @@ export default function DemoPage() {
       setRunning(true);
       setRunError(null);
       setRunResult(null);
-      if (isMockMode) {
+      if (isOfflineMode) {
         await simulateScenario(scenario);
       } else {
         const result = await executeDemoScenario(scenario);
@@ -1881,7 +1881,7 @@ export default function DemoPage() {
     } finally {
       setRunning(false);
     }
-  }, [refresh, isMockMode, simulateScenario, mergeTraceIntoData]);
+  }, [refresh, isOfflineMode, simulateScenario, mergeTraceIntoData]);
 
   const runJudgeSuite = useCallback(async () => {
     const startedAt = Date.now();
@@ -1900,12 +1900,12 @@ export default function DemoPage() {
         setSuiteRuns(nextRuns);
 
         try {
-          const result = isMockMode ? await simulateScenario(item.scenario) : await executeDemoScenario(item.scenario);
+          const result = isOfflineMode ? await simulateScenario(item.scenario) : await executeDemoScenario(item.scenario);
           const completedRun = suiteRunFromResult(item, result);
           nextRuns = nextRuns.map((run) => (run.scenario === item.scenario ? completedRun : run));
           setRunResult(result);
           setSuiteRuns(nextRuns);
-          if (!isMockMode) {
+          if (!isOfflineMode) {
             if (result.trace) { mergeTraceIntoData(result.trace); }
             await refresh();
           }
@@ -1922,13 +1922,13 @@ export default function DemoPage() {
         elapsedMs: Date.now() - startedAt,
       });
       setRunError(suiteStatus === "passed" ? null : "Judge suite finished with one or more failed scenarios.");
-      if (!isMockMode) {
+      if (!isOfflineMode) {
         await refresh();
       }
     } finally {
       setSuiteRunning(false);
     }
-  }, [refresh, isMockMode, simulateScenario, mergeTraceIntoData]);
+  }, [refresh, isOfflineMode, simulateScenario, mergeTraceIntoData]);
 
   useEffect(() => {
     refresh();
@@ -1936,7 +1936,7 @@ export default function DemoPage() {
     return () => window.clearInterval(timer);
   }, [refresh]);
 
-  const activeData = isMockMode ? (simulatedData || {
+  const activeData = isOfflineMode ? (simulatedData || {
     status: "success",
     generatedAt: new Date().toISOString(),
     relayers: { guildRegistry: true, zkVerifier: true },
@@ -1944,13 +1944,13 @@ export default function DemoPage() {
       membershipVerifier: { id: "CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y", explorer: "https://stellar.expert/explorer/testnet/contract/CBX3GKLGB73LKYGWDWNIIJO7MDIZHE73KS2SRZWBC3TBVYKYT6ANCE5Y" },
       guildRegistry: { id: "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB", explorer: "https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" }
     },
-    trace: INITIAL_MOCK_TRACE,
-    traces: [INITIAL_MOCK_TRACE]
+    trace: OFFLINE_FALLBACK_TRACE,
+    traces: [OFFLINE_FALLBACK_TRACE]
   }) : data;
 
-  const activePreflight = isMockMode ? MOCK_PREFLIGHT_REPORT : preflight;
-  const activeArtifactPack = isMockMode ? MOCK_ARTIFACT_PACK : artifactPack;
-  const activeSubmissionPack = isMockMode ? MOCK_SUBMISSION_PACK : submissionPack;
+  const activePreflight = isOfflineMode ? OFFLINE_FALLBACK_PREFLIGHT : preflight;
+  const activeArtifactPack = isOfflineMode ? OFFLINE_FALLBACK_ARTIFACT_PACK : artifactPack;
+  const activeSubmissionPack = isOfflineMode ? OFFLINE_FALLBACK_SUBMISSION_PACK : submissionPack;
 
   const trace = activeData?.trace || null;
   const stepsById = useMemo(() => new Map((trace?.steps || []).map((step) => [step.id, step])), [trace]);
@@ -2071,7 +2071,7 @@ export default function DemoPage() {
             </div>
           </div>
 
-          <JudgePreflightPanel report={activePreflight} isMockMode={isMockMode} setIsMockMode={setIsMockMode} />
+          <JudgePreflightPanel report={activePreflight} isOfflineMode={isOfflineMode} setIsOfflineMode={setIsOfflineMode} />
           <JudgeSuitePanel
             runs={visibleSuiteRuns}
             result={suiteResult}

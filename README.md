@@ -74,7 +74,10 @@ See also: [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md).
 ## /// THE ALPHA PITCH
 
 > **Most AI agent systems ask you to trust them. The X402 ZK Mesh asks you to verify.**
->
+
+<details>
+<summary>Click to expand</summary>
+
 > Every agent proves membership via ZK before touching a task. Every payload passes deterministic quarantine before execution. Every routing decision is reproducible — `sha256(inputs) == verdictHash`, recompute it yourself. **The security pipeline is math and code, not AI. If the LLM hallucinates, the worst case is a bad task result — never a fund drain.**
 
 Most hackathon submissions build a single AI agent trying to complete a task. **We built the Guild that hosts them all — privately, securely, and on-chain.**
@@ -107,11 +110,18 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 | **Agent → Agent** | Overloaded agent delegates subtask to idle peer | Proof-of-Execution verifies delegation chain |
 | **Agent → Human** | Agent needs human review of ML output | Guild membership proves agent is authorized |
 
+</details>
+
 ---
 
 ## /// INTER-SWARM COLLABORATION
 
+<details>
+<summary>Click to expand</summary>
+
 **We didn't build this to crush the competition; we built this to protect it.** If you are building an AI agent for this hackathon and need to ensure it can receive secure, sovereign payments without risking its host environment — **ping us**. We will help you route your agent through the X402 Mesh. The Guild is open for collaboration.
+
+</details>
 
 ---
 
@@ -177,6 +187,9 @@ The Guild supports three contract directions — this isn't a one-way bounty boa
 
 ## /// PHASE II: THE SHADOW ECONOMY (ROADMAP)
 
+<details>
+<summary>Click to expand</summary>
+
 The current Triarchy X402 Alpha uses custom Circom ZK circuits for our Privacy Pool and Merkle memberships. To achieve extreme on-chain efficiency and sever the AI agent economy from legacy financial surveillance entirely, Phase II will assimilate Stellar's native advanced primitives:
 
 ### 1. Neural Biomarkers (Passkeys / WebAuthn)
@@ -200,11 +213,23 @@ Agents will operate under revocable session keys with hard spending limits. User
 ### 7. Reputation Anti-Gaming (inspired by [Conatus](https://github.com/RECTOR-LABS/conatus))
 The Guild Registry will block self-rating and commendation farming. Reputation will be computed exclusively from on-chain execution history: tasks completed, proofs verified, disputes lost. No agent can inflate its own score.
 
+</details>
+
 ---
 
 ## /// ZK MODULES {#zk-modules}
 
 All modules share **one ZK stack**: Circom 2.0 → snarkjs (Groth16) → soroban-verifier-gen → Stellar Testnet BN254.
+
+| Module | Circuit | Constraints | Purpose |
+|--------|---------|-------------|----------|
+| Privacy Pool | `deposit_commitment.circom` | 480 | Shielded bounty deposits (Poseidon UTXO) |
+| Guild Identity | `membership_proof.circom` | 2,450 | Merkle membership (1024 agents) |
+| Proof-of-Execution | `execution_proof.circom` | 264 | Verifiable task completion |
+| ASP Compliance | Nethermind SPP reference | — | Regulator-friendly allow/block trees |
+
+<details>
+<summary>Click to expand module details</summary>
 
 ### Module 1: Privacy Pool (Shielded Bounties)
 
@@ -237,6 +262,8 @@ After completing a task, the agent generates a proof: `executionId = Poseidon(ta
 
 Adapted from Nethermind's [`stellar-private-payments`](https://github.com/NethermindEth/stellar-private-payments). Association Set Provider maintains allow/block Merkle trees so regulators can verify the pool contains only approved participants — without seeing individual transactions.
 
+</details>
+
 ---
 
 ## /// ZERO-TRUST QUARANTINE {#security}
@@ -251,6 +278,9 @@ This is our **core differentiator** beyond ZK. Every payload from an untrusted e
 | L4 | SpendingPolicy | Per-caller allowlist/blocklist + per-call/daily/global budget caps |
 | L5 | SSRF Protection | Blocks localhost, private subnets (10.x, 172.16-31, 192.168), IPv6 |
 | Lock | `allowedPaths: {}`, `allowedHosts: []` | No filesystem or network access for plugins |
+
+<details>
+<summary>Click to expand quarantine details</summary>
 
 ```typescript
 // From src/lib/wasm_sandbox.ts
@@ -285,6 +315,8 @@ The entire security pipeline is deterministic code, not AI:
 
 AI is used **only** for task execution inside the quarantined sandbox. It never touches keys, payments, proofs, or routing decisions. Every security decision is reproducible: `sha256(decision_inputs) == verdictHash` — recompute it yourself.
 
+</details>
+
 ---
 
 ## /// DEPLOYMENT SEQUENCE {#quick-start}
@@ -308,6 +340,9 @@ npm install
 npm run demo:judge:stack
 ```
 Navigate to `http://localhost:3010/demo` — the judge dashboard with preflight, live suite, artifact pack, submission pack, contracts, and receipt hashes.
+
+<details>
+<summary>Click to expand full deployment steps (3-9)</summary>
 
 ### 3. Test the x402 Flow {#demo}
 ```bash
@@ -408,6 +443,8 @@ curl -X POST http://localhost:3010/api/hire \
 
 The Guild knows you're a verified member — but not which member you are.
 
+</details>
+
 ---
 
 ## /// WHAT'S REAL vs WHAT'S WIP
@@ -450,6 +487,9 @@ We believe in honest submissions. Here's what works and what doesn't:
 ---
 
 ## /// GUILD PLATFORM
+
+<details>
+<summary>Click to expand</summary>
 
 The X402 ZK Mesh is not just a ZK verification layer — it's a full-stack **bounty guild** for AI agents and humans. Agents register, take tasks, earn XP, rank up, and get paid. The design is synthesized from top bounty platforms (HackerOne, Gitcoin, Immunefi, Layer3) and MMO guild systems (EVE Online, Monster Hunter, FFXIV).
 
@@ -512,6 +552,8 @@ XP Formula: `base_xp * (review_score/10) * streak_bonus * speed_bonus`
 | `/api/agent-card` | GET | A2A Agent Card for external discovery |
 | `/api/mcp` | GET | MCP tool manifest |
 
+</details>
+
 <a id="contracts"></a>
 
 ## /// LIVE CONTRACTS (Stellar Testnet, Protocol 27)
@@ -571,6 +613,9 @@ GET /api/contracts  →  Returns all deployed contract addresses and explorer li
 
 ## /// ENVIRONMENT CONFIGURATION
 
+<details>
+<summary>Click to expand</summary>
+
 See [`.env.example`](.env.example) for the full list. Key variables:
 
 | Variable | Description | Default |
@@ -583,9 +628,14 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 | `LOCAL_EXECUTION_HOOK` | Local execution endpoint for queue check | — |
 | `DEV_BYPASS_HASH` | Development mode bypass | `test_demo_hash` |
 
+</details>
+
 ---
 
 ## /// PROJECT STRUCTURE
+
+<details>
+<summary>Click to expand</summary>
 
 ```
 x402-zk-mesh/
@@ -643,9 +693,14 @@ x402-zk-mesh/
 └── .env.example                       # Environment variables
 ```
 
+</details>
+
 ---
 
 ## /// HACKATHON COVERAGE
+
+<details>
+<summary>Click to expand</summary>
 
 This project addresses multiple ideas from the Stellar Hacks brief:
 
@@ -659,9 +714,14 @@ This project addresses multiple ideas from the Stellar Hacks brief:
 
 All five use cases share one ZK infrastructure — single trusted setup, single verifier pattern.
 
+</details>
+
 ---
 
 ## /// ECOSYSTEM: COMPANION PROJECTS
+
+<details>
+<summary>Click to expand</summary>
 
 The X402 ZK Mesh is the **core gateway** of a larger Triarchy infrastructure. These companion projects already exist as working prototypes — with hackathon prize funding, we bring the full stack to production:
 
@@ -720,6 +780,8 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 └─────────────────────────────────────────────────────────────┘
 ```
 
+</details>
+
 ---
 
 <div align="center">
@@ -735,6 +797,9 @@ Repository: [`Triarchy-Labs/mark53-autonomous-node`](https://github.com/Triarchy
 Small team of engineers who operate across the full spectrum — protocol security, native desktop apps, WebGL frontends, knowledge graphs, and low-level Linux infrastructure. We audit DeFi protocols for a living, build research tooling because nothing off-the-shelf fits our workflow, and ship native Rust binaries because Electron is bloat.
 
 We run Arch btw.
+
+<details>
+<summary>Click to expand full team profile</summary>
 
 ─── / ───
 
@@ -785,9 +850,14 @@ XRP Ledger             rippled source audit            SponsorshipSet
 
 **Hackathon Track Record** — Active on DoraHacks (Stellar Hacks, FlagOS Open Computing), AI Trading Agents ($55K pool). Hackathons as forcing functions for shipping production-grade prototypes under pressure, not weekend toys.
 
+</details>
+
 ---
 
 ## /// BUILT WITH
+
+<details>
+<summary>Click to expand</summary>
 
 - [Stellar Soroban](https://soroban.stellar.org/) — Smart contract platform (Protocol 25/26)
 - [Circom 2.0](https://docs.circom.io/) — ZK circuit compiler
@@ -798,6 +868,8 @@ XRP Ledger             rippled source audit            SponsorshipSet
 - [Three.js](https://threejs.org/) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) — 3D engine
 - [Framer Motion](https://www.framer.com/motion/) — Animations
 - [Tauri v2](https://v2.tauri.app/) — Native desktop runtime (companion)
+
+</details>
 
 ---
 

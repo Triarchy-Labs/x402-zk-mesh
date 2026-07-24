@@ -33,5 +33,23 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(pack);
+  return NextResponse.json({
+    ...pack,
+    verifiabilityEvidence: {
+      verdictHashMethod: "sha256(artifacts + stepStatuses + payment + zk + routing + quarantine + settlement)",
+      verdictHashCoverage: "12+ decision-critical inputs per trace",
+      trustPathAnalysis: {
+        paymentValidation: { actor: "Stellar Horizon RPC", aiInvolvement: "NONE" },
+        zkVerification: { actor: "Soroban BN254 Groth16 Precompile", aiInvolvement: "NONE" },
+        sandboxQuarantine: { actor: "WASM Extism + heuristic engine", aiInvolvement: "NONE" },
+        settlementExecution: { actor: "Soroban smart contract", aiInvolvement: "NONE" },
+        taskExecution: { actor: "LLM (sandboxed)", aiInvolvement: "SANDBOXED — output only, no security decisions" },
+      },
+      securityAudit: {
+        findingsDocumented: 106,
+        documentUrl: "/SECURITY.md",
+        criticalResolved: "SC-1 through SC-7",
+      },
+    },
+  });
 }

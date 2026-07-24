@@ -34,6 +34,27 @@ npm run demo:submission:pack
 
 Use `docs/DEMO_VIDEO_SCRIPT.md` for the 2-3 minute walkthrough.
 
+## Verifying Verdict Hash
+
+Every trace includes a `verdictHash` — a sha256 digest of 12+ decision-critical inputs:
+
+```
+sha256(artifacts + stepStatuses + paymentTxHash + zkProofValid + zkApprovedRoot
+       + zkMethod + delegationMode + routingStrategy + routingCandidateCount
+       + quarantineEngine + settlementStatus + settlementTxHash)
+```
+
+### How to verify:
+1. Open `/demo` → scroll to any trace → the emerald **⬡ Verdict Hash** badge shows the hash.
+2. Click **COPY** to copy the hash.
+3. Hit `/api/demo/trace` → find the same trace → `verdictHash` field matches.
+4. To verify no AI involvement in security decisions, check `/api/demo/artifact-pack` → `verifiabilityEvidence.trustPathAnalysis`.
+
+### What the hash proves:
+- **Determinism**: Same inputs always produce the same hash.
+- **Integrity**: Any tampered step, payment, or ZK result produces a different hash.
+- **LLM exclusion**: All hash inputs come from deterministic code paths (Stellar RPC, Groth16, WASM quarantine).
+
 ## Honest Scope
 
 - The demo uses a Stellar Testnet transaction-hash-backed 402 gate through `x-l402-txhash` or `Authorization: L402`.

@@ -349,10 +349,13 @@ const BountiesPage = () => {
                                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", padding: "0 2rem" }}>
                                         <div style={{ padding: "2.4rem", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", borderTop: "none", borderBottomLeftRadius: "6px", borderBottomRightRadius: "6px", marginBottom: "0.5rem" }}>
                                             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.6rem", lineHeight: "1.5", marginBottom: "2rem", whiteSpace: "pre-wrap" }}>{task.description}</p>
-                                            <div style={{ display: "flex", gap: "1rem" }}>
-                                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://stellar.expert/explorer/testnet/contract/CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB`, '_blank'); }} style={{ padding: "1rem 2rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "var(--radius-pill, 10rem)", color: "rgba(255,255,255,0.6)", fontSize: "1.35rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }} onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
+                                            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://stellar.expert/explorer/testnet/contract/${task.is_shielded ? "CDJKNLOK5U4N7IPLDDX2Y3FPMSS6ERREGU7VXCXDVANC7YUAB56ZD7ZB" : "CDPXHNH72PPJQ7EVO3JZS5NSIVHBMQNYQPBGNKRSRT7Y7XPZXQWDQJ7J"}`, '_blank'); }} style={{ padding: "1rem 2rem", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "var(--radius-pill, 10rem)", color: "rgba(255,255,255,0.6)", fontSize: "1.35rem", fontFamily: "'Space Mono', monospace", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }} onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
                                                     [ VERIFY ON STELLAR ]
                                                 </button>
+                                                <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "1.15rem", fontFamily: "'Space Mono', monospace" }}>
+                                                    {task.is_shielded ? "ZK VERIFIER" : "GUILD REGISTRY"}
+                                                </span>
                                             </div>
                                         </div>
                                     </motion.div>
